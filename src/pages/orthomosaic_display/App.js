@@ -9,6 +9,8 @@ function App() {
   const [gridCols, setGridCols] = useState(2);
   const [gridRows, setGridRows] = useState(2);
 
+  const [flightDetails, setFlightDetails] = useState('');
+
   const handleGridColsChange = (event) => {
     const newCols = parseInt(event.target.value, 10);
     setGridCols(newCols);
@@ -17,6 +19,10 @@ function App() {
     const newRows = parseInt(event.target.value, 10);
     setGridRows(newRows);
   };
+  const handleFlightDetailsUpdate = (newFlightDetails) => {
+    setFlightDetails(newFlightDetails);
+    console.log('setting', flightDetails);
+  }
   return (
     <Box
       style={{
@@ -37,16 +43,11 @@ function App() {
         }} mt={3}>
           <Grid>
             <Typography variant="h5" gutterBottom align="center">
-              Flights:
+              Flights
               </Typography>
           </Grid>
           {/* TODO: Autopopulate from the API */}
-          <FlightList></FlightList>
-          {/* <Grid item xs={12} sm={12} md={12} lg={12}>
-            <Typography variant="h6" gutterBottom align="center">
-            Cloud Optimized GeoTIFF (COG)
-            </Typography>
-          </Grid> */}
+          <FlightList sendData={handleFlightDetailsUpdate}></FlightList>
         </Grid>
 
         {/* right side - header, rows/cols, map, etc */}
@@ -97,7 +98,7 @@ function App() {
               transform: 'translateX(-50%)',
             }}
             mt={1}>
-            <GeoTIFFMap gridCols={gridCols} gridRows={gridRows}/>
+            <GeoTIFFMap gridCols={gridCols} gridRows={gridRows} orthoUrl={flightDetails?.orthomosaic_url}/>
           </Grid>
         </Grid>
 
