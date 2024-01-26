@@ -21,7 +21,6 @@ function App() {
   };
   const handleFlightDetailsUpdate = (newFlightDetails) => {
     setFlightDetails(newFlightDetails);
-    console.log('setting', flightDetails);
   }
   return (
     <Box
@@ -98,7 +97,7 @@ function App() {
               transform: 'translateX(-50%)',
             }}
             mt={1}>
-            <GeoTIFFMap gridCols={gridCols} gridRows={gridRows} orthoUrl={flightDetails?.orthomosaic_url}/>
+            <GeoTIFFMap gridCols={gridCols} gridRows={gridRows} flightDetails={flightDetails}/>
           </Grid>
         </Grid>
 

@@ -6,7 +6,6 @@ const FlightList = ({sendData}) => {
     const [flightDict, setFlightDict] = useState({});
     
     const clickFlightID = (event) => {
-        console.log('click', event.target.id);
         const flight_id = event.target.id;
         // console.log(flightDict[flight_id]);
         sendData(flightDict[flight_id]);

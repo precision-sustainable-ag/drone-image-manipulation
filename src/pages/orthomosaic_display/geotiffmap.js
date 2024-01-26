@@ -21,6 +21,7 @@ import Translate from 'ol/interaction/Translate';
 import { Collection } from 'ol';
 
 import {Button, Box, Grid, TextField, Typography} from '@mui/material';
+import {View} from 'ol';
 import { transform } from 'ol/proj';
 import 'ol/ol.css';
 import '../../styles/App.css';
@@ -42,8 +43,8 @@ class ToggleDraw extends Control {
       target: options.target,
     });
 
-    this.vectorSource = options['vs'];
-    this.mapRef = options['mr'];
+    this.vectorSource = options['vector_source'];
+    this.mapRef = options['map_reference'];
     // this.map = map;
     
     button.addEventListener('click', this.handleToggleDraw.bind(this), false);
@@ -54,17 +55,14 @@ class ToggleDraw extends Control {
 }
 
 // TODO: Change the default EPSG:3857 projection to EPSG:4326
-const GeoTIFFMap = ({gridCols, gridRows, orthoUrl}) => {
+const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
   const mapRef = useRef(null);
   let gridDraw;
   // const [finalBoxCoords, setFinalBoxCoords] = useState([]);
   const [coordinateFeatures, setCoordinateFeatures] = useState({});
 
   const sendGrid = async () => {
-    // const originalCoordinates = coordinateFeatures['box'][0];
-    // const transformedCoordinates = transform(originalCoordinates, 'EPSG:3857', 'EPSG:4326');
-    // console.log(transformedCoordinates);
-    // console.log(fromLonLat(transformedCoordinates));
+    // console.log('button', orthoUrl);
     console.log('tehee ',coordinateFeatures);
     // setCoordinateFeatures((oldData) => ({
     //   ...oldData,
@@ -90,19 +88,14 @@ const GeoTIFFMap = ({gridCols, gridRows, orthoUrl}) => {
     const mapSource = new GeoTIFF({
       sources: [
         {
-          // url: 'https://ncsudronedata.blob.core.windows.net/test/0002SET_ortho_cog.tif?sp=r&st=2024-01-17T16:57:01Z&se=2024-02-12T00:57:01Z&spr=https&sv=2022-11-02&sr=b&sig=hYcRxIQ9W1Cw7oW6RFuvDDHCUnd6DR6E4XqFA41EAEo%3D',
-          url: orthoUrl,
-          crossOrigin: 'anonymous'
+          url: flightDetails.orthomosaic_url,
+          crossOrigin: 'anonymous',
+          projection: 'EPSG:4326'
         },
         
       ],
-      // projection:proj,
     });
     const vectorSource = new VectorSource();
-    
-    // const centerCoordinates = toLonLat([621082.8863332459, 3894560.1348702004]);
-    // const centerEPSG = [-79.67,35.18];
-    // const tog = new ToggleDraw({vectorSource:vectorSource});
     
     const map = new Map({
       target: mapRef.current,
@@ -117,18 +110,18 @@ const GeoTIFFMap = ({gridCols, gridRows, orthoUrl}) => {
       ],
       view: mapSource.getView(),
     });
-    map.addControl(new ToggleDraw({'vs':vectorSource, 'mr':map}));
-    // if (toggleGridDraw){
-    // drawGrid(vectorSource,map);
-    // }
-    // console.log(map);
+    map.addControl(new ToggleDraw({'vector_source':vectorSource, 'map_reference':map}));
     
+    setCoordinateFeatures((oldData) => ({
+      ...oldData,
+      'flight_id': flightDetails.flight_id,
+    }));
 
     // Clean up the map when the component is unmounted
     return () => {
       map.setTarget(null);
     };
-  }, [gridCols, gridRows, orthoUrl]);
+  }, [gridCols, gridRows, flightDetails]);
   
   
   const drawGrid = (source, map) => {
@@ -152,10 +145,6 @@ const GeoTIFFMap = ({gridCols, gridRows, orthoUrl}) => {
           ],
         ];
         if (geometry) {
-          // const center = getCenter(geometry.getExtent());
-          // const angle = map.getView().getRotation();
-          // console.log(angle);
-          // geometry.rotate(angle, center);
           geometry.setCoordinates(boxCoordinates);
         } else {
           geometry = new Polygon(boxCoordinates);
@@ -197,7 +186,6 @@ const GeoTIFFMap = ({gridCols, gridRows, orthoUrl}) => {
     
     gridDraw.on('drawend', (e) => {
       const currentRotation = map.getView().getRotation();
-      // console.log('drawend', e.feature);
       e.feature.setStyle(getGridStyle(e.feature, gridCols, gridRows, 'red', currentRotation));
       map.removeInteraction(gridDraw);
 
@@ -209,7 +197,13 @@ const GeoTIFFMap = ({gridCols, gridRows, orthoUrl}) => {
         ev.features.getArray()[0].setStyle(getGridStyle(ev.features.getArray()[0], gridCols, gridRows, 'red', currentRotation));
       });
       translate.on('translateend', (ev) => {
-        setCoordinateFeatures({});
+        setCoordinateFeatures((oldData) => ({
+          ...oldData,
+          'box': [],
+          'vertical': [],
+          'horizontal': []
+        }));
+        // setCoordinateFeatures({});
         ev.features.getArray()[0].setStyle(getGridStyle(ev.features.getArray()[0], gridCols, gridRows, 'red', currentRotation));
       });
       map.addInteraction(translate);
@@ -218,7 +212,13 @@ const GeoTIFFMap = ({gridCols, gridRows, orthoUrl}) => {
   window.drawGrid = drawGrid;
   
   const getGridStyle = (feature, cols, rows, gridColor, currentRotation) => {
-    setCoordinateFeatures({});
+    setCoordinateFeatures((oldData) => ({
+      ...oldData,
+      'box': [],
+      'vertical': [],
+      'horizontal': []
+    }));
+    
     const styles = [];
     styles.push(
       new Style({
@@ -231,14 +231,6 @@ const GeoTIFFMap = ({gridCols, gridRows, orthoUrl}) => {
         }),
       })
     );
-    
-    // console.log(feature.getGeometry().getExtent());
-    // const extent = feature.getGeometry().getExtent();
-    // const bottomLeftCoord = getBottomLeft(extent);
-    // const topLeftCoord = getTopLeft(extent);
-    // const topRightCoord = getTopRight(extent);
-    // console.log(feature.getGeometry().getCoordinates());
-    // console.log(topLeftCoord);
     const coords = feature.getGeometry().getCoordinates()[0];
     const topLeftCoord = coords[0];
     const topRightCoord = coords[1];
@@ -269,15 +261,9 @@ const GeoTIFFMap = ({gridCols, gridRows, orthoUrl}) => {
         ...oldData,
         vertical: oldData.vertical ? [...oldData.vertical, {'Point 1': xColCoord,'Point 2': yColCoord}] : [{'Point 1':xColCoord,'Point 2':yColCoord}],
       }));
-      // setCoordinateFeatures((oldData) => ({
-      //   ...oldData,
-      //   vertical: oldData.vertical ? [...oldData.vertical, (xColCoord,yColCoord)] : [(xColCoord,yColCoord)],
-      // }));
-      
       styles.push(
         new Style({
           geometry: lineString,
-          // geometry: new LineString([xColCoord, yColCoord]),
           stroke: new Stroke({
             color: gridColor,
             width: 2,
@@ -307,14 +293,9 @@ const GeoTIFFMap = ({gridCols, gridRows, orthoUrl}) => {
         ...oldData,
         horizontal: oldData.horizontal ? [...oldData.horizontal, {'Point 1': xRowCoord,'Point 2': yRowCoord}] : [{'Point 1':xRowCoord,'Point 2':yRowCoord}],
       }));
-      // setCoordinateFeatures((oldData) => ({
-      //   ...oldData,
-      //   horizontal: oldData.horizontal ? [...oldData.horizontal, (xRowCoord,yRowCoord)] : [(xRowCoord,yRowCoord)],
-      // }));
       styles.push(
         new Style({
           geometry: lineString,
-          // geometry: new LineString([xColCoord, yColCoord]),
           stroke: new Stroke({
             color: gridColor,
             width: 2,
