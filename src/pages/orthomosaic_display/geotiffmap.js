@@ -1,28 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import {Button, Box, Grid} from '@mui/material';
+
+import { Collection } from 'ol';
 import Map from 'ol/Map';
 import GeoTIFF from 'ol/source/GeoTIFF';
 import TileLayer from 'ol/layer/WebGLTile';
-import {toLonLat} from 'ol/proj';
-import { Draw, Modify, Snap } from 'ol/interaction';
+import { Draw } from 'ol/interaction';
+import Translate from 'ol/interaction/Translate';
+import { defaults } from 'ol/interaction/defaults';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import LineString from 'ol/geom/LineString';
-import { getBottomLeft, getTopLeft, getTopRight, getBottomRight } from 'ol/extent';
+import { getBottomLeft, getTopLeft, getTopRight, getBottomRight, getCenter, boundingExtent } from 'ol/extent';
 import {Style, Stroke, Fill} from 'ol/style';
 import DragRotateAndZoom  from 'ol/interaction/DragRotateAndZoom';
-import { defaults } from 'ol/interaction/defaults';
 import {Control} from 'ol/control';
 import { Polygon, MultiPoint} from 'ol/geom';
-import { getCenter } from 'ol/extent';
-import { boundingExtent } from 'ol/extent';
 import { fromUserCoordinate, getUserProjection } from 'ol/proj';
-import Translate from 'ol/interaction/Translate';
-import { Collection } from 'ol';
 
-import {Button, Box, Grid, TextField, Typography} from '@mui/material';
-import {View} from 'ol';
-import { transform } from 'ol/proj';
 import 'ol/ol.css';
 import '../../styles/App.css';
 
@@ -56,25 +53,25 @@ class ToggleDraw extends Control {
 
 // TODO: Change the default EPSG:3857 projection to EPSG:4326
 const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
+  const navigate = useNavigate();
   const mapRef = useRef(null);
   let gridDraw;
-  // const [finalBoxCoords, setFinalBoxCoords] = useState([]);
   const [coordinateFeatures, setCoordinateFeatures] = useState({});
 
   const sendGrid = async () => {
+    // const history = useHistory();
     // console.log('button', orthoUrl);
+    
+    // TODO: error handling, loading modal
     console.log('tehee ',coordinateFeatures);
-    // setCoordinateFeatures((oldData) => ({
-    //   ...oldData,
-    //   'gridCols': gridCols,
-    //   'gridRows': gridRows,
-    // }));
     try {
       const response = await axios.post('http://localhost:5000/setGrid', coordinateFeatures, 
       { headers: {
         'Content-Type': 'application/json',
       }});
       console.log(response.data);
+      navigate('/plot-features', {state : response.data} );
+      // history.push('/plot-features');
     } catch (error) {
       console.log(error);
     }
@@ -90,7 +87,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
         {
           url: flightDetails.orthomosaic_url,
           crossOrigin: 'anonymous',
-          projection: 'EPSG:4326'
+          // projection: 'EPSG:4326'
         },
         
       ],
@@ -218,7 +215,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       'vertical': [],
       'horizontal': []
     }));
-    
+
     const styles = [];
     styles.push(
       new Style({

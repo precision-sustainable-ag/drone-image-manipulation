@@ -1,15 +1,52 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './styles/index.css';
-import App from './pages/orthomosaic_display/App';
+// import App from './pages/orthomosaic_display/App';
 import reportWebVitals from './reportWebVitals';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
+// import {BrowserRouter, Route, RouterProvider, Switch} from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import App from './pages/orthomosaic_display/App';
+import ErrorPage from './pages/error_page';
+import PlotTable from './pages/plot_features/plot_table';
+
+// const root = ReactDOM.createRoot(document.getElementById('root'));
+// root.render(
+//   <React.StrictMode>
+//     <App />
+//   </React.StrictMode>
+// );
+
+// const App = () => {
+//   return (
+//     <BrowserRouter>
+//       <Switch>
+//         <Route exact path='/' component={geotiffPage} />
+//         <Route path='/plot-features' component={plotTable} />
+//       </Switch>
+//     </BrowserRouter>
+//   );
+// }
+
+// ReactDOM.render(<App/>, document.getElementById('root'));
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <App />,
+    errorElement: <ErrorPage />
+  },
+  {
+    path: '/plot-features',
+    element: <PlotTable />,
+  }
+]);
+
+ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <RouterProvider router = {router} />
   </React.StrictMode>
-);
+)
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
