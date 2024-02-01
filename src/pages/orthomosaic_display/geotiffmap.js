@@ -22,6 +22,7 @@ import { fromUserCoordinate, getUserProjection } from 'ol/proj';
 
 import 'ol/ol.css';
 import '../../styles/App.css';
+import FieldFeatureModal from './field_features_modal';
 
 class ToggleDraw extends Control {
   constructor(opt_options) {
@@ -57,6 +58,11 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
   const mapRef = useRef(null);
   let gridDraw;
   const [coordinateFeatures, setCoordinateFeatures] = useState({});
+  const [fieldFeatures, setFieldFeatures] = useState({});
+
+  const handleFieldFeaturesUpdate = (newData) => {
+    setFieldFeatures(newData);
+  };
 
   const sendGrid = async () => {
     // const history = useHistory();
@@ -64,6 +70,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     
     // TODO: error handling, loading modal
     console.log('tehee ',coordinateFeatures);
+    console.log('tehee2', fieldFeatures);
     try {
       const response = await axios.post('http://localhost:5000/setGrid', coordinateFeatures, 
       { headers: {
@@ -320,7 +327,10 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       <Grid container spacing={2}>
         <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef} style={{ width: '100%', height: '400px' }} />
         <Grid item xs={12} sm={12} md={12} lg={12} align='right'>
-          <Button onClick={sendGrid}>yessir</Button>
+          <Button onClick={sendGrid}>NEXT</Button>
+        </Grid>
+        <Grid item xs={12} sm={12} md={12} lg={12} align='right'>
+          <FieldFeatureModal setFieldFeatures={handleFieldFeaturesUpdate}></FieldFeatureModal>
         </Grid>
       </Grid>
       

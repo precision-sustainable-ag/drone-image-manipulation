@@ -206,7 +206,7 @@ const PlotTable = () => {
                         Plot Details
                     </Typography>
                     <Typography variant="h6" gutterBottom align="center">
-                        TODO: Add details about the flight 
+                        {state.flight_details.display_name}
                     </Typography>
 
                 </Grid>
