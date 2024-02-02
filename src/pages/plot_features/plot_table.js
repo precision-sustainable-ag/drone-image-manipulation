@@ -14,19 +14,110 @@ const PlotTable = () => {
     console.log(state);
     
     const initalRows = state.grids;
-    // const initalRows = [
+    // const columns = [
     //     {
-    //         id: "1",
-    //         plot_num: 1,
-    //         plot_name: "custom name",
-    //         height: 10,
-    //         lodging: 10,
-    //         insect_damamge: true,
-    //         color: "Red",
-    //         flowering: "2024-02-09T05:00:00.000Z",
-    //         insect_damage: true,
+    //         field: 'plot_num',
+    //         headerName: 'Plot Number',
+    //         headerAlign: 'center',
+    //         align: 'center',
+    //         // editable: true,
+    //         width: 100
+    //     },
+    //     {
+    //         field: 'plot_name',
+    //         headerName: 'Plot Name',
+    //         headerAlign: 'center',
+    //         align: 'center',
+    //         editable: true,
+    //         width: 120
+    //     },
+    //     {
+    //         field: 'height',
+    //         headerName: 'Height (cm)',
+    //         headerAlign: 'center',
+    //         align: 'center',
+    //         type: 'number',
+    //         width: 100,
+    //         editable: true
+    //     },
+    //     {
+    //         field: 'color',
+    //         headerName: 'Color',
+    //         headerAlign: 'center',
+    //         align: 'center',
+    //         type: 'singleSelect',
+    //         valueOptions: ['Red', 'Orange', 'Green'],
+    //         width: 150,
+    //         editable: true
+    //     },
+    //     {
+    //         field: 'lodging',
+    //         headerName: 'Lodging (%)',
+    //         headerAlign: 'center',
+    //         align: 'center',
+    //         type: 'number',
+    //         width: 100,
+    //         editable: true
+    //     },
+    //     {
+    //         field: 'flowering',
+    //         headerName: 'Flowering Date',
+    //         headerAlign: 'center',
+    //         align: 'center',
+    //         type: 'date',
+    //         width: 160,
+    //         editable: true,
+    //         valueGetter: ({value}) => value && new Date(value),
+    //     },
+    //     {
+    //         field: 'insect_damage',
+    //         headerName: 'Insect Damage',
+    //         headerAlign: 'center',
+    //         type: 'boolean',
+    //         width: 120,
+    //         editable: true
+    //     },
+    //     {
+    //         field: 'actions',
+    //         type: 'actions',
+    //         headerName: 'Actions',
+    //         width: 100,
+    //         cellClassName: 'actions',
+    //         getActions: ({id}) => {
+    //             const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+    //             if (isInEditMode) {
+    //                 return [
+    //                     <GridActionsCellItem
+    //                         icon={<SaveIcon/>}
+    //                         label='Save'
+    //                         sx={{
+    //                             color: 'primary.main',
+    //                         }}
+    //                         onClick={handleSaveClick(id)}
+    //                     />,
+    //                     <GridActionsCellItem
+    //                         icon={<CancelIcon/>}
+    //                         label='Cancel'
+    //                         className='textPrimary'
+    //                         onClick={handleCancelClick(id)}
+    //                         color='inherit'
+    //                     />,
+    //                 ];
+    //             }
+    //             return [
+    //                 <GridActionsCellItem
+    //                     icon={<EditIcon/>}
+    //                     label='Edit'
+    //                     className='textPrimary'
+    //                     onClick={handleEditClick(id)}
+    //                     color='inherit'
+    //                 />,
+    //             ];
+    //         }
+            
     //     }
     // ]
+
     const columns = [
         {
             field: 'plot_num',
@@ -45,50 +136,20 @@ const PlotTable = () => {
             width: 120
         },
         {
-            field: 'height',
-            headerName: 'Height (cm)',
+            field: 'gli',
+            headerName: 'Green Leaf Index',
             headerAlign: 'center',
             align: 'center',
-            type: 'number',
-            width: 100,
-            editable: true
-        },
-        {
-            field: 'color',
-            headerName: 'Color',
-            headerAlign: 'center',
-            align: 'center',
-            type: 'singleSelect',
-            valueOptions: ['Red', 'Orange', 'Green'],
-            width: 150,
-            editable: true
-        },
-        {
-            field: 'lodging',
-            headerName: 'Lodging (%)',
-            headerAlign: 'center',
-            align: 'center',
-            type: 'number',
-            width: 100,
-            editable: true
-        },
-        {
-            field: 'flowering',
-            headerName: 'Flowering Date',
-            headerAlign: 'center',
-            align: 'center',
-            type: 'date',
-            width: 160,
             editable: true,
-            valueGetter: ({value}) => value && new Date(value),
+            width: 150
         },
         {
-            field: 'insect_damage',
-            headerName: 'Insect Damage',
+            field: 'vari',
+            headerName: 'VARI',
             headerAlign: 'center',
-            type: 'boolean',
-            width: 120,
-            editable: true
+            align: 'center',
+            editable: true,
+            width: 120
         },
         {
             field: 'actions',
@@ -129,8 +190,8 @@ const PlotTable = () => {
             }
             
         }
+        
     ]
-
     const [rows, setRows] = useState(initalRows);
     const [rowModesModel, setRowModesModel] = useState({});
 

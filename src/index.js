@@ -9,6 +9,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './pages/orthomosaic_display/App';
 import ErrorPage from './pages/error_page';
 import PlotTable from './pages/plot_features/plot_table';
+import SpatialMap from './pages/SpatialQuery/map';
 
 // const root = ReactDOM.createRoot(document.getElementById('root'));
 // root.render(
@@ -32,13 +33,18 @@ import PlotTable from './pages/plot_features/plot_table';
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: '/explore',
     element: <App />,
     errorElement: <ErrorPage />
   },
   {
     path: '/plot-features',
     element: <PlotTable />,
+  },
+  {
+    path: '/',
+    element: <SpatialMap />,
+    errorElement: <ErrorPage />
   }
 ]);
 

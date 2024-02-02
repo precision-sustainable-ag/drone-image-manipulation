@@ -61,7 +61,7 @@ const FieldFeatureModal = ({setFieldFeatures}) => {
             Study Metadata
           </Typography>
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+            Please add some field metadata that is common across all the plots.
           </Typography>
           <FormControl fullWidth sx={{mt:2}}>
             <InputLabel id='cropTypeLabel'>Crop Type</InputLabel>

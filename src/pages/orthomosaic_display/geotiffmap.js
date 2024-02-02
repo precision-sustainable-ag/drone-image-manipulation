@@ -58,7 +58,11 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
   const mapRef = useRef(null);
   let gridDraw;
   const [coordinateFeatures, setCoordinateFeatures] = useState({});
-  const [fieldFeatures, setFieldFeatures] = useState({});
+  const [fieldFeatures, setFieldFeatures] = useState({
+    'planting_date': null,
+    'insect_damage': null,
+    'crop_type': null,
+  });
 
   const handleFieldFeaturesUpdate = (newData) => {
     setFieldFeatures(newData);
@@ -328,7 +332,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
         <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef} style={{ width: '100%', height: '400px' }} />
         <Grid item xs={12} sm={12} md={12} lg={12} align='right'>
           <Button onClick={sendGrid}>NEXT</Button>
-        </Grid>
+        </Grid> 
         <Grid item xs={12} sm={12} md={12} lg={12} align='right'>
           <FieldFeatureModal setFieldFeatures={handleFieldFeaturesUpdate}></FieldFeatureModal>
         </Grid>
