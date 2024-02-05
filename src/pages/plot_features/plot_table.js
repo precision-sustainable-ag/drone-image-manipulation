@@ -140,7 +140,7 @@ const PlotTable = () => {
             headerName: 'Green Leaf Index',
             headerAlign: 'center',
             align: 'center',
-            editable: true,
+            // editable: true,
             width: 150
         },
         {
@@ -148,7 +148,7 @@ const PlotTable = () => {
             headerName: 'VARI',
             headerAlign: 'center',
             align: 'center',
-            editable: true,
+            // editable: true,
             width: 120
         },
         {
@@ -295,7 +295,7 @@ const PlotTable = () => {
                     {/* <DataGrid editMode='row' rows={initalRows} columns={columns} /> */}
                 </Grid>
                 <Grid item xs={12} md={12} lg={12} align='right'>
-                    <Button variant='outlined' onClick={sendToAPI}>Let's go!</Button>
+                    <Button variant='outlined' onClick={sendToAPI}>DONE</Button>
                 </Grid>
             </Grid>
         </Box>

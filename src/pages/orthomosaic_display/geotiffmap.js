@@ -331,11 +331,12 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       <Grid container spacing={2}>
         <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef} style={{ width: '100%', height: '400px' }} />
         <Grid item xs={12} sm={12} md={12} lg={12} align='right'>
-          <Button onClick={sendGrid}>NEXT</Button>
-        </Grid> 
-        <Grid item xs={12} sm={12} md={12} lg={12} align='right'>
           <FieldFeatureModal setFieldFeatures={handleFieldFeaturesUpdate}></FieldFeatureModal>
         </Grid>
+        <Grid item xs={12} sm={12} md={12} lg={12} align='right'>
+          <Button onClick={sendGrid}>NEXT</Button>
+        </Grid> 
+        
       </Grid>
       
     </Box>

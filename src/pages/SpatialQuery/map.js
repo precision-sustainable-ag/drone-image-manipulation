@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import {Button, Box, TextField, Grid} from '@mui/material';
+import {Button, Box, TextField, Grid, Typography} from '@mui/material';
 
 import OSM from 'ol/source/OSM';
 import TileLayer from 'ol/layer/Tile';
@@ -169,6 +169,14 @@ const SpatialMap = () => {
                     // transform: 'translateX(-50%)',
                 }}
                 mt={1}>
+                    <Grid item xs={12} sm={12} md={12} lg={12} align='center' mt={2}>
+                        <Typography variant="h4" gutterBottom align="center">
+                            Orthomosaic evaluation
+                        </Typography>
+                        <Typography variant="h6" gutterBottom align="center">
+                            Draw a box around the concerned region and select a date range to get available missions
+                        </Typography>
+                    </Grid>
                     <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef} style={{ width: '90%', height: '400px', transform: 'translateX(5%)'}} mt={3} />
                     <Grid item xs={12} sm={12} md={12} lg={12} align='center' mt={2}>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
