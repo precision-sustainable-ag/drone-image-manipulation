@@ -6,6 +6,7 @@ import { DataGrid, GridRowsProp, GridColDef, GridRowEditStopReasons, GridRowMode
 import { DefaultUniform } from 'ol/webgl/Helper';
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import PlotMap from './plot_map';
 
 const PlotTable = () => {
     // let rows;
@@ -14,6 +15,13 @@ const PlotTable = () => {
     console.log(state);
     
     const initalRows = state.grids;
+    const initalRowsCopy = [...initalRows];
+    // console.log('intial rows ', initalRows);
+    initalRowsCopy.sort((a,b) => {
+        if (a['plot_num'] < b['plot_num']) {return -1;}
+        else if (a['plot_num'] > b['plot_num']) {return 1;}
+        else return 0;
+    });
     // const columns = [
     //     {
     //         field: 'plot_num',
@@ -125,7 +133,8 @@ const PlotTable = () => {
             headerAlign: 'center',
             align: 'center',
             // editable: true,
-            width: 100
+            // width: 100,
+            flex:1
         },
         {
             field: 'plot_name',
@@ -133,7 +142,8 @@ const PlotTable = () => {
             headerAlign: 'center',
             align: 'center',
             editable: true,
-            width: 120
+            // width: 120
+            flex:1
         },
         {
             field: 'gli',
@@ -141,7 +151,8 @@ const PlotTable = () => {
             headerAlign: 'center',
             align: 'center',
             // editable: true,
-            width: 150
+            // width: 150
+            flex:1
         },
         {
             field: 'vari',
@@ -149,13 +160,15 @@ const PlotTable = () => {
             headerAlign: 'center',
             align: 'center',
             // editable: true,
-            width: 120
+            // width: 120
+            flex:1
         },
         {
             field: 'actions',
             type: 'actions',
             headerName: 'Actions',
-            width: 100,
+            // width: 100,
+            flex:1,
             cellClassName: 'actions',
             getActions: ({id}) => {
                 const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -192,7 +205,8 @@ const PlotTable = () => {
         }
         
     ]
-    const [rows, setRows] = useState(initalRows);
+    // const [rows, setRows] = useState(initalRows);
+    const [rows, setRows] = useState(initalRowsCopy);
     const [rowModesModel, setRowModesModel] = useState({});
 
     const handleRowModesModelChange = (newRowModesModel) => {
@@ -274,11 +288,13 @@ const PlotTable = () => {
             </Grid>
 
             <Grid container spacing = {2} mt={1}>
+                <PlotMap apiOutput={state}/>
                 <Grid item xs={12} md={12} lg={12}
                 style={{
                 backgroundColor: 'rgba(240,247,235,.5)',
                 position: 'relative',
                 width: '100%',
+                padding: '10px'
                 }} mt={2}>
                     <DataGrid
                         rows={rows}
@@ -290,13 +306,14 @@ const PlotTable = () => {
                         processRowUpdate={processRowUpdate}
                         slotProps={{
                         toolbar: { setRows, setRowModesModel },
-                        }}
+                        }} mr={2}
                     />
                     {/* <DataGrid editMode='row' rows={initalRows} columns={columns} /> */}
                 </Grid>
                 <Grid item xs={12} md={12} lg={12} align='right'>
                     <Button variant='outlined' onClick={sendToAPI}>DONE</Button>
                 </Grid>
+                
             </Grid>
         </Box>
     );

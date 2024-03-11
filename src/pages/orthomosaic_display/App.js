@@ -4,8 +4,15 @@ import '../../styles/App.css';
 import GeoTIFFMap from './geotiffmap';
 import FlightList from '../FlightListSidebar/flight_list';
 import {Button, Box, Grid, TextField, Typography} from '@mui/material';
+import { useLocation } from 'react-router-dom';
 
 function App() {
+
+  const {state} = useLocation();
+  // const {start_date, end_date, polygon_coordinates} = state;
+  // console.log(start_date, end_date, polygon_coordinates);
+  
+
   const [gridCols, setGridCols] = useState(2);
   const [gridRows, setGridRows] = useState(2);
 
@@ -46,7 +53,7 @@ function App() {
               </Typography>
           </Grid>
           {/* TODO: Autopopulate from the API */}
-          <FlightList sendData={handleFlightDetailsUpdate}></FlightList>
+          <FlightList sendData={handleFlightDetailsUpdate} spatialQuery={state}></FlightList>
         </Grid>
 
         {/* right side - header, rows/cols, map, etc */}

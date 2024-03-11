@@ -1,7 +1,7 @@
 import React, {useState,  useEffect} from 'react';
 import {Button, Box, Grid, TextField, Typography} from '@mui/material';
 
-const FlightList = ({sendData}) => {
+const FlightList = ({sendData, spatialQuery}) => {
     // const [flightList, setFlightList] = useState(['1','2']);
     const [flightDict, setFlightDict] = useState({});
     
@@ -12,14 +12,22 @@ const FlightList = ({sendData}) => {
     }
 
     useEffect(() => {
-        fetch('http://localhost:5000/flight_list')
+        console.log(spatialQuery);
+        fetch('http://localhost:5000/flight_list', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(spatialQuery),
+        })
         .then((response) => {
             return response.json();
         })
         .then((data) => setFlightDict(data.flights))
         // .then((data) => setFlightList(data.flights))
         .catch((error) => console.log('error: ', error))
-    }, []);
+        // write logic to navigate back if no flights found
+    }, [spatialQuery]);
     
     return (
         <Grid item xs={12} sm={12} md={12} lg={12}>

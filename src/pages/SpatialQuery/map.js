@@ -16,7 +16,7 @@ import Translate from 'ol/interaction/Translate';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-
+import moment from 'moment';
 import 'ol/ol.css';
 import '../../styles/App.css';
 
@@ -62,12 +62,19 @@ const SpatialMap = () => {
     const [coordinates, setCoordinates] = useState([]);
 
     const buttonClick = async () => {
+        if (startDate.isAfter(endDate)) {
+            alert('End date needs to be after the start date');
+            return;
+            // console.log('large');
+        }
+        setStartDate(moment(startDate).format('YYYY-MM-DD'));
+        setStartDate(moment(endDate).format('YYYY-MM-DD'));
+
         const requestJson = {
             'start_date': startDate,
             'end_date': endDate,
             'polygon_coordinates': coordinates,
         };
-        console.log(requestJson);
         try {
             // const response = await axios.post('http://localhost:5000/setGrid', coordinateFeatures, 
             // { headers: {
@@ -75,7 +82,7 @@ const SpatialMap = () => {
             // }});
             // console.log(response.data);
             // navigate('/plot-features', {state : response.data} );
-            navigate('/explore');
+            navigate('/explore', {state: requestJson});
             // history.push('/plot-features');
           } catch (error) {
             console.log(error);
@@ -120,6 +127,7 @@ const SpatialMap = () => {
         map.addInteraction(gridDraw);
         gridDraw.on('drawend', (e) => {
             setCoordinates(e.feature.getGeometry().getCoordinates());
+            console.log(map.getView());
 
         });
         
@@ -178,25 +186,30 @@ const SpatialMap = () => {
                         </Typography>
                     </Grid>
                     <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef} style={{ width: '90%', height: '400px', transform: 'translateX(5%)'}} mt={3} />
-                    <Grid item xs={12} sm={12} md={12} lg={12} align='center' mt={2}>
+                    <Grid item xs={12} sm={12} md={12} lg={12} align='center' mt={2} style={{display: 'flex', flexDirection:'row', alignContent: 'space-around', justifyContent: 'space-evenly'}}>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <div>
                             <DatePicker
-                            renderInput={(props) => <TextField {...props} sx={{ mr: 2 }} />}
+                            required
+                            renderInput={(props) => <TextField {...props} sx={{ mr: 5 }} />}
                             label="Start Date"
                             value={startDate}
                             onChange={(newValue) => {
-                            setStartDate(newValue.toString());
+                            setStartDate(newValue);
                             }}
-                            style={{ margin: '10px'}}
                             />
+                            </div>
+                            <div>
                             <DatePicker
-                            renderInput={(props) => <TextField {...props} sx={{ ml: 2 }} />}
+                            required
+                            renderInput={(props) => <TextField {...props} sx={{ ml: 5 }} />}
                             label="End Date"
                             value={endDate}
                             onChange={(newValue) => {
-                            setEndDate(newValue.toString());
+                            setEndDate(newValue);
                             }}
                             />
+                            </div>
                         </LocalizationProvider>
                     </Grid>
                     <Grid item xs={12} sm={12} md={12} lg={12} align='right' mt={2}>
