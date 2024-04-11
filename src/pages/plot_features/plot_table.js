@@ -14,12 +14,22 @@ const PlotTable = () => {
     const { state } = useLocation();
     console.log(state);
     
-    const initalRows = state.grids;
+    // const initalRows = state.grids;
+    // const initalRowsCopy = [...initalRows];
+    // // console.log('intial rows ', initalRows);
+    // initalRowsCopy.sort((a,b) => {
+    //     if (a['plot_num'] < b['plot_num']) {return -1;}
+    //     else if (a['plot_num'] > b['plot_num']) {return 1;}
+    //     else return 0;
+    // });
+    const initalRows = state.features.features;
+    // for 
     const initalRowsCopy = [...initalRows];
+    console.log(initalRowsCopy);
     // console.log('intial rows ', initalRows);
     initalRowsCopy.sort((a,b) => {
-        if (a['plot_num'] < b['plot_num']) {return -1;}
-        else if (a['plot_num'] > b['plot_num']) {return 1;}
+        if (a['properties']['plot_num'] < b['properties']['plot_num']) {return -1;}
+        else if (a['properties']['plot_num'] > b['properties']['plot_num']) {return 1;}
         else return 0;
     });
     // const columns = [
@@ -132,9 +142,12 @@ const PlotTable = () => {
             headerName: 'Plot Number',
             headerAlign: 'center',
             align: 'center',
+            valueGetter: params => params.row.properties.plot_num,
             // editable: true,
             // width: 100,
-            flex:1
+            flex:1,
+            // valueGetter: (params) => {console.log(params)},
+            
         },
         {
             field: 'plot_name',
@@ -142,27 +155,48 @@ const PlotTable = () => {
             headerAlign: 'center',
             align: 'center',
             editable: true,
+            valueGetter: (params) => params.row.properties.name,
             // width: 120
             flex:1
         },
         {
-            field: 'gli',
-            headerName: 'Green Leaf Index',
+            field: 'ndvi',
+            headerName: 'NDVI',
             headerAlign: 'center',
             align: 'center',
+            valueGetter: (params) => params.row.properties.ndvi,
             // editable: true,
             // width: 150
             flex:1
         },
         {
-            field: 'vari',
-            headerName: 'VARI',
+            field: 'lai',
+            headerName: 'LAI',
             headerAlign: 'center',
             align: 'center',
+            valueGetter: (params) => params.row.properties.lai,
             // editable: true,
             // width: 120
             flex:1
         },
+        // {
+        //     field: 'gli',
+        //     headerName: 'Green Leaf Index',
+        //     headerAlign: 'center',
+        //     align: 'center',
+        //     // editable: true,
+        //     // width: 150
+        //     flex:1
+        // },
+        // {
+        //     field: 'vari',
+        //     headerName: 'VARI',
+        //     headerAlign: 'center',
+        //     align: 'center',
+        //     // editable: true,
+        //     // width: 120
+        //     flex:1
+        // },
         {
             field: 'actions',
             type: 'actions',

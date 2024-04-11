@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Box, Button, FormControl, FormLabel,
-  Grid, InputLabel, RadioGroup, Radio,
-  Select, TextField, Typography, Modal, MenuItem, FormControlLabel } from '@mui/material';
+import { Backdrop, Box, Button, CircularProgress, FormControl,
+  Grid, InputLabel, Select, Modal, MenuItem, Typography } from '@mui/material';
 
 import { Collection } from 'ol';
 import Map from 'ol/Map';
@@ -68,6 +67,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
 
   const [walkPattern, setWalkPattern] = useState('dh');
   const [walkStartLocation, setWalkStartLocation] = useState('tl');
+  const [loading, setLoading] = useState(false);
 
   const handleFieldFeaturesUpdate = (newData) => {
     setFieldFeatures(newData);
@@ -96,6 +96,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     console.log('tehee ',coordinateFeatures);
     console.log('tehee2', fieldFeatures);
     try {
+      setLoading(true);
       const response = await axios.post('http://localhost:5000/setGrid', requestData, 
       { headers: {
         'Content-Type': 'application/json',
@@ -105,11 +106,14 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       // history.push('/plot-features');
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   }
   // valid till Feb 11th
   // cog.tif -> https://ncsudronedata.blob.core.windows.net/test/cog.tif?sp=r&st=2024-02-29T20:59:58Z&se=2024-03-30T03:59:58Z&spr=https&sv=2022-11-02&sr=b&sig=XSquPt1XLVps%2BqJCHMY4Z7VfqJKr6jZnzrLlp30rkdc%3D
   // 0002SET_ortho_cog.tif -> https://ncsudronedata.blob.core.windows.net/test/0002SET_ortho_cog.tif?sp=r&st=2024-02-29T20:59:02Z&se=2024-03-30T03:59:02Z&spr=https&sv=2022-11-02&sr=b&sig=XPbQkWDEsOHJk9EoOhb8RaY3cP5n1OzdioAUJq0Thew%3D
+  // 0004SET -> https://ncsudronedata.blob.core.windows.net/test/0004SET_orthophoto_cog.tif?sp=r&st=2024-03-22T17:14:22Z&se=2024-05-02T01:14:22Z&spr=https&sv=2022-11-02&sr=b&sig=FIN8QMD5C3PFV1GYS8Jo0eccf8in798S6y4Su07y8NQ%3D
   
   useEffect(() => {
     
@@ -117,6 +121,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       sources: [
         {
           url: flightDetails.orthomosaic_url,
+          // url: 'http://localhost:8080/cog.tif',
           crossOrigin: 'anonymous',
           // projection: 'EPSG:4326'
         },
@@ -377,37 +382,58 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
                   id='walkPatternSelect'
                   value={walkPattern}
                   onChange={(e) => setWalkPattern(e.target.value)}
-                  sx={{mb:2, ml:1}}
-              >
+                  sx={{mb:2, ml:1}}>
                   <MenuItem value={'dh'}>Deadheaded</MenuItem>
                   <MenuItem value={'st'}>Serpentine</MenuItem>
               </Select>
-              </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={6} lg={6} >
-              <FormControl fullWidth style={{display: 'flex', flexDirection:'row'}}>
-              <InputLabel id='walkStartLabel'>Where did you start collecting data from?</InputLabel>
-              <Select fullWidth
-                  labelId='walkStartLabel'
-                  id='walkStartSelect'
-                  value={walkStartLocation}
-                  // label='Crop Type'
-                  // onChange={handleCropTypeChange}
-                  onChange={(e) => setWalkStartLocation(e.target.value)}
-                  sx={{mb:2, mr: 1}}
-              >
-                  <MenuItem value={'tl'}>Top left corner</MenuItem>
-                  <MenuItem value={'tr'}>Top right corner</MenuItem>
-                  <MenuItem value={'bl'}>Bottom left corner</MenuItem>
-                  <MenuItem value={'br'}>Bottom right corner</MenuItem>
-              </Select>
           </FormControl>
-          </Grid>
-        <Grid item xs={12} sm={12} md={12} lg={12} align='right'>
+        </Grid>
+        <Grid item xs={12} sm={6} md={6} lg={6} >
+          <FormControl fullWidth style={{display: 'flex', flexDirection:'row'}}>
+            <InputLabel id='walkStartLabel'>Where did you start collecting data from?</InputLabel>
+            <Select fullWidth
+              labelId='walkStartLabel'
+              id='walkStartSelect'
+              value={walkStartLocation}
+              // label='Crop Type'
+              // onChange={handleCropTypeChange}
+              onChange={(e) => setWalkStartLocation(e.target.value)}
+              sx={{mb:2, mr: 1}}>
+              <MenuItem value={'tl'}>Top left corner</MenuItem>
+              <MenuItem value={'tr'}>Top right corner</MenuItem>
+              <MenuItem value={'bl'}>Bottom left corner</MenuItem>
+              <MenuItem value={'br'}>Bottom right corner</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={6} sm={6} md={6} lg={6} align='left' sx={{mb:1}}>
           <FieldFeatureModal setFieldFeatures={handleFieldFeaturesUpdate}></FieldFeatureModal>
         </Grid>
-        <Grid item xs={12} sm={12} md={12} lg={12} align='right'>
+        <Grid item xs={6} sm={6} md={6} lg={6} align='right' sx={{mb:1}}>
           <Button onClick={sendGrid}>NEXT</Button>
+          <Modal
+            open={loading}
+          >
+            <Box
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '50%',
+                height: '50%',
+                backgroundColor: 'white',
+                boxShadow: 24,
+                p: 4,
+                borderRadius: '8px',
+                textAlign: 'center',
+                maxHeight: '100px',
+              }}
+            >
+              <CircularProgress />
+              <Typography>Calculating vegetation indices</Typography>
+            </Box>
+          </Modal>
         </Grid> 
         
       </Grid>

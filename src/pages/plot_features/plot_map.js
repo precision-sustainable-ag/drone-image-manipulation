@@ -70,7 +70,6 @@ const PlotMap = ({apiOutput}) => {
         const vectorLayer = new VectorLayer({
             source: vectorSource,
             style: function (feature) {
-                console.log(feature.get('name'));
                 labelStyle.getText().setText(`${feature.get('name')}`);
                 return style;
             }

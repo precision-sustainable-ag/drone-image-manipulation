@@ -52,7 +52,6 @@ function App() {
               Flights
               </Typography>
           </Grid>
-          {/* TODO: Autopopulate from the API */}
           <FlightList sendData={handleFlightDetailsUpdate} spatialQuery={state}></FlightList>
         </Grid>
 
