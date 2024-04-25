@@ -1,0 +1,13 @@
+server {
+    listen 80;
+    root /var/www/drone-image-manipulation/build;
+    index index.html;
+    client_max_body_size 100M;
+    location / {
+        try_files $uri $uri/ =404;
+    }
+    location /imgproc {
+        include proxy_params;
+        proxy_pass http://localhost:5000;
+    }
+}
