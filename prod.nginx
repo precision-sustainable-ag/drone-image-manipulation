@@ -6,7 +6,7 @@ server {
     location / {
         try_files $uri $uri/ =404;
     }
-    location /imgproc {
+    location /ping {
         include proxy_params;
         proxy_pass http://localhost:5000;
     }
