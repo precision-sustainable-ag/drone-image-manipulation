@@ -10,4 +10,12 @@ server {
         include proxy_params;
         proxy_pass http://localhost:5000;
     }
+    location /flight_list {
+        include proxy_params;
+        proxy_pass http://localhost:5000;
+    }
+    location /setGrid {
+        include proxy_params;
+        proxy_pass http://localhost:5000;
+    }
 }
