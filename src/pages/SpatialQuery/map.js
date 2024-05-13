@@ -19,6 +19,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from 'moment';
 import 'ol/ol.css';
 import '../../styles/App.css';
+import Header from '../Header/header';
 
 
 // TODO: Move to shared resources
@@ -166,8 +167,11 @@ const SpatialMap = () => {
       }}
       margin={5}
     >
+      {/* <Grid> */}
+        
+      {/* </Grid> */}
         <Grid container spacing={2}>
-            
+        <Header/>
                 <Grid
                 style={{
                     backgroundColor: 'rgba(240,247,235,.5)',

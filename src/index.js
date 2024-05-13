@@ -10,6 +10,7 @@ import App from './pages/orthomosaic_display/App';
 import ErrorPage from './pages/error_page';
 import PlotTable from './pages/plot_features/plot_table';
 import SpatialMap from './pages/SpatialQuery/map';
+import FeedbackComponent from './pages/Feedback/feedback';
 
 // const root = ReactDOM.createRoot(document.getElementById('root'));
 // root.render(
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
   {
     path: '/plot-features',
     element: <PlotTable />,
+  },
+  {
+    path: '/feedback',
+    element: <FeedbackComponent />,
   },
   {
     path: '/',

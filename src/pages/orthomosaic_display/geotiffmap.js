@@ -84,6 +84,15 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     //     'pattern': walkPattern,
     //   },
     // }));
+
+    // if ((fieldFeatures['crop_type'] === undefined) || (fieldFeatures['lead_scientist'] === null)){
+    //   alert('Please add required details by clicking "Add Field Features"');
+    //   return;
+    // }
+    if ([null, undefined, ''].includes(fieldFeatures['crop_type']) || [null,undefined, ''].includes(fieldFeatures['lead_scientist'])){
+      alert('Please add required details by clicking "Add Field Features"');
+      return;
+    }
     const requestData = {
       'flight_id': coordinateFeatures['flight_id'],
       'coordinate_features': coordinateFeatures,
@@ -105,6 +114,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       navigate('/plot-features', {state : response.data} );
       // history.push('/plot-features');
     } catch (error) {
+      alert('Could not process. Please try again later');
       console.log(error);
     } finally {
       setLoading(false);

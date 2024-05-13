@@ -3,6 +3,7 @@ import logo from '../../logo.svg';
 import '../../styles/App.css';
 import GeoTIFFMap from './geotiffmap';
 import FlightList from '../FlightListSidebar/flight_list';
+import Header from '../Header/header';
 import {Button, Box, Grid, TextField, Typography} from '@mui/material';
 import { useLocation } from 'react-router-dom';
 
@@ -41,6 +42,7 @@ function App() {
     >
       <Grid container spacing={2}>
         {/* left column */}
+        <Header/>
         <Grid item xs={12} md={3} lg={2}
         style={{
           backgroundColor: 'rgba(240,247,235,.5)',
