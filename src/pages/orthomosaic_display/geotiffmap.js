@@ -102,20 +102,20 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       },
       'field_features': fieldFeatures
     }
-    console.log('tehee ',coordinateFeatures);
-    console.log('tehee2', fieldFeatures);
+    // console.log('tehee ',coordinateFeatures);
+    // console.log('tehee2', fieldFeatures);
     try {
       setLoading(true);
       const response = await axios.post('http://localhost:5000/setGrid', requestData, 
       { headers: {
         'Content-Type': 'application/json',
       }});
-      console.log(response.data);
+      // console.log(response.data);
       navigate('/plot-features', {state : response.data} );
       // history.push('/plot-features');
     } catch (error) {
       alert('Could not process. Please try again later');
-      console.log(error);
+      // console.log(error);
     } finally {
       setLoading(false);
     }
@@ -276,7 +276,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       })
     );
     const coords = feature.getGeometry().getCoordinates()[0];
-    console.log('get grid', coords);
+    // console.log('get grid', coords);
     const topLeftCoord = coords[0];
     const topRightCoord = coords[1];
     const bottomRightCoord = coords[2];
@@ -312,9 +312,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
         ...oldData,
         vertical: oldData.vertical ? [...oldData.vertical, {'Point 1': xColCopy,'Point 2': yColCopy}] : [{'Point 1':xColCopy,'Point 2':yColCopy}],
       }));
-      console.log('vertical push', xColCoord, yColCoord);
       verticalD.push(([xColCopy, yColCopy]));
-      console.log('loop V', verticalD);
       styles.push(
         new Style({
           geometry: lineString,
@@ -329,9 +327,8 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       xColCoord[1] = xColCoord[1] - colXRotationOffset;
       yColCoord[0] = yColCoord[0] + colWidth;
       yColCoord[1] = yColCoord[1] - colYRotationOffset;
-      console.log('after: ', xColCoord, yColCoord);
+      
     }
-    // console.log('internal V', verticalD);
     // setVerticalData(verticalD);
     
     const gridHeight = bottomLeftCoord[1] - topLeftCoord[1];
@@ -354,7 +351,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
         ...oldData,
         horizontal: oldData.horizontal ? [...oldData.horizontal, {'Point 1': xRowCopy,'Point 2': yRowCopy}] : [{'Point 1':xRowCopy,'Point 2':yRowCopy}],
       }));
-      console.log('horizontal push', xRowCoord, yRowCoord);
+      
       styles.push(
         new Style({
           geometry: lineString,

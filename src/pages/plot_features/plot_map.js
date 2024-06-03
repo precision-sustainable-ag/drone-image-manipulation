@@ -30,7 +30,7 @@ const PlotMap = ({apiOutput}) => {
     let gridDraw;
 
     useEffect(() => {
-        console.log(apiOutput);
+        // console.log(apiOutput);
         const mapSource = new GeoTIFF({
             sources: [
               {
@@ -88,9 +88,6 @@ const PlotMap = ({apiOutput}) => {
             view: mapSource.getView(),        
         });
         // map.addLayer(vectorLayer);
-        console.log(vectorLayer.getSource().getFeatures());
-        console.log(map);
-
         const vectorExtent = vectorSource.getView();
         const mapViewExtent = map.getView();
 

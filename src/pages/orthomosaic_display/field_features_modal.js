@@ -36,7 +36,6 @@ const FieldFeatureModal = ({setFieldFeatures}) => {
         'disease_data_desc': diseaseDataDetails,
         'data_usage_desc': dataUsageDescription,
     });
-    console.log('yolo');
     setOpen(false);
   };
 

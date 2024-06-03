@@ -179,24 +179,26 @@ const PlotTable = () => {
             // width: 120
             flex:1
         },
-        // {
-        //     field: 'gli',
-        //     headerName: 'Green Leaf Index',
-        //     headerAlign: 'center',
-        //     align: 'center',
-        //     // editable: true,
-        //     // width: 150
-        //     flex:1
-        // },
-        // {
-        //     field: 'vari',
-        //     headerName: 'VARI',
-        //     headerAlign: 'center',
-        //     align: 'center',
-        //     // editable: true,
-        //     // width: 120
-        //     flex:1
-        // },
+        {
+            field: 'gli',
+            headerName: 'GLI',
+            headerAlign: 'center',
+            align: 'center',
+            valueGetter: (params) => params.row.properties.gli,
+            // editable: true,
+            // width: 120
+            flex:1
+        },
+        {
+            field: 'vari',
+            headerName: 'VARI',
+            headerAlign: 'center',
+            align: 'center',
+            valueGetter: (params) => params.row.properties.vari,
+            // editable: true,
+            // width: 120
+            flex:1
+        },
         {
             field: 'actions',
             type: 'actions',
@@ -283,7 +285,7 @@ const PlotTable = () => {
     // };
 
     const sendToAPI = () => {
-        console.log(rows);
+        // console.log(rows);
     };
 
 

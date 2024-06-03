@@ -128,7 +128,7 @@ const SpatialMap = () => {
         map.addInteraction(gridDraw);
         gridDraw.on('drawend', (e) => {
             setCoordinates(e.feature.getGeometry().getCoordinates());
-            console.log(map.getView());
+            // console.log(map.getView());
 
         });
         

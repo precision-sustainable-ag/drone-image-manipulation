@@ -12,7 +12,7 @@ const FlightList = ({sendData, spatialQuery}) => {
     }
 
     useEffect(() => {
-        console.log(spatialQuery);
+        // console.log(spatialQuery);
         fetch('http://localhost:5000/flight_list', {
             method: 'POST',
             headers: {
