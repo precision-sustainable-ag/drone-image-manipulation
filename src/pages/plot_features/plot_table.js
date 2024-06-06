@@ -1,4 +1,4 @@
-import { Button, Box, Grid, Typography } from '@mui/material';
+import { Button, Box, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
@@ -7,6 +7,7 @@ import { DefaultUniform } from 'ol/webgl/Helper';
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import PlotMap from './plot_map';
+import FileSaver from 'file-saver';
 
 const PlotTable = ({state}) => {
     // let rows;
@@ -244,6 +245,8 @@ const PlotTable = ({state}) => {
     // const [rows, setRows] = useState(initalRows);
     const [rows, setRows] = useState(initalRowsCopy);
     const [rowModesModel, setRowModesModel] = useState({});
+    const [openDialog, setOpenDialog] = useState(false);
+    const [responseData, setResponseData] = useState("");
 
     const handleRowModesModelChange = (newRowModesModel) => {
         setRowModesModel(newRowModesModel);
@@ -277,7 +280,14 @@ const PlotTable = ({state}) => {
         return updatedRow;
     }
 
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+    };
 
+    const handleDownload = () => {
+        const blob = new Blob([responseData], { type: "text/plain;charset=utf-8" });
+        FileSaver.saveAs(blob, "response.txt");
+    };
 
     // const [editedRows, setEditedRows] = useState([]);
     // const handleCellEdit = (newRow) => {
@@ -287,6 +297,29 @@ const PlotTable = ({state}) => {
     const sendToAPI = () => {
         // console.log(rows);
     };
+
+    const exportData = () => {
+        fetch('http://localhost:5000/export-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                features: state.features.features,
+                flight_details: state.flight_details,
+                field_features: state.field_features,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+            setResponseData(data);
+            setOpenDialog(true);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
 
     return (
         <Box
@@ -322,10 +355,31 @@ const PlotTable = ({state}) => {
                     {/* <DataGrid editMode='row' rows={initalRows} columns={columns} /> */}
                 </Grid>
                 <Grid item xs={12} md={12} lg={12} align='right'>
+                    <Button variant='outlined' onClick={exportData}>EXPORT</Button>
                     <Button variant='outlined' onClick={sendToAPI}>DONE</Button>
                 </Grid>
                 
             </Grid>
+
+            <Dialog open={openDialog} onClose={handleCloseDialog}>
+                <DialogTitle>Export BrAPI Request</DialogTitle>
+                <DialogContent dividers>
+                    <pre>
+                        <code>
+                            {responseData}
+                        </code>
+                    </pre>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDownload} color="primary">
+                        Download
+                    </Button>
+                    <Button onClick={handleCloseDialog} color="primary">
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
         </Box>
     );
 };
