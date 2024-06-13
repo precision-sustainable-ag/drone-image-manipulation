@@ -11,11 +11,11 @@ server {
         include proxy_params;
         proxy_pass http://localhost:5000;
     }
-    location /flight_list {
+    location /flight-list {
         include proxy_params;
         proxy_pass http://localhost:5000;
     }
-    location /setGrid {
+    location /set-grid {
         include proxy_params;
         proxy_pass http://localhost:5000;
     }
