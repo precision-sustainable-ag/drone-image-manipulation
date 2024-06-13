@@ -215,6 +215,10 @@ const PlotMap = ({apiOutput}) => {
         }}
         mt={2}>
           <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef} style={{ width: '90%', height: '400px', padding: '10px'}} />
+                    <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef} style={{ width: '90%', height: '400px', }} />
+                {/* </Grid> */}
+                <Button variant='outlined' onClick={exportPlotImages}>EXPORT IMAGES</Button>
+
         </Grid>
         </Box>
     )
