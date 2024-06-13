@@ -299,26 +299,23 @@ const PlotTable = ({state}) => {
     };
 
     const exportData = () => {
-        fetch('http://localhost:5000/export-data', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                features: state.features.features,
-                flight_details: state.flight_details,
-                field_features: state.field_features,
-            }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Success:', data);
-            setResponseData(data);
-            setOpenDialog(true);
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+
+        var body = [{"studyName": state.field_features["lead_scientist"] + "_" + state.field_features["crop_type"],
+                 "additionalInfo": {"features": state.features.features,
+                                    "flight_id": state.flight_details["flight_id"],
+                                    "mission_start_time": state.flight_details["mission_start_time"]},
+                 "commonCropName": state.field_features["crop_type"],
+                 "contacts": [{"name": state.field_features["lead_scientist"],}],
+                 }]
+
+        const curlRequest = `curl --include \\
+        --request POST \\
+        --header "Content-Type: application/json" \\
+        --data-binary '${JSON.stringify(body, null, 0)}'  \\
+        'https://<your-brapi-instance>/brapi/v2/studies'`;
+
+        setResponseData(curlRequest);
+        setOpenDialog(true);
     }
 
     return (

@@ -113,7 +113,6 @@ const PlotMap = ({apiOutput}) => {
       if (!vectorSource) return;
       const features = vectorSource.getFeatures();
       const zip = new JSZip();
-      console.log(vectorSource)
 
       for (const feature of features) {
           const extent = feature.getGeometry().getExtent();
