@@ -1,5 +1,6 @@
 server {
     listen 80;
+    server_name dronepilotapp.psi.ncsu.edu;
     root /var/www/drone-image-manipulation/build;
     index index.html;
     client_max_body_size 100M;

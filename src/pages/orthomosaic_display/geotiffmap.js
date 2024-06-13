@@ -106,7 +106,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     // console.log('tehee2', fieldFeatures);
     try {
       setLoading(true);
-      const response = await axios.post('http://localhost:5000/setGrid', requestData, 
+      const response = await axios.post(process.env.REACT_APP_API_URL+'/set-grid', requestData, 
       { headers: {
         'Content-Type': 'application/json',
       }});
