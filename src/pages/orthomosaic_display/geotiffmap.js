@@ -68,6 +68,8 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
   const [walkPattern, setWalkPattern] = useState('dh');
   const [walkStartLocation, setWalkStartLocation] = useState('tl');
   const [loading, setLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [responseData, setResponseData] = useState(null);
 
   const handleFieldFeaturesUpdate = (newData) => {
     setFieldFeatures(newData);
@@ -77,18 +79,6 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     
     // TODO: error handling, loading modal
     // TODO: sending field features
-    // setCoordinateFeatures((oldData) => ({
-    //   ...oldData,
-    //   'data_collection_method': {
-    //     'start_point': walkStartLocation,
-    //     'pattern': walkPattern,
-    //   },
-    // }));
-
-    // if ((fieldFeatures['crop_type'] === undefined) || (fieldFeatures['lead_scientist'] === null)){
-    //   alert('Please add required details by clicking "Add Field Features"');
-    //   return;
-    // }
     if ([null, undefined, ''].includes(fieldFeatures['crop_type']) || [null,undefined, ''].includes(fieldFeatures['lead_scientist'])){
       alert('Please add required details by clicking "Add Field Features"');
       return;
@@ -102,24 +92,29 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       },
       'field_features': fieldFeatures
     }
-    // console.log('tehee ',coordinateFeatures);
-    // console.log('tehee2', fieldFeatures);
     try {
       setLoading(true);
       const response = await axios.post(process.env.REACT_APP_API_URL+'/set-grid', requestData, 
       { headers: {
         'Content-Type': 'application/json',
       }});
-      // console.log(response.data);
-      navigate('/plot-features', {state : response.data} );
-      // history.push('/plot-features');
+      setResponseData(response.data);
+      setIsSubmitted(true);
+      
     } catch (error) {
       alert('Could not process. Please try again later');
-      // console.log(error);
+      
     } finally {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (isSubmitted && responseData){
+      navigate('/plot-features', {state : responseData} );
+    }
+
+  }, [isSubmitted, responseData, navigate]);
   // valid till Feb 11th
   // cog.tif -> https://ncsudronedata.blob.core.windows.net/test/cog.tif?sp=r&st=2024-02-29T20:59:58Z&se=2024-03-30T03:59:58Z&spr=https&sv=2022-11-02&sr=b&sig=XSquPt1XLVps%2BqJCHMY4Z7VfqJKr6jZnzrLlp30rkdc%3D
   // 0002SET_ortho_cog.tif -> https://ncsudronedata.blob.core.windows.net/test/0002SET_ortho_cog.tif?sp=r&st=2024-02-29T20:59:02Z&se=2024-03-30T03:59:02Z&spr=https&sv=2022-11-02&sr=b&sig=XPbQkWDEsOHJk9EoOhb8RaY3cP5n1OzdioAUJq0Thew%3D
@@ -130,7 +125,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     const mapSource = new GeoTIFF({
       sources: [
         {
-          url: process.env.REACT_APP_API_URL+'/flights/'+flightDetails.orthomosaic_url,
+          url: process.env.REACT_APP_FILE_SERVER_URL+'/flights/'+flightDetails.orthomosaic_url,
           // url: 'http://localhost:8080/cog.tif',
           crossOrigin: 'anonymous',
           // projection: 'EPSG:4326'

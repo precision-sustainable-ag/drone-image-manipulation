@@ -34,7 +34,7 @@ const PlotMap = ({apiOutput}) => {
         const mapSource = new GeoTIFF({
             sources: [
               {
-                url: process.env.REACT_APP_API_URL+'/flights/'+apiOutput['flight_details']['orthomosaic_url'],
+                url: process.env.REACT_APP_FILE_SERVER_URL+'/flights/'+apiOutput['flight_details']['orthomosaic_url'],
                 crossOrigin: 'anonymous',
                 // projection: 'EPSG:4326'
               },
