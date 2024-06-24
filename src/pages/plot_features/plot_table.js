@@ -1,4 +1,4 @@
-import { Button, Box, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Button, Box, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Menu, MenuItem, Divider } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
@@ -14,7 +14,17 @@ const PlotTable = ({state}) => {
     // let columns;
     // const { state } = useLocation();
     console.log(state);
-    
+
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const plotMapRef = useRef();
     // const initalRows = state.grids;
     // const initalRowsCopy = [...initalRows];
     // // console.log('intial rows ', initalRows);
@@ -24,7 +34,6 @@ const PlotTable = ({state}) => {
     //     else return 0;
     // });
     const initalRows = state.features.features;
-    // for 
     const initalRowsCopy = [...initalRows];
     console.log(initalRowsCopy);
     // console.log('intial rows ', initalRows);
@@ -33,109 +42,6 @@ const PlotTable = ({state}) => {
         else if (a['properties']['plot_num'] > b['properties']['plot_num']) {return 1;}
         else return 0;
     });
-    // const columns = [
-    //     {
-    //         field: 'plot_num',
-    //         headerName: 'Plot Number',
-    //         headerAlign: 'center',
-    //         align: 'center',
-    //         // editable: true,
-    //         width: 100
-    //     },
-    //     {
-    //         field: 'plot_name',
-    //         headerName: 'Plot Name',
-    //         headerAlign: 'center',
-    //         align: 'center',
-    //         editable: true,
-    //         width: 120
-    //     },
-    //     {
-    //         field: 'height',
-    //         headerName: 'Height (cm)',
-    //         headerAlign: 'center',
-    //         align: 'center',
-    //         type: 'number',
-    //         width: 100,
-    //         editable: true
-    //     },
-    //     {
-    //         field: 'color',
-    //         headerName: 'Color',
-    //         headerAlign: 'center',
-    //         align: 'center',
-    //         type: 'singleSelect',
-    //         valueOptions: ['Red', 'Orange', 'Green'],
-    //         width: 150,
-    //         editable: true
-    //     },
-    //     {
-    //         field: 'lodging',
-    //         headerName: 'Lodging (%)',
-    //         headerAlign: 'center',
-    //         align: 'center',
-    //         type: 'number',
-    //         width: 100,
-    //         editable: true
-    //     },
-    //     {
-    //         field: 'flowering',
-    //         headerName: 'Flowering Date',
-    //         headerAlign: 'center',
-    //         align: 'center',
-    //         type: 'date',
-    //         width: 160,
-    //         editable: true,
-    //         valueGetter: ({value}) => value && new Date(value),
-    //     },
-    //     {
-    //         field: 'insect_damage',
-    //         headerName: 'Insect Damage',
-    //         headerAlign: 'center',
-    //         type: 'boolean',
-    //         width: 120,
-    //         editable: true
-    //     },
-    //     {
-    //         field: 'actions',
-    //         type: 'actions',
-    //         headerName: 'Actions',
-    //         width: 100,
-    //         cellClassName: 'actions',
-    //         getActions: ({id}) => {
-    //             const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-    //             if (isInEditMode) {
-    //                 return [
-    //                     <GridActionsCellItem
-    //                         icon={<SaveIcon/>}
-    //                         label='Save'
-    //                         sx={{
-    //                             color: 'primary.main',
-    //                         }}
-    //                         onClick={handleSaveClick(id)}
-    //                     />,
-    //                     <GridActionsCellItem
-    //                         icon={<CancelIcon/>}
-    //                         label='Cancel'
-    //                         className='textPrimary'
-    //                         onClick={handleCancelClick(id)}
-    //                         color='inherit'
-    //                     />,
-    //                 ];
-    //             }
-    //             return [
-    //                 <GridActionsCellItem
-    //                     icon={<EditIcon/>}
-    //                     label='Edit'
-    //                     className='textPrimary'
-    //                     onClick={handleEditClick(id)}
-    //                     color='inherit'
-    //                 />,
-    //             ];
-    //         }
-            
-    //     }
-    // ]
 
     const columns = [
         {
@@ -315,8 +221,36 @@ const PlotTable = ({state}) => {
         'https://<your-brapi-instance>/brapi/v2/studies'`;
 
         setResponseData(curlRequest);
-        setOpenDialog(true);
     }
+
+    const exportAsCSV = () => {
+        const columnsToExport = columns.filter(col => col.field !== 'actions');
+        const headers = columnsToExport.map(col => col.headerName).join(',');
+        const csvRows = rows.map(row => {
+            return columnsToExport.map(col => {
+                const value = col.valueGetter ? col.valueGetter({ row }) : row[col.field];
+                return value !== undefined ? value : '';
+            }).join(',');
+        });
+
+        console.log(csvRows)
+        const csvContent = [headers, ...csvRows].join('\n');
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+        FileSaver.saveAs(blob, "plot_table.csv");
+        handleClose();
+    }
+
+    const exportAll = () => {
+
+        handleDownload();
+        exportAsCSV();
+        plotMapRef.current.exportPlotImages();
+
+    };
+
+    useEffect(() => {
+        exportData()
+      });
 
     return (
         <Box
@@ -352,7 +286,23 @@ const PlotTable = ({state}) => {
                     {/* <DataGrid editMode='row' rows={initalRows} columns={columns} /> */}
                 </Grid>
                 <Grid item xs={12} md={12} lg={12} align='right'>
-                    <Button variant='outlined' onClick={exportData}>EXPORT</Button>
+                    <Button variant='outlined' id="basic-button" onClick={handleClick}>EXPORT
+                    </Button>
+                    <Menu
+                        id="basic-menu"
+                        anchorEl={anchorEl}
+                        open={open}
+                        onClose={handleClose}
+                        MenuListProps={{
+                        'aria-labelledby': 'basic-button',
+                        }}
+                    >
+                        <MenuItem onClick={() => setOpenDialog(true)}>EXPORT TABLE AS BRAPI REQUEST</MenuItem>
+                        <MenuItem onClick={exportAsCSV}>EXPORT TABLE AS CSV</MenuItem>
+                        <MenuItem onClick={() => plotMapRef.current.exportPlotImages()}>EXPORT PLOT IMAGES</MenuItem>
+                        <Divider />
+                        <MenuItem onClick={exportAll}>EXPORT ALL</MenuItem>
+                    </Menu>
                     <Button variant='outlined' onClick={sendToAPI}>DONE</Button>
                 </Grid>
                 

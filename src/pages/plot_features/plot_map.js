@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {Button, Box, Grid, Typography} from '@mui/material';
@@ -27,13 +27,17 @@ import { Polygon } from 'ol/geom';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
-const PlotMap = ({apiOutput}) => {
+const PlotMap = forwardRef(({apiOutput}, ref) => {
     // const navigate = useNavigate();
 
     const mapRef = useRef(null);
     const [map, setMap] = useState(null);
     const [vectorSource, setVectorSource] = useState(null);
     let gridDraw;
+
+    useImperativeHandle(ref, () => ({
+      exportPlotImages,
+  }));
 
     useEffect(() => {
         // console.log(apiOutput);
@@ -205,7 +209,7 @@ const PlotMap = ({apiOutput}) => {
 
                 </Grid>
         </Grid>
-        <Grid container spacing={2}
+        <Grid container spacing={2} 
         style={{
             backgroundColor: 'rgba(240,247,235,.5)',
             // position: 'relative',
@@ -215,13 +219,9 @@ const PlotMap = ({apiOutput}) => {
         }}
         mt={2}>
           <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef} style={{ width: '90%', height: '400px', padding: '10px'}} />
-                    <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef} style={{ width: '90%', height: '400px', }} />
-                {/* </Grid> */}
-                <Button variant='outlined' onClick={exportPlotImages}>EXPORT IMAGES</Button>
-
         </Grid>
-        </Box>
+      </Box>
     )
-};
+});
 
 export default PlotMap;
