@@ -24,6 +24,7 @@ import { fromUserCoordinate, getUserProjection } from 'ol/proj';
 import 'ol/ol.css';
 import '../../styles/App.css';
 import FieldFeatureModal from './field_features_modal';
+import { set } from 'ol/transform';
 
 class ToggleDraw extends Control {
   constructor(opt_options) {
@@ -69,12 +70,20 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
   const [walkStartLocation, setWalkStartLocation] = useState('tl');
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [responseData, setResponseData] = useState(null);
 
   const handleFieldFeaturesUpdate = (newData) => {
     setFieldFeatures(newData);
   };
 
+  const forceLoad = (respData) => {
+    var x = 0;
+    for (const [key, value] of Object.entries(respData)) {
+      if (key && value){
+        x += 1;
+      }
+    }
+    return x;
+  }
   const sendGrid = async () => {
     
     // TODO: error handling, loading modal
@@ -98,23 +107,41 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       { headers: {
         'Content-Type': 'application/json',
       }});
-      setResponseData(response.data);
       setIsSubmitted(true);
-      
+
+      const responseData = JSON.parse(response.data.replace(/\bNaN\b/g, "null"));
+      // these steps are added to force react to load the complete data
+      console.log('test', responseData);
+      var x = JSON.parse(JSON.stringify(responseData));
+      x = forceLoad(responseData);
+      if (isSubmitted && responseData && responseData.features && responseData.flight_details){
+        console.log('did this and found data, ', responseData);
+        navigate('/plot-features', {state : responseData} );
+      } else {
+        console.error('Error in sending grid due to react issue');
+        alert('Could not process. Please try again later');
+        setIsSubmitted(false);
+      }
     } catch (error) {
+      console.error('Error in sending grid', error);
       alert('Could not process. Please try again later');
+      setIsSubmitted(false);
       
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => {
-    if (isSubmitted && responseData){
-      navigate('/plot-features', {state : responseData} );
-    }
-
-  }, [isSubmitted, responseData, navigate]);
+  // useEffect(() => {
+  //   if (isSubmitted && responseData){
+  //     console.log('did this and found data, ', responseData);
+  //     navigate('/plot-features', {state : responseData} );
+  //   } else {
+  //     console.log('response data', responseData);
+  //     // console.log('response data', responseData.features);
+  //     // console.log('response data', responseData.flight_details);
+  //   }
+  // }, [isSubmitted, responseData, navigate]);
   // valid till Feb 11th
   // cog.tif -> https://ncsudronedata.blob.core.windows.net/test/cog.tif?sp=r&st=2024-02-29T20:59:58Z&se=2024-03-30T03:59:58Z&spr=https&sv=2022-11-02&sr=b&sig=XSquPt1XLVps%2BqJCHMY4Z7VfqJKr6jZnzrLlp30rkdc%3D
   // 0002SET_ortho_cog.tif -> https://ncsudronedata.blob.core.windows.net/test/0002SET_ortho_cog.tif?sp=r&st=2024-02-29T20:59:02Z&se=2024-03-30T03:59:02Z&spr=https&sv=2022-11-02&sr=b&sig=XPbQkWDEsOHJk9EoOhb8RaY3cP5n1OzdioAUJq0Thew%3D

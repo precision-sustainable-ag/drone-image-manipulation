@@ -9,28 +9,9 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './pages/orthomosaic_display/App';
 import ErrorPage from './pages/error_page';
 import PlotTable from './pages/plot_features/plot_table';
+import PlotPage from './pages/plot_features/plot_page';
 import SpatialMap from './pages/SpatialQuery/map';
 import FeedbackComponent from './pages/Feedback/feedback';
-
-// const root = ReactDOM.createRoot(document.getElementById('root'));
-// root.render(
-//   <React.StrictMode>
-//     <App />
-//   </React.StrictMode>
-// );
-
-// const App = () => {
-//   return (
-//     <BrowserRouter>
-//       <Switch>
-//         <Route exact path='/' component={geotiffPage} />
-//         <Route path='/plot-features' component={plotTable} />
-//       </Switch>
-//     </BrowserRouter>
-//   );
-// }
-
-// ReactDOM.render(<App/>, document.getElementById('root'));
 
 const router = createBrowserRouter([
   {
@@ -40,7 +21,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/plot-features',
-    element: <PlotTable />,
+    element: <PlotPage />,
   },
   {
     path: '/feedback',

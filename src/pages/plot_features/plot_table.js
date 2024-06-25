@@ -8,10 +8,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import PlotMap from './plot_map';
 
-const PlotTable = () => {
+const PlotTable = ({state}) => {
     // let rows;
     // let columns;
-    const { state } = useLocation();
+    // const { state } = useLocation();
     console.log(state);
     
     // const initalRows = state.grids;
@@ -288,14 +288,6 @@ const PlotTable = () => {
         // console.log(rows);
     };
 
-
-    useEffect(() => {
-        
-        return () => {
-          
-        };
-      }, []);
-
     return (
         <Box
             style={{
@@ -306,32 +298,15 @@ const PlotTable = () => {
             }}
             margin={5}
         >
-            <Grid container spacing={2}>
-                <Grid item xs={12} md={12} lg={12}
-                style={{
-                backgroundColor: 'rgba(240,247,235,.5)',
-                position: 'relative',
-                width: '100%',
-                }} mt={3}>
-                    <Typography variant="h5" gutterBottom align="center">
-                        Plot Details
-                    </Typography>
-                    <Typography variant="h6" gutterBottom align="center">
-                        {state.flight_details.display_name}
-                    </Typography>
-
-                </Grid>
-            </Grid>
 
             <Grid container spacing = {2} mt={1}>
-                <PlotMap apiOutput={state}/>
                 <Grid item xs={12} md={12} lg={12}
                 style={{
                 backgroundColor: 'rgba(240,247,235,.5)',
                 position: 'relative',
                 width: '100%',
                 padding: '10px'
-                }} mt={2}>
+                }}>
                     <DataGrid
                         rows={rows}
                         columns={columns}

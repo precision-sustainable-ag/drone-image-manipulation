@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import {Button, Box, Grid} from '@mui/material';
+import {Button, Box, Grid, Typography} from '@mui/material';
 
 import { Collection } from 'ol';
 import Map from 'ol/Map';
@@ -102,16 +102,31 @@ const PlotMap = ({apiOutput}) => {
     }, [apiOutput]);
 
     return (
-    //     <Box
-    //   style={{
-    //     height: '100%',
-    //     // display: 'flex',
-    //     // flexDirection: 'column',
-    //     minHeight: '100px',
-    //     minWidth: '500px'
-    //   }}
-    //   margin={5}
-    // >
+      <Box
+            style={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: '100px'
+            }}
+            margin={5}
+      >
+        <Grid container spacing={2}>
+                <Grid item xs={12} md={12} lg={12}
+                style={{
+                backgroundColor: 'rgba(240,247,235,.5)',
+                position: 'relative',
+                width: '100%',
+                }} mt={3}>
+                    <Typography variant="h5" gutterBottom align="center">
+                        Plot Details
+                    </Typography>
+                    <Typography variant="h6" gutterBottom align="center">
+                        {apiOutput.flight_details.display_name}
+                    </Typography>
+
+                </Grid>
+        </Grid>
         <Grid container spacing={2} 
         style={{
             backgroundColor: 'rgba(240,247,235,.5)',
@@ -120,24 +135,10 @@ const PlotMap = ({apiOutput}) => {
             // left: '1%',
             // transform: 'translateX(-50%)',
         }}
-        mt={2} ml={0}>
-            
-                {/* <Grid
-                style={{
-                    backgroundColor: 'rgba(240,247,235,.5)',
-                    position: 'relative',
-                    width: '100%',
-                    left: '1%',
-                    // transform: 'translateX(-50%)',
-                }}
-                mt={2}> */}
-                    <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef} style={{ width: '90%', height: '400px', }} />
-                {/* </Grid> */}
-            
+        mt={2}>
+          <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef} style={{ width: '90%', height: '400px', padding: '10px'}} />
         </Grid>
-            
-      
-        // </Box>
+      </Box>
     )
 };
 
