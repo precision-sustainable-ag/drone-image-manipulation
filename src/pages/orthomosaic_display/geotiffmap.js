@@ -70,20 +70,26 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
   const [walkStartLocation, setWalkStartLocation] = useState('tl');
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [respData, setRespData] = useState(null);
 
   const handleFieldFeaturesUpdate = (newData) => {
     setFieldFeatures(newData);
   };
 
-  const forceLoad = (respData) => {
-    var x = 0;
-    for (const [key, value] of Object.entries(respData)) {
-      if (key && value){
-        x += 1;
+  const forceLoad = (d) => {
+    let x = 0;
+    
+    const iterate = (data) => {
+      for (const [key, value] of Object.entries(data)) {
+        if (key && value) {
+          if (typeof value === 'object' && value !== null) {iterate(value);} else {x += 1;}
+        }
       }
-    }
+    };
+    iterate(d);
     return x;
-  }
+  };
+  
   const sendGrid = async () => {
     
     // TODO: error handling, loading modal
@@ -108,19 +114,16 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
         'Content-Type': 'application/json',
       }});
       setIsSubmitted(true);
+      console.log('response', response);
+      let responseData = response.data;
+      responseData = JSON.parse(response.data.replace(/\bNaN\b/g, "null"));
 
-      const responseData = JSON.parse(response.data.replace(/\bNaN\b/g, "null"));
-      // these steps are added to force react to load the complete data
-      console.log('test', responseData);
-      var x = JSON.parse(JSON.stringify(responseData));
-      x = forceLoad(responseData);
-      if (isSubmitted && responseData && responseData.features && responseData.flight_details){
-        console.log('did this and found data, ', responseData);
-        navigate('/plot-features', {state : responseData} );
+      if (forceLoad(responseData) > 0){
+        setRespData(responseData);
+        console.log('forceloaded');
+        setIsSubmitted(true);
       } else {
-        console.error('Error in sending grid due to react issue');
-        alert('Could not process. Please try again later');
-        setIsSubmitted(false);
+        throw new Error('Improper response data');
       }
     } catch (error) {
       console.error('Error in sending grid', error);
@@ -130,23 +133,16 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     } finally {
       setLoading(false);
     }
-  }
-
-  // useEffect(() => {
-  //   if (isSubmitted && responseData){
-  //     console.log('did this and found data, ', responseData);
-  //     navigate('/plot-features', {state : responseData} );
-  //   } else {
-  //     console.log('response data', responseData);
-  //     // console.log('response data', responseData.features);
-  //     // console.log('response data', responseData.flight_details);
-  //   }
-  // }, [isSubmitted, responseData, navigate]);
-  // valid till Feb 11th
-  // cog.tif -> https://ncsudronedata.blob.core.windows.net/test/cog.tif?sp=r&st=2024-02-29T20:59:58Z&se=2024-03-30T03:59:58Z&spr=https&sv=2022-11-02&sr=b&sig=XSquPt1XLVps%2BqJCHMY4Z7VfqJKr6jZnzrLlp30rkdc%3D
-  // 0002SET_ortho_cog.tif -> https://ncsudronedata.blob.core.windows.net/test/0002SET_ortho_cog.tif?sp=r&st=2024-02-29T20:59:02Z&se=2024-03-30T03:59:02Z&spr=https&sv=2022-11-02&sr=b&sig=XPbQkWDEsOHJk9EoOhb8RaY3cP5n1OzdioAUJq0Thew%3D
-  // 0004SET -> https://ncsudronedata.blob.core.windows.net/test/0004SET_orthophoto_cog.tif?sp=r&st=2024-03-22T17:14:22Z&se=2024-05-02T01:14:22Z&spr=https&sv=2022-11-02&sr=b&sig=FIN8QMD5C3PFV1GYS8Jo0eccf8in798S6y4Su07y8NQ%3D
-  
+  };
+  useEffect(() => {
+    if (isSubmitted && respData && respData['features'] && respData['flight_details']) {
+      console.log('navigate');
+      setIsSubmitted(false);
+      navigate('/plot-features', {state: respData});
+    } else {
+      console.log('couldnt navigate');
+    }
+  }, [isSubmitted, respData, navigate]);
   useEffect(() => {
     
     const mapSource = new GeoTIFF({
