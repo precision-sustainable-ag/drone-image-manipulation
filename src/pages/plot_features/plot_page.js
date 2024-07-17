@@ -6,6 +6,8 @@ import PlotTable from './plot_table';
 const PlotPage = () => {
     const location = useLocation();
     const { state } = location;
+    const plotMapRef = useRef(null);
+
     console.log("plot page", state);
     console.log("plot page",state['features']);
     console.log("plot page",state['flight_details']);
@@ -16,8 +18,8 @@ const PlotPage = () => {
 
     return (
         <div>
-            <PlotMap apiOutput={state} />
-            <PlotTable state={state} />
+            <PlotMap apiOutput={state} ref={plotMapRef} />
+            <PlotTable state={state} plotMapRef={plotMapRef} />
         </div>
     );
 }

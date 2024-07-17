@@ -9,7 +9,7 @@ import { useLocation } from 'react-router-dom';
 import PlotMap from './plot_map';
 import FileSaver from 'file-saver';
 
-const PlotTable = ({state}) => {
+const PlotTable = ({state, plotMapRef}) => {
     // let rows;
     // let columns;
     // const { state } = useLocation();
@@ -24,7 +24,7 @@ const PlotTable = ({state}) => {
         setAnchorEl(null);
     };
 
-    const plotMapRef = useRef();
+    // const plotMapRef = useRef();
     // const initalRows = state.grids;
     // const initalRowsCopy = [...initalRows];
     // // console.log('intial rows ', initalRows);
