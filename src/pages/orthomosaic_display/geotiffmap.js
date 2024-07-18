@@ -78,7 +78,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
 
   const forceLoad = (d) => {
     let x = 0;
-    
+
     const iterate = (data) => {
       for (const [key, value] of Object.entries(data)) {
         if (key && value) {
@@ -89,7 +89,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     iterate(d);
     return x;
   };
-  
+
   const sendGrid = async () => {
     
     // TODO: error handling, loading modal
@@ -116,7 +116,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       setIsSubmitted(true);
       console.log('response', response);
       let responseData = response.data;
-      responseData = JSON.parse(response.data.replace(/\bNaN\b/g, "null"));
+      // responseData = JSON.parse(response.data.replace(/\bNaN\b/g, "null"));
 
       if (forceLoad(responseData) > 0){
         setRespData(responseData);
@@ -129,7 +129,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       console.error('Error in sending grid', error);
       alert('Could not process. Please try again later');
       setIsSubmitted(false);
-      
+
     } finally {
       setLoading(false);
     }

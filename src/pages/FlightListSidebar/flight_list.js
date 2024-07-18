@@ -13,7 +13,7 @@ const FlightList = ({sendData, spatialQuery}) => {
 
     useEffect(() => {
         // console.log(spatialQuery);
-        fetch(process.env.REACT_APP_API_URL+'/flight-list', {
+        fetch(process.env.REACT_APP_API_URL + '/flight-list', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
