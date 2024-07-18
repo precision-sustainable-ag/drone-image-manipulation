@@ -6,7 +6,6 @@ import { DataGrid, GridRowsProp, GridColDef, GridRowEditStopReasons, GridRowMode
 import { DefaultUniform } from 'ol/webgl/Helper';
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import PlotMap from './plot_map';
 import FileSaver from 'file-saver';
 
 const PlotTable = ({state, plotMapRef}) => {
@@ -24,7 +23,6 @@ const PlotTable = ({state, plotMapRef}) => {
         setAnchorEl(null);
     };
 
-    // const plotMapRef = useRef();
     // const initalRows = state.grids;
     // const initalRowsCopy = [...initalRows];
     // // console.log('intial rows ', initalRows);
@@ -286,7 +284,7 @@ const PlotTable = ({state, plotMapRef}) => {
                     {/* <DataGrid editMode='row' rows={initalRows} columns={columns} /> */}
                 </Grid>
                 <Grid item xs={12} md={12} lg={12} align='right'>
-                    <Button variant='outlined' id="basic-button" onClick={handleClick}>EXPORT
+                    <Button variant='outlined' id="basic-button" onClick={handleClick} style={{ marginRight: '10px' }}>EXPORT
                     </Button>
                     <Menu
                         id="basic-menu"
