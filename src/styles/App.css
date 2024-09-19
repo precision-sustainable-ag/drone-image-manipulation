@@ -60,6 +60,41 @@
   width: 3.375em;
   line-height: .4em;
   background-color: white;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 2px;
+}
+
+.rotate-div {
+  position: absolute;
+  margin: 8px;
+  border-radius: 2px;
+}
+
+.left-rotate-div {
+  margin-top: 97px;
+}
+
+.right-rotate-div {
+  margin-top: 119px;
+}
+
+.rotate-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 22px;
+  width: 22px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+}
+
+.button-hover button:hover {
+  border: 1px solid #666666;
+}
+
+.rotate-img {
+  width: 11px;
+  height: 11px;
+  opacity: 0.8;
 }

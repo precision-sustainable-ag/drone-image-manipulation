@@ -26,6 +26,10 @@ import '../../styles/App.css';
 import FieldFeatureModal from './field_features_modal';
 import { set } from 'ol/transform';
 
+
+const leftRotate = require("../../assets/images/rotate-left.png");
+const rightRotate = require("../../assets/images/rotate-right.png");
+
 class ToggleDraw extends Control {
   constructor(opt_options) {
     
@@ -35,7 +39,7 @@ class ToggleDraw extends Control {
     button.innerHTML = 'Draw';
 
     const element = document.createElement('div');
-    element.className = 'toggle-draw';
+    element.className = 'toggle-draw button-hover';
     element.appendChild(button);
 
     super({
@@ -51,6 +55,50 @@ class ToggleDraw extends Control {
   }
   handleToggleDraw() {
     window.drawGrid(this.vectorSource, this.mapRef);
+  }
+}
+
+class RotateMap extends Control {
+  constructor(options) {
+
+    const direction = options["direction"];
+
+    const button = document.createElement("button");
+    button.className = "rotate-button";
+    const img = document.createElement("img");
+    img.src = direction === "left" ? leftRotate : rightRotate;
+    img.className = "rotate-img";
+    button.appendChild(img);
+    button.title =
+      direction === "left"
+        ? "Rotate left\nShift+Drag"
+        : "Rotate right\nShift+Drag";
+
+    const element = document.createElement("div");
+    element.className =
+      direction === "left"
+        ? "rotate-div left-rotate-div button-hover"
+        : "rotate-div right-rotate-div button-hover";
+    element.appendChild(button);
+
+    super({
+      element: element,
+      target: options.target,
+    });
+
+    this.direction = direction;
+    button.addEventListener("click", this.handleRotate.bind(this), false);
+  }
+  handleRotate() {
+    const view = this.getMap().getView();
+    const rotation = view.getRotation();
+    view.animate({
+      rotation:
+        this.direction === "left"
+          ? rotation - Math.PI / 20
+          : rotation + Math.PI / 20,
+      duration: 250,
+    });
   }
 }
 
@@ -172,6 +220,8 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       view: mapSource.getView(),
     });
     map.addControl(new ToggleDraw({'vector_source':vectorSource, 'map_reference':map}));
+    map.addControl(new RotateMap({'direction': 'left'}));
+    map.addControl(new RotateMap({'direction': 'right'}));
     
     setCoordinateFeatures((oldData) => ({
       ...oldData,
