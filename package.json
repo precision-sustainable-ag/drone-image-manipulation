@@ -1,6 +1,6 @@
 {
-  "name": "openlayers-test",
-  "version": "0.1.0",
+  "name": "orthomosaic-insights-tool",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -20,6 +20,7 @@
     "jszip": "^3.10.1",
     "moment": "^2.30.1",
     "ol": "^8.2.0",
+    "ol-layerswitcher": "^4.1.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.21.3",
@@ -31,13 +32,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "format": "prettier --write ."
   },
   "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "extends": "react-app"
   },
   "browserslist": {
     "production": [

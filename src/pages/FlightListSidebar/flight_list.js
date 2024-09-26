@@ -1,5 +1,5 @@
 import React, {useState,  useEffect} from 'react';
-import {Button, Box, Grid, TextField, Typography} from '@mui/material';
+import {Button, Grid } from '@mui/material';
 
 const FlightList = ({sendData, spatialQuery}) => {
     // const [flightList, setFlightList] = useState(['1','2']);

@@ -4,6 +4,8 @@ import axios from 'axios';
 import {Button, Box, TextField, Grid, Typography} from '@mui/material';
 
 import OSM from 'ol/source/OSM';
+import XYZ from 'ol/source/XYZ';
+import GeoJSON from 'ol/format/GeoJSON';
 import TileLayer from 'ol/layer/Tile';
 import {Map, View} from 'ol';
 import {fromLonLat} from 'ol/proj';
@@ -12,7 +14,7 @@ import VectorLayer from 'ol/layer/Vector';
 import {Control} from 'ol/control';
 import  Draw, { createBox }from 'ol/interaction/Draw';
 import Translate from 'ol/interaction/Translate';
-
+import {Style, Stroke, Fill, Text} from 'ol/style';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -20,6 +22,12 @@ import moment from 'moment';
 import 'ol/ol.css';
 import '../../styles/App.css';
 import Header from '../Header/header';
+import LayerSwitcher from 'ol-layerswitcher';
+import { BaseLayerOptions, GroupLayerOptions } from 'ol-layerswitcher';
+import LayerGroup from 'ol/layer/Group';
+// import * as field_details from '../../shared/cc_fields_2024.geojson';
+import 'ol-layerswitcher/dist/ol-layerswitcher.css';
+import '../../styles/App.css';
 
 
 // TODO: Move to shared resources
@@ -47,7 +55,7 @@ class ToggleDraw extends Control {
       button.addEventListener('click', this.handleToggleDraw.bind(this), false);
     }
     handleToggleDraw() {
-      window.drawGrid(this.vectorSource, this.mapRef);
+      window.drawArea(this.vectorSource, this.mapRef);
     }
   }
 
@@ -91,26 +99,96 @@ const SpatialMap = () => {
         
     };
     useEffect(() => {
+      const field_details = require('../../shared/cc_fields_2024.json');
         const vectorSource = new VectorSource();
-
-        const map = new Map({
-            target: mapRef.current,
-            layers: [
-              new TileLayer({
-                source: new OSM(),
+        const boundaryStyle = new Style({
+          stroke: new Stroke({
+              color: 'white',
+              width: 2,
+          }),
+        });
+        const labelStyle = new Style({
+            text: new Text({
+              font: '13px Calibri,sans-serif',
+              stroke: new Stroke({
+                color: '#fff',
+                width: 3,
               }),
-              new VectorLayer({
-                source: vectorSource,
-              })
-            ],
-            view: new View({
-              center: fromLonLat([0, 0]),
-              zoom: 2,
             }),
         });
+        const style = [boundaryStyle, labelStyle];
+        // const map = new Map({
+        //     target: mapRef.current,
+        //     layers: [
+        //       new TileLayer({
+        //           // source: new OSM(),
+        //           source: new XYZ({
+        //             url: 'http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}'
+        //           })
+        //       }),
+        //       new VectorLayer({
+        //         source: vectorSource,
+        //       }),
+        //     ],
+        //     view: new View({
+        //       center: fromLonLat([-87.5, 42.0]),
+        //       zoom: 4,
+        //     }),
+        // });
+        const osmLayer = new TileLayer({
+          title: 'OSM',
+          type: 'base',
+          visible: true,
+          source: new OSM(),
+        });
+        const osm2 = new TileLayer({
+          title: 'Satellite View',
+          type: 'base',
+          visible: false,
+          source: new XYZ({url: 'http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}'}),
+        });
+        const layerswitcher = new LayerSwitcher({
+          // activationMode: 'click',
+          startActive: false,
+        });
+        const map = new Map({
+          target: mapRef.current,
+          layers: [
+            osm2, osmLayer,
+            // new LayerGroup({
+            //   title: 'Base maps',
+            //   type: 'base',
+            //   visible: true,
+            //   layers: [osmLayer, osm2]
+            // }),
+            new VectorLayer({
+              source: vectorSource,
+            })
+          ],
+          view: new View({
+            center: fromLonLat([-80.5, 35.0]),
+            zoom: 6,
+          }),
+        });
+        map.addControl(layerswitcher);
 
         map.addControl(new ToggleDraw({'vector_source':vectorSource, 'map_reference':map}));
-
+        
+        const field_vector = new VectorLayer({
+          source: new VectorSource({
+            format: new GeoJSON(),
+            // url: 'http://152.7.196.7/cc/cc_fields_2024.geojson',
+            features: new GeoJSON().readFeatures(field_details, {
+              dataProjection: 'EPSG:4326',
+              featureProjection: map.getView().getProjection(),
+            }),
+          }),
+          style: function (feature) {
+            labelStyle.getText().setText(`${feature.get('field')}`);
+            return style;
+          }
+        });
+        map.addLayer(field_vector);
         return () => {
             map.setTarget(null);
         };
@@ -118,7 +196,8 @@ const SpatialMap = () => {
     }, []);
     
 
-    const drawGrid = (source, map) => {
+    const drawArea = (source, map) => {
+      console.log(map.getView().getProjection());
         gridDraw = new Draw({
           source: source,
           type: 'Circle',
@@ -131,31 +210,8 @@ const SpatialMap = () => {
             // console.log(map.getView());
 
         });
-        
-        // gridDraw.on('drawend', (e) => {
-        //   map.removeInteraction(gridDraw);
-    
-        //   const translate = new Translate({
-        //     features: new Collection([e.feature]),
-        //   });
-    
-        //   translate.on('translating', (ev) => {
-        //     ev.features.getArray()[0].setStyle(getGridStyle(ev.features.getArray()[0], gridCols, gridRows, 'red', currentRotation));
-        //   });
-        //   translate.on('translateend', (ev) => {
-        //     setCoordinateFeatures((oldData) => ({
-        //       ...oldData,
-        //       'box': [],
-        //       'vertical': [],
-        //       'horizontal': []
-        //     }));
-        //     // setCoordinateFeatures({});
-        //     ev.features.getArray()[0].setStyle(getGridStyle(ev.features.getArray()[0], gridCols, gridRows, 'red', currentRotation));
-        //   });
-        //   map.addInteraction(translate);
-        // });
     };
-    window.drawGrid = drawGrid;
+    window.drawArea = drawArea;
 
     return (
         <Box
