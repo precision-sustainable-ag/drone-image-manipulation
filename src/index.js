@@ -1,14 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './styles/index.css';
-// import App from './pages/orthomosaic_display/App';
 import reportWebVitals from './reportWebVitals';
 
 // import {BrowserRouter, Route, RouterProvider, Switch} from 'react-router-dom';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './pages/orthomosaic_display/App';
 import ErrorPage from './pages/error_page';
-import PlotTable from './pages/plot_features/plot_table';
 import PlotPage from './pages/plot_features/plot_page';
 import SpatialMap from './pages/SpatialQuery/map';
 import FeedbackComponent from './pages/Feedback/feedback';
