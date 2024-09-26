@@ -186,7 +186,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     if (isSubmitted && respData && respData['features'] && respData['flight_details']) {
       console.log('navigate');
       setIsSubmitted(false);
-      navigate('/plot-features', {state: respData});
+      navigate('/plot-features', {state: {...respData, rotation: coordinateFeatures.rotation}});
     } else {
       console.log('couldnt navigate');
     }
@@ -300,6 +300,10 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       e.feature.setStyle(getGridStyle(e.feature, gridCols, gridRows, 'red', currentRotation));
       map.removeInteraction(gridDraw);
       // console.log('total data', coordinateFeatures);
+      setCoordinateFeatures((oldData) => ({
+        ...oldData,
+        'rotation': currentRotation,
+      }));
 
       const translate = new Translate({
         features: new Collection([e.feature]),

@@ -8,7 +8,6 @@ import Map from 'ol/Map';
 import View from 'ol/View';
 import Feature from 'ol/Feature';
 import Projection from 'ol/proj/Projection';
-import { getBottomLeft, getTopRight } from 'ol/extent';
 import GeoTIFF from 'ol/source/GeoTIFF';
 import TileLayer from 'ol/layer/WebGLTile';
 import VectorLayer from 'ol/layer/Vector';
@@ -115,47 +114,57 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
 
     const exportPlotImages = async () => {
       if (!vectorSource) return;
+
+      const currentView = map.getView();
+      const currentCenter = currentView.getCenter();
+      const currentZoom = currentView.getZoom();
+      const currentRotation = currentView.getRotation();
+
       const features = vectorSource.getFeatures();
       const zip = new JSZip();
 
       for (const feature of features) {
-          const extent = feature.getGeometry().getExtent();
+          const flatCoordinates = feature.getGeometry().getFlatCoordinates();
+          const gridCoordinates = [];
+          for (let i = 0; i < flatCoordinates.length; i += 2) {
+              gridCoordinates.push([flatCoordinates[i], flatCoordinates[i + 1]]);
+          }
           const name = feature.get('name');
-          const imageBlob = await captureExtentAsImage(extent);
-          zip.file(`${name}.png`, imageBlob, { binary: true })
+          const imageBlob = await captureExtentAsImage(gridCoordinates);
+          zip.file(`${name}.png`, imageBlob, { binary: true });
       }
 
       zip.generateAsync({type: 'blob'}).then((content) => {saveAs(content, "plot_images.zip")})
 
+      map.getView().setCenter(currentCenter);
+      map.getView().setZoom(currentZoom);
+      map.getView().setRotation(currentRotation);
   };
 
-    const captureExtentAsImage = async (extent) => {
+    const captureExtentAsImage = async (gridCoords) => {
       return new Promise((resolve, reject) => {
           if (!map) return reject(new Error('Map not initialized'));
 
-          const currentView = map.getView();
-          const currentCenter = currentView.getCenter();
-          const currentZoom = currentView.getZoom();
-
-          map.getView().fit(extent, { size: map.getSize() });
+          const polygon = new Polygon([gridCoords]);
+          map.getView().setRotation(apiOutput.rotation);
+          map.getView().fit(polygon, { size: map.getSize() });
 
           map.once('rendercomplete', () => {
               const mapCanvas = map.getViewport().querySelector('canvas');
 
-              const bottomLeft = getBottomLeft(extent);
-              const topRight = getTopRight(extent);
+              // Calculate pixel coordinates from actual coordinates
+              const gridPixels = gridCoords.map((coord) => map.getPixelFromCoordinate(coord));
 
-              const bottomLeftPixel = map.getPixelFromCoordinate(bottomLeft);
-              const topRightPixel = map.getPixelFromCoordinate(topRight);
+              const topLeftPixel = gridPixels[0];
+              const bottomRightPixel = gridPixels[2];
 
               // Calculate width and height of the area
               const pixelRatio = window.devicePixelRatio || 1;
-              const width = Math.ceil((topRightPixel[0] - bottomLeftPixel[0]) * pixelRatio);
-              const height = Math.ceil((bottomLeftPixel[1] - topRightPixel[1]) * pixelRatio);
+              const width = Math.ceil((bottomRightPixel[0] - topLeftPixel[0]) * pixelRatio);
+              const height = Math.ceil((bottomRightPixel[1] - topLeftPixel[1]) * pixelRatio);
 
               // Create a new canvas and context for the plot image
               const canvas = document.createElement('canvas');
-              console.log("Pixel ratio: ", canvas.devicePixelRatio);
               canvas.width = width;
               canvas.height = height;
               const context = canvas.getContext('2d');
@@ -163,7 +172,7 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
               if (mapCanvas) {
                 context.drawImage(
                   mapCanvas,
-                  bottomLeftPixel[0] * pixelRatio, topRightPixel[1] * pixelRatio,
+                  topLeftPixel[0] * pixelRatio, topLeftPixel[1] * pixelRatio,
                   width, height,
                   0, 0,
                   width, height
@@ -171,8 +180,6 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
 
               canvas.toBlob((blob) => {
                   resolve(blob);
-                  map.getView().setCenter(currentCenter);
-                  map.getView().setZoom(currentZoom);
               }, 'image/png');
               } else {
                   reject(new Error('Canvas element not found'));
