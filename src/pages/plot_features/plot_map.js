@@ -115,11 +115,6 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
     const exportPlotImages = async () => {
       if (!vectorSource) return;
 
-      const currentView = map.getView();
-      const currentCenter = currentView.getCenter();
-      const currentZoom = currentView.getZoom();
-      const currentRotation = currentView.getRotation();
-
       const features = vectorSource.getFeatures();
       const zip = new JSZip();
 
@@ -135,15 +130,16 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
       }
 
       zip.generateAsync({type: 'blob'}).then((content) => {saveAs(content, "plot_images.zip")})
-
-      map.getView().setCenter(currentCenter);
-      map.getView().setZoom(currentZoom);
-      map.getView().setRotation(currentRotation);
   };
 
     const captureExtentAsImage = async (gridCoords) => {
       return new Promise((resolve, reject) => {
           if (!map) return reject(new Error('Map not initialized'));
+
+          const currentView = map.getView();
+          const currentCenter = currentView.getCenter();
+          const currentZoom = currentView.getZoom();
+          const currentRotation = currentView.getRotation();
 
           const polygon = new Polygon([gridCoords]);
           map.getView().setRotation(apiOutput.rotation);
@@ -180,6 +176,9 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
 
               canvas.toBlob((blob) => {
                   resolve(blob);
+                  map.getView().setCenter(currentCenter);
+                  map.getView().setZoom(currentZoom);
+                  map.getView().setRotation(currentRotation);
               }, 'image/png');
               } else {
                   reject(new Error('Canvas element not found'));
