@@ -212,16 +212,16 @@ const PlotTable = ({state, plotMapRef}) => {
                  "contacts": [{"name": state.field_features["lead_scientist"],}],
                  }]
 
-        const curlRequest = `curl --include \\
-        --request POST \\
-        --header "Content-Type: application/json" \\
-        --data-binary '${JSON.stringify(body, null, 0)}'  \\
-        'https://<your-brapi-instance>/brapi/v2/studies'`;
+        const curlRequest = `curl "https://<your-brapi-instance>/brapi/v2/studies" -H "Content-Type: application/json" -H "Authorization: Bearer <login_token>" -H "Cookie: sgn_session_id=<login_token>; user_prefs="  -d "${JSON.stringify(
+          body,
+          null,
+          0
+        )}"`;
 
         setResponseData(curlRequest);
     }
 
-    const exportAsCSV = () => {
+    const exportTableAsCSV = () => {
         const columnsToExport = columns.filter(col => col.field !== 'actions');
         const headers = columnsToExport.map(col => col.headerName).join(',');
         const csvRows = rows.map(row => {
@@ -231,19 +231,26 @@ const PlotTable = ({state, plotMapRef}) => {
             }).join(',');
         });
 
-        console.log(csvRows)
         const csvContent = [headers, ...csvRows].join('\n');
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
         FileSaver.saveAs(blob, "plot_table.csv");
         handleClose();
     }
 
+    const exportMetadataAsCSV = () => {
+        const fieldFeatures = Object.entries(state.field_features);
+        const csvRows = fieldFeatures.map(([key, val]) => `${key},${val}`);
+        const csvContent = csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+        FileSaver.saveAs(blob, "field_metadata.csv");
+        handleClose();
+    }
+
     const exportAll = () => {
-
         handleDownload();
-        exportAsCSV();
+        exportTableAsCSV();
+        exportMetadataAsCSV();
         plotMapRef.current.exportPlotImages();
-
     };
 
     useEffect(() => {
@@ -296,7 +303,8 @@ const PlotTable = ({state, plotMapRef}) => {
                         }}
                     >
                         <MenuItem onClick={() => setOpenDialog(true)}>EXPORT TABLE AS BRAPI REQUEST</MenuItem>
-                        <MenuItem onClick={exportAsCSV}>EXPORT TABLE AS CSV</MenuItem>
+                        <MenuItem onClick={exportTableAsCSV}>EXPORT TABLE AS CSV</MenuItem>
+                        <MenuItem onClick={exportMetadataAsCSV}>EXPORT METADATA AS CSV</MenuItem>
                         <MenuItem onClick={() => plotMapRef.current.exportPlotImages()}>EXPORT PLOT IMAGES</MenuItem>
                         <Divider />
                         <MenuItem onClick={exportAll}>EXPORT ALL</MenuItem>
