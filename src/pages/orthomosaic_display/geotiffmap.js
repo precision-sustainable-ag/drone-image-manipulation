@@ -1,111 +1,30 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Backdrop, Box, Button, CircularProgress, FormControl,
   Grid, InputLabel, Select, Modal, MenuItem, Typography } from '@mui/material';
 
 import { Collection } from 'ol';
-import Map from 'ol/Map';
 import GeoTIFF from 'ol/source/GeoTIFF';
-import TileLayer from 'ol/layer/WebGLTile';
 import { Draw } from 'ol/interaction';
 import Translate from 'ol/interaction/Translate';
-import { defaults } from 'ol/interaction/defaults';
-import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
+import VectorLayer from 'ol/layer/Vector';
 import LineString from 'ol/geom/LineString';
 import { getBottomLeft, getTopLeft, getTopRight, getBottomRight, getCenter, boundingExtent } from 'ol/extent';
 import {Style, Stroke, Fill} from 'ol/style';
-import DragRotateAndZoom  from 'ol/interaction/DragRotateAndZoom';
-import {Control} from 'ol/control';
 import { Polygon, MultiPoint} from 'ol/geom';
 import { fromUserCoordinate, getUserProjection } from 'ol/proj';
 
 import 'ol/ol.css';
 import '../../styles/App.css';
 import FieldFeatureModal from './field_features_modal';
-import { set } from 'ol/transform';
-
-
-const leftRotate = require("../../assets/images/rotate-left.png");
-const rightRotate = require("../../assets/images/rotate-right.png");
-
-class ToggleDraw extends Control {
-  constructor(opt_options) {
-    
-    const options = opt_options || {};
-    const button = document.createElement('button');
-    button.className = 'toggle-button';
-    button.innerHTML = 'Draw';
-
-    const element = document.createElement('div');
-    element.className = 'toggle-draw button-hover';
-    element.appendChild(button);
-
-    super({
-      element: element,
-      target: options.target,
-    });
-
-    this.vectorSource = options['vector_source'];
-    this.mapRef = options['map_reference'];
-    // this.map = map;
-    
-    button.addEventListener('click', this.handleToggleDraw.bind(this), false);
-  }
-  handleToggleDraw() {
-    window.drawGrid(this.vectorSource, this.mapRef);
-  }
-}
-
-class RotateMap extends Control {
-  constructor(options) {
-
-    const direction = options["direction"];
-
-    const button = document.createElement("button");
-    button.className = "rotate-button";
-    const img = document.createElement("img");
-    img.src = direction === "left" ? leftRotate : rightRotate;
-    img.className = "rotate-img";
-    button.appendChild(img);
-    button.title =
-      direction === "left"
-        ? "Rotate left\nShift+Drag"
-        : "Rotate right\nShift+Drag";
-
-    const element = document.createElement("div");
-    element.className =
-      direction === "left"
-        ? "rotate-div left-rotate-div button-hover"
-        : "rotate-div right-rotate-div button-hover";
-    element.appendChild(button);
-
-    super({
-      element: element,
-      target: options.target,
-    });
-
-    this.direction = direction;
-    button.addEventListener("click", this.handleRotate.bind(this), false);
-  }
-  handleRotate() {
-    const view = this.getMap().getView();
-    const rotation = view.getRotation();
-    view.animate({
-      rotation:
-        this.direction === "left"
-          ? rotation - Math.PI / 20
-          : rotation + Math.PI / 20,
-      duration: 250,
-    });
-  }
-}
+import MapComponent from '../../components/MapComponent';
+import { RotateMap, ToggleDraw } from '../../components/MapControls';
 
 // TODO: Change the default EPSG:3857 projection to EPSG:4326
 const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
   const navigate = useNavigate();
-  const mapRef = useRef(null);
   let gridDraw;
   const [coordinateFeatures, setCoordinateFeatures] = useState({});
   const [fieldFeatures, setFieldFeatures] = useState({
@@ -119,6 +38,10 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [respData, setRespData] = useState(null);
+
+  const [mapSource, setMapSource] = useState(null);
+  const [vectorLayer, setVectorLayer] = useState(null);
+  const [controls, setControls] = useState([]);
 
   const handleFieldFeaturesUpdate = (newData) => {
     setFieldFeatures(newData);
@@ -182,6 +105,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     if (isSubmitted && respData && respData['features'] && respData['flight_details']) {
       console.log('navigate');
@@ -191,8 +115,10 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       console.log('couldnt navigate');
     }
   }, [isSubmitted, respData, navigate]);
+
   useEffect(() => {
-    
+    if (!flightDetails) return;
+
     const mapSource = new GeoTIFF({
       sources: [
         {
@@ -201,37 +127,27 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
           crossOrigin: 'anonymous',
           // projection: 'EPSG:4326'
         },
-        
       ],
     });
     const vectorSource = new VectorSource();
-    
-    const map = new Map({
-      target: mapRef.current,
-      interactions: defaults().extend([new DragRotateAndZoom()]),
-      layers: [
-        new TileLayer({
-          source: mapSource,
-        }),
-        new VectorLayer({
-          source: vectorSource,
-        })
-      ],
-      view: mapSource.getView(),
+    const vectorLayer = new VectorLayer({
+      source: vectorSource
     });
-    map.addControl(new ToggleDraw({'vector_source':vectorSource, 'map_reference':map}));
-    map.addControl(new RotateMap({'direction': 'left'}));
-    map.addControl(new RotateMap({'direction': 'right'}));
-    
+    const controls = [
+      new ToggleDraw({ vector_source: vectorSource }),
+      new RotateMap({ direction: "left" }),
+      new RotateMap({ direction: "right" }),
+    ];
+
+    setMapSource(mapSource);
+    setVectorLayer(vectorLayer);
+    setControls(controls);
+
     setCoordinateFeatures((oldData) => ({
       ...oldData,
       'flight_id': flightDetails.flight_id,
     }));
 
-    // Clean up the map when the component is unmounted
-    return () => {
-      map.setTarget(null);
-    };
   }, [gridCols, gridRows, flightDetails]);
   
   
@@ -442,6 +358,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     // console.log(styles);
     return styles;
   };
+
   return (
     <Box
       style={{
@@ -452,7 +369,15 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       }}
     >
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef} style={{ width: '100%', height: '400px' }} />
+        <Grid item xs={12} sm={12} md={12} lg={12}>
+          <MapComponent
+            mapSource={mapSource}
+            vectorLayer={vectorLayer}
+            controls={controls}
+            flightDetails={flightDetails}
+          />
+        </Grid>
+          
         <Grid item xs={12} sm={6} md={6} lg={6} >
           <FormControl fullWidth style={{display: 'flex', flexDirection:'row'}}>
               <InputLabel id='walkPatternLabel'>What is your data collection method?</InputLabel>

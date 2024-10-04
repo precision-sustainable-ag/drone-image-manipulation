@@ -1,45 +1,41 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import {Button, Box, Grid, Typography} from '@mui/material';
 
-import { Collection } from 'ol';
-import Map from 'ol/Map';
-import View from 'ol/View';
-import Feature from 'ol/Feature';
-import Projection from 'ol/proj/Projection';
 import GeoTIFF from 'ol/source/GeoTIFF';
-import TileLayer from 'ol/layer/WebGLTile';
-import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
-import {Style, Stroke, Fill, Text} from 'ol/style';
-import { defaults } from 'ol/interaction/defaults';
-import DragRotateAndZoom  from 'ol/interaction/DragRotateAndZoom';
-
+import VectorLayer from 'ol/layer/Vector';
+import {Style, Stroke, Text} from 'ol/style';
 import GeoJSON from 'ol/format/GeoJSON';
-
+import { Polygon } from 'ol/geom';
 
 import 'ol/ol.css';
 import '../../styles/App.css';
-import { Polygon } from 'ol/geom';
 
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import MapComponent from '../../components/MapComponent';
+import { RotateMap } from '../../components/MapControls';
 
 const PlotMap = forwardRef(({apiOutput}, ref) => {
     // const navigate = useNavigate();
 
     const mapRef = useRef(null);
-    const [map, setMap] = useState(null);
-    const [vectorSource, setVectorSource] = useState(null);
+    const [mapSource, setMapSource] = useState(null);
+    const [vectorLayer, setVectorLayer] = useState(null);
+    const [controls, setControls] = useState([]);
     let gridDraw;
 
     useImperativeHandle(ref, () => ({
       exportPlotImages,
   }));
 
+  const handleMapInit = useCallback((mapInstance) => {
+    mapRef.current = mapInstance;
+}, []);
+
     useEffect(() => {
-        // console.log(apiOutput);
+        if (!apiOutput) return;
+
         const mapSource = new GeoTIFF({
             sources: [
               {
@@ -47,7 +43,6 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
                 crossOrigin: 'anonymous',
                 // projection: 'EPSG:4326'
               },
-              
             ],
           });
         const geoJSONFormat = new GeoJSON();
@@ -84,38 +79,18 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
             }
             // style: customStyleFunction // Apply the custom style function
         });
+        const controls = [new RotateMap({direction: 'left'}), new RotateMap({direction: 'right'})];
 
-        const map = new Map({
-            target: mapRef.current,
-            interactions: defaults().extend([new DragRotateAndZoom()]),
-            layers: [
-                new TileLayer({
-                    source: mapSource,
-                }),
-                vectorLayer
-            ],
-            view: mapSource.getView(),        
-        });
-        setMap(map)
-        setVectorSource(vectorSource)
-
-        // map.addLayer(vectorLayer);
-        const vectorExtent = vectorSource.getView();
-        const mapViewExtent = map.getView();
-
-        console.log(vectorExtent, mapViewExtent);
-        //   console.log(map.getView().getProjection());
-          // Clean up the map when the component is unmounted
-          return () => {
-            map.setTarget(null);
-          };
+        setMapSource(mapSource);
+        setVectorLayer(vectorLayer);
+        setControls(controls);
             
     }, [apiOutput]);
 
     const exportPlotImages = async () => {
-      if (!vectorSource) return;
-
-      const features = vectorSource.getFeatures();
+      if (!vectorLayer) return;
+      
+      const features = vectorLayer.getSource().getFeatures();
       const zip = new JSZip();
 
       for (const feature of features) {
@@ -134,8 +109,9 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
 
     const captureExtentAsImage = async (gridCoords) => {
       return new Promise((resolve, reject) => {
-          if (!map) return reject(new Error('Map not initialized'));
+          if (!mapRef.current) return reject(new Error('Map not initialized'));
 
+          const map = mapRef.current;
           const currentView = map.getView();
           const currentCenter = currentView.getCenter();
           const currentZoom = currentView.getZoom();
@@ -224,7 +200,14 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
             // transform: 'translateX(-50%)',
         }}
         mt={2}>
-          <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef} style={{ width: '90%', height: '400px', padding: '10px'}} />
+          <Grid item xs={12} sm={12} md={12} lg={12}>
+          <MapComponent
+            mapSource={mapSource}
+            vectorLayer={vectorLayer}
+            controls={controls}
+            onMapInit={handleMapInit}
+          />
+        </Grid>
         </Grid>
       </Box>
     )
