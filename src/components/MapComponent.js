@@ -34,7 +34,6 @@ const MapComponent = ({
       view: view ? view : mapSource?.getView(),
     });
 
-    console.log(defaultControls());
     mapInstanceRef.current = map;
 
     if (onMapInit) {
