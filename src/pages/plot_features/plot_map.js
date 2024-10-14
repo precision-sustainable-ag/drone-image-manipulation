@@ -39,7 +39,7 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
         const mapSource = new GeoTIFF({
             sources: [
               {
-                url: process.env.REACT_APP_FILE_SERVER_URL+apiOutput['flight_details']['research_station']+'/flights/'+apiOutput['flight_details']['cog_path'],
+                url: process.env.REACT_APP_FILE_SERVER_URL+'/data/'+apiOutput['flight_details']['cog_path'],
                 crossOrigin: 'anonymous',
                 // projection: 'EPSG:4326'
               },
