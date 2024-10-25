@@ -27,11 +27,11 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
 
     useImperativeHandle(ref, () => ({
       exportPlotImages,
-  }));
+    }));
 
-  const handleMapInit = useCallback((mapInstance) => {
-    mapRef.current = mapInstance;
-}, []);
+    const handleMapInit = useCallback((mapInstance) => {
+      mapRef.current = mapInstance;
+    }, []);
 
     useEffect(() => {
         if (!apiOutput) return;

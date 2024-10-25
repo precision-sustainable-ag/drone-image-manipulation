@@ -69,7 +69,7 @@ export class ToggleDraw extends Control {
   handleToggleDraw() {
     const map = this.getMap();
     if (map) {
-      window.drawGrid(this.vectorSource, map);
+      window.drawHandler(this.vectorSource, map);
     }
   }
 }
