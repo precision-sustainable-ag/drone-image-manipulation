@@ -241,7 +241,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       map.addInteraction(translate);
     });
   };
-  window.drawGrid = drawGrid;
+  window.drawHandler = drawGrid;
   
   const getGridStyle = (feature, cols, rows, gridColor, currentRotation) => {
     setCoordinateFeatures((oldData) => ({

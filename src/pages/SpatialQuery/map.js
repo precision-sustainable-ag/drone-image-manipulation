@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {Button, Box, TextField, Grid, Typography} from '@mui/material';
 
 import OSM from 'ol/source/OSM';
-import { View } from 'ol';
 import XYZ from 'ol/source/XYZ';
 import GeoJSON from 'ol/format/GeoJSON';
 import TileLayer from 'ol/layer/Tile';
-import {Map} from 'ol';
+import {Map, View} from 'ol';
 import {fromLonLat} from 'ol/proj';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
+import {Control} from 'ol/control';
 import  Draw, { createBox }from 'ol/interaction/Draw';
 import Translate from 'ol/interaction/Translate';
 import {Style, Stroke, Fill, Text} from 'ol/style';
@@ -21,59 +22,31 @@ import moment from 'moment';
 import 'ol/ol.css';
 import '../../styles/App.css';
 import Header from '../Header/header';
-import MapComponent from '../../components/MapComponent';
-import { ToggleDraw } from '../../components/MapControls';
 import LayerSwitcher from 'ol-layerswitcher';
 import { BaseLayerOptions, GroupLayerOptions } from 'ol-layerswitcher';
 import LayerGroup from 'ol/layer/Group';
 // import * as field_details from '../../shared/cc_fields_2024.geojson';
 import 'ol-layerswitcher/dist/ol-layerswitcher.css';
 import '../../styles/App.css';
-
-
-// TODO: Move to shared resources
-class ToggleDraw extends Control {
-    constructor(opt_options) {
-
-      const options = opt_options || {};
-      const button = document.createElement('button');
-      button.className = 'toggle-button';
-      button.innerHTML = 'Draw';
-
-      const element = document.createElement('div');
-      element.className = 'toggle-draw';
-      element.appendChild(button);
-
-      super({
-        element: element,
-        target: options.target,
-      });
-
-      this.vectorSource = options['vector_source'];
-      this.mapRef = options['map_reference'];
-      // this.map = map;
-
-      button.addEventListener('click', this.handleToggleDraw.bind(this), false);
-    }
-    handleToggleDraw() {
-      window.drawArea(this.vectorSource, this.mapRef);
-    }
-  }
+import MapComponent from '../../components/MapComponent';
+import { ToggleDraw, RotateMap } from '../../components/MapControls';
 
 
 const SpatialMap = () => {
     const navigate = useNavigate();
 
+    const mapRef2 = useRef(null);
     let gridDraw;
 
     const [startDate, setStartDate] = useState();
     const [endDate, setEndDate] = useState();
     const [coordinates, setCoordinates] = useState([]);
 
+    const mapRef = useRef(null);
     const [mapSource, setMapSource] = useState(null);
     const [vectorLayer, setVectorLayer] = useState(null);
     const [controls, setControls] = useState([]);
-    const [view, setView] = useState([]);
+    const [view, setView] = useState(null);
 
     const buttonClick = async () => {
         if (startDate.isAfter(endDate)) {
@@ -90,23 +63,14 @@ const SpatialMap = () => {
             'polygon_coordinates': coordinates,
         };
         try {
-            // const response = await axios.post('http://localhost:5000/setGrid', coordinateFeatures, 
-            // { headers: {
-            //   'Content-Type': 'application/json',
-            // }});
-            // console.log(response.data);
-            // navigate('/plot-features', {state : response.data} );
             navigate('/explore', {state: requestJson});
-            // history.push('/plot-features');
           } catch (error) {
             console.log(error);
           }
         
     };
-
     useEffect(() => {
       const field_details = require('../../shared/cc_fields_2024.json');
-        const mapSource = new OSM();
         const vectorSource = new VectorSource();
         const boundaryStyle = new Style({
           stroke: new Stroke({
@@ -124,24 +88,6 @@ const SpatialMap = () => {
             }),
         });
         const style = [boundaryStyle, labelStyle];
-        // const map = new Map({
-        //     target: mapRef.current,
-        //     layers: [
-        //       new TileLayer({
-        //           // source: new OSM(),
-        //           source: new XYZ({
-        //             url: 'http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}'
-        //           })
-        //       }),
-        //       new VectorLayer({
-        //         source: vectorSource,
-        //       }),
-        //     ],
-        //     view: new View({
-        //       center: fromLonLat([-87.5, 42.0]),
-        //       zoom: 4,
-        //     }),
-        // });
         const osmLayer = new TileLayer({
           title: 'OSM',
           type: 'base',
@@ -154,20 +100,11 @@ const SpatialMap = () => {
           visible: false,
           source: new XYZ({url: 'http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}'}),
         });
-        const layerswitcher = new LayerSwitcher({
-          // activationMode: 'click',
-          startActive: false,
-        });
+        
         const map = new Map({
-          target: mapRef.current,
+          target: mapRef2.current,
           layers: [
             osm2, osmLayer,
-            // new LayerGroup({
-            //   title: 'Base maps',
-            //   type: 'base',
-            //   visible: true,
-            //   layers: [osmLayer, osm2]
-            // }),
             new VectorLayer({
               source: vectorSource,
             })
@@ -177,9 +114,19 @@ const SpatialMap = () => {
             zoom: 6,
           }),
         });
-        map.addControl(layerswitcher);
+        
 
-        map.addControl(new ToggleDraw({'vector_source':vectorSource, 'map_reference':map}));
+        // map.addControl(new ToggleDraw({'vector_source':vectorSource, 'map_reference':map}));
+        // map.addControl(layerswitcher);
+        const controls = [
+          new ToggleDraw({ vector_source: vectorSource }),
+          new RotateMap({ direction: "left" }),
+          new RotateMap({ direction: "right" }),
+        ];
+        const layerswitcher = new LayerSwitcher({
+          // activationMode: 'click',
+          startActive: false,
+        });
 
         const field_vector = new VectorLayer({
           source: new VectorSource({
@@ -196,23 +143,35 @@ const SpatialMap = () => {
           }
         });
         map.addLayer(field_vector);
-        return () => {
-            map.setTarget(null);
-        };
-
-        const vectorLayer = new VectorLayer({
-          source: vectorSource,
+        
+        const o1 = new TileLayer({
+          title: 'OSM',
+          type: 'base',
+          visible: true,
+          source: new OSM(),
         });
-        const controls = [new ToggleDraw({ vector_source: vectorSource })];
+        const sat = new TileLayer({
+          title: 'Satellite View',
+          type: 'base',
+          visible: false,
+          source: new XYZ({url: 'http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}'}),
+        });
+        const mapSource = [sat];
         const view = new View({
           center: fromLonLat([0, 0]),
           zoom: 2,
         });
-        setMapSource(mapSource);
-        setVectorLayer(vectorLayer);
+        setMapSource([mapSource]);
         setControls(controls);
         setView(view);
+        // return () => {
+        //     map.setTarget(null);
+        // };
+
+        
+            
     }, []);
+    
 
     const drawArea = (source, map) => {
       console.log(map.getView().getProjection());
@@ -229,7 +188,7 @@ const SpatialMap = () => {
 
         });
     };
-    window.drawArea = drawArea;
+    window.drawHandler = drawArea;
 
     return (
         <Box
@@ -241,6 +200,9 @@ const SpatialMap = () => {
       }}
       margin={5}
     >
+      {/* <Grid> */}
+        
+      {/* </Grid> */}
         <Grid container spacing={2}>
         <Header/>
                 <Grid
@@ -260,12 +222,11 @@ const SpatialMap = () => {
                             Draw a box around the concerned region and select a date range to get available missions
                         </Typography>
                     </Grid>
+                    {/* <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef2} style={{ width: '90%', height: '400px', transform: 'translateX(5%)'}} mt={3} /> */}
                     <Grid item xs={12} sm={12} md={12} lg={12}>
-                        <MapComponent
-                          mapSource={mapSource}
+                      <MapComponent mapSource={mapSource}
                           vectorLayer={vectorLayer}
                           controls={controls}
-                          view={view}
                         />
                     </Grid>
                     <Grid item xs={12} sm={12} md={12} lg={12} align='center' mt={2} style={{display: 'flex', flexDirection:'row', alignContent: 'space-around', justifyContent: 'space-evenly'}}>
@@ -300,6 +261,8 @@ const SpatialMap = () => {
                 </Grid>
             
         </Grid>
+            
+      
         </Box>
     )
 };
