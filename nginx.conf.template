@@ -7,28 +7,40 @@ server {
     index index.html;
     client_max_body_size 100M;
 
+    # Add CORS headers
+    add_header 'Access-Control-Allow-Origin' '*' always;
+    add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
+    add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+    add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
+
     location / {
         try_files $uri $uri/ =404;
+
+        # Handle OPTIONS method for CORS preflight
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' '*';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE';
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+            add_header 'Access-Control-Max-Age' 1728000;
+            add_header 'Content-Type' 'text/plain; charset=utf-8';
+            add_header 'Content-Length' 0;
+            return 204;
+        }
     }
 
     # API endpoints
-    location /ping {
-        include proxy_params;
-        proxy_pass ${API_URL};
-    }
-    location /flight-list {
-        include proxy_params;
-        proxy_pass ${API_URL};
-    }
-    location /set-grid {
-        include proxy_params;
-        proxy_pass ${API_URL};
+    location ~ ^/(ping|flight-list|set-grid) {
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_pass ${REACT_APP_API_URL};
     }
     location /data {
         # Needed because prod is only accessible from the VPN
         # TODO: but, prod api url on prod frontend is localhost (huge files over disk space)
         resolver ${DNS_RESOLVER};
-        proxy_pass ${API_URL};
+        proxy_pass ${REACT_APP_API_URL};
         rewrite ^/data(.*) $1 break;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;

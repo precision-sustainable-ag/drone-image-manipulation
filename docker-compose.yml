@@ -1,11 +1,61 @@
 version: '1'
+# Define environments first
+x-environments:
+  dev-local: &dev-local-env
+    environment:
+      NODE_ENV: development
+      REACT_APP_API_URL: http://localhost:5000
+      SERVER_NAME: localhost
+      DNS_RESOLVER: 8.8.8.8
+      SSL_CONFIG: ""
+
+  dev-prod: &dev-prod-env
+    environment:
+      NODE_ENV: development
+      REACT_APP_API_URL: http://dronepilotapp.psi.ncsu.edu
+      SERVER_NAME: localhost
+      DNS_RESOLVER: 152.1.14.14
+      SSL_CONFIG: ""
+
+  prod: &prod-env
+    environment:
+      NODE_ENV: production
+      REACT_APP_API_URL: http://localhost:5000
+      SERVER_NAME: localhost
+      DNS_RESOLVER: 8.8.8.8
+      SSL_CONFIG: "ssl_certificate /etc/nginx/ssl/cert.pem; ssl_certificate_key /etc/nginx/ssl/key.pem;"
+
 services:
-  app:
+  dev-local:
+    image: node:22
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "3000:3000"
+    command: npm start
+    <<: *dev-local-env
+    profiles:
+      - dev-local
+
+  dev-prod:
+    image: node:22
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "3000:3000"
+    command: npm start
+    <<: *dev-prod-env
+    profiles:
+      - dev-prod
+
+  prod:
     build:
       context: .
       dockerfile: dev.Dockerfile
     ports:
-      - "3000:3000"
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules 
+      - "3000:80"
+    <<: *prod-env
+    profiles:
+      - prod
