@@ -29,23 +29,12 @@ server {
     }
 
     # API endpoints
-    location ~ ^/(ping|flight-list|set-grid) {
+    location ~ ^/(ping|flight-list|set-grid|data/.*) {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_pass ${REACT_APP_API_URL};
-    }
-    location /data {
-        # Needed because prod is only accessible from the VPN
-        # TODO: but, prod api url on prod frontend is localhost (huge files over disk space)
-        resolver ${DNS_RESOLVER};
-        proxy_pass ${REACT_APP_API_URL};
-        rewrite ^/data(.*) $1 break;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 # TODO: Add SSL configuration (only for production)

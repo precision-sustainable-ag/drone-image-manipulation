@@ -21,7 +21,7 @@ x-environments:
     environment:
       NODE_ENV: production
       REACT_APP_API_URL: http://localhost:5000
-      SERVER_NAME: localhost
+      SERVER_NAME: dronepilotapp.psi.ncsu.edu
       DNS_RESOLVER: 8.8.8.8
       SSL_CONFIG: "ssl_certificate /etc/nginx/ssl/cert.pem; ssl_certificate_key /etc/nginx/ssl/key.pem;"
 
