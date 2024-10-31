@@ -5,13 +5,14 @@ import CancelIcon from '@mui/icons-material/Close';
 import { DataGrid, GridRowsProp, GridColDef, GridRowEditStopReasons, GridRowModes, GridActionsCellItem } from '@mui/x-data-grid';
 import { DefaultUniform } from 'ol/webgl/Helper';
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import FileSaver from 'file-saver';
 
 const PlotTable = ({state, plotMapRef}) => {
     // let rows;
     // let columns;
     // const { state } = useLocation();
+    const navigate = useNavigate();
     console.log(state);
 
     const [anchorEl, setAnchorEl] = useState(null);
@@ -41,7 +42,7 @@ const PlotTable = ({state, plotMapRef}) => {
         else return 0;
     });
 
-    const columns = [
+    const allColumns = [
         {
             field: 'plot_num',
             headerName: 'Plot Number',
@@ -146,7 +147,30 @@ const PlotTable = ({state, plotMapRef}) => {
         }
         
     ]
+
+    const getFilteredColumns = (rows, allCols) => {
+        return allCols.filter((column) => {
+          // Keep plot_num, plot_name and actions columns
+          if (
+            column.field === "plot_num" ||
+            column.field === "plot_name" ||
+            column.field === "actions"
+          ) {
+            return true;
+          }
+    
+          // If the column has any non-null, non-undefined, non-empty values, include that column
+          return rows.some((row) => {
+            const value = column.valueGetter
+              ? column.valueGetter({ row })
+              : row.properties[column.field];
+            return value !== null && value !== undefined && value !== "";
+          });
+        });
+      };
+
     // const [rows, setRows] = useState(initalRows);
+    const [columns, setColumns] = useState(getFilteredColumns(initalRowsCopy, allColumns));
     const [rows, setRows] = useState(initalRowsCopy);
     const [rowModesModel, setRowModesModel] = useState({});
     const [openDialog, setOpenDialog] = useState(false);
@@ -197,10 +221,6 @@ const PlotTable = ({state, plotMapRef}) => {
     // const handleCellEdit = (newRow) => {
     //     setEditedRows((prevRows) => [...prevRows.filter(row => row.id!== newRow.id), newRow]);
     // };
-
-    const sendToAPI = () => {
-        // console.log(rows);
-    };
 
     const exportData = () => {
 
@@ -309,7 +329,7 @@ const PlotTable = ({state, plotMapRef}) => {
                         <Divider />
                         <MenuItem onClick={exportAll}>EXPORT ALL</MenuItem>
                     </Menu>
-                    <Button variant='outlined' onClick={sendToAPI}>DONE</Button>
+                    <Button variant='outlined' onClick={() => { navigate('/')} }>DONE</Button>
                 </Grid>
                 
             </Grid>
