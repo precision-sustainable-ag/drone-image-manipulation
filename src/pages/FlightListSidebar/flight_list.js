@@ -30,7 +30,10 @@ const FlightList = ({sendData, spatialQuery}) => {
     }, [spatialQuery]);
     
     return (
-        <Grid item xs={12} sm={12} md={12} lg={12}>
+        <Grid item xs={12} sm={12} md={12} lg={12} style={{
+             overflow: 'auto',
+             height: '100%',
+        }}>
             {Object.entries(flightDict).length > 0 &&
                 Object.entries(flightDict).map(([flight_id, value]) => {
                 return (
