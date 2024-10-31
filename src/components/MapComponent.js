@@ -1,7 +1,5 @@
 import { useEffect, useRef } from "react";
 import { Map } from "ol";
-import WebGLTileLayer from "ol/layer/WebGLTile";
-import Layer from "ol/layer/Layer";
 import {
   defaults as defaultInteractions,
   DragRotateAndZoom,
@@ -9,8 +7,7 @@ import {
 import { defaults as defaultControls } from "ol/control";
 
 const MapComponent = ({
-  mapSources,
-  vectorLayer,
+  mapLayers,
   controls,
   interactions,
   view,
@@ -20,31 +17,14 @@ const MapComponent = ({
   const mapInstanceRef = useRef(null);
 
   useEffect(() => {
-    if (!mapRef.current || !mapSources || !vectorLayer) return;
-
-    const sourceArray = Array.isArray(mapSources) ? mapSources : [mapSources];
-    
-    const tileLayers = sourceArray.map(source => {
-      // If source is already a Layer instance (TileLayer, etc), use it directly
-      if (source instanceof Layer) {
-        return source;
-      }
-      // Otherwise, create a new WebGLTileLayer (maintaining backward compatibility)
-      return new WebGLTileLayer({
-        source: source,
-      });
-    });
-
+    if (!mapRef.current || !mapLayers) return;
 
     const map = new Map({
       target: mapRef.current,
-      layers: [
-        tileLayers,
-        vectorLayer,
-      ],
+      layers: mapLayers,
       controls: defaultControls().extend(controls),
       interactions: interactions || defaultInteractions().extend([new DragRotateAndZoom()]),
-      view: view ? view : sourceArray[0]?.getView(),
+      view: view ? view : mapLayers[0]?.getSource().getView(),
     });
 
     mapInstanceRef.current = map;
@@ -59,7 +39,7 @@ const MapComponent = ({
         mapInstanceRef.current = null;
       }
     };
-  }, [mapSources, vectorLayer, controls, interactions, view, onMapInit]);
+  }, [mapLayers, controls, interactions, view, onMapInit]);
 
   return (
     <div

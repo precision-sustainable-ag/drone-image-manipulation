@@ -4,6 +4,7 @@ import {Button, Box, Grid, Typography} from '@mui/material';
 import GeoTIFF from 'ol/source/GeoTIFF';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
+import WebGLTileLayer from 'ol/layer/WebGLTile';
 import {Style, Stroke, Text} from 'ol/style';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Polygon } from 'ol/geom';
@@ -20,7 +21,7 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
     // const navigate = useNavigate();
 
     const mapRef = useRef(null);
-    const [mapSource, setMapSource] = useState(null);
+    // const [mapSource, setMapSource] = useState(null);
     const [vectorLayer, setVectorLayer] = useState(null);
     const [controls, setControls] = useState([]);
     let gridDraw;
@@ -45,6 +46,7 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
               },
             ],
           });
+        const tileLayer = new WebGLTileLayer({source: mapSource})
         const geoJSONFormat = new GeoJSON();
         const geoJSONFeature = geoJSONFormat.readFeatures(apiOutput['features']);
 
@@ -81,8 +83,8 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
         });
         const controls = [new RotateMap({direction: 'left'}), new RotateMap({direction: 'right'})];
 
-        setMapSource(mapSource);
-        setVectorLayer(vectorLayer);
+        // setMapSource(mapSource);
+        setVectorLayer([tileLayer, vectorLayer]);
         setControls(controls);
             
     }, [apiOutput]);
@@ -202,8 +204,7 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
         mt={2}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
           <MapComponent
-            mapSource={mapSource}
-            vectorLayer={vectorLayer}
+            mapLayers={vectorLayer}
             controls={controls}
             onMapInit={handleMapInit}
           />

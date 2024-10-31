@@ -10,6 +10,7 @@ import { Draw } from 'ol/interaction';
 import Translate from 'ol/interaction/Translate';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
+import WebGLTileLayer from 'ol/layer/WebGLTile';
 import LineString from 'ol/geom/LineString';
 import { getBottomLeft, getTopLeft, getTopRight, getBottomRight, getCenter, boundingExtent } from 'ol/extent';
 import {Style, Stroke, Fill} from 'ol/style';
@@ -39,7 +40,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [respData, setRespData] = useState(null);
 
-  const [mapSource, setMapSource] = useState(null);
+  // const [mapSource, setMapSource] = useState(null);
   const [vectorLayer, setVectorLayer] = useState(null);
   const [controls, setControls] = useState([]);
 
@@ -129,6 +130,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
         },
       ],
     });
+    const tileLayer = new WebGLTileLayer({source: mapSource});
     const vectorSource = new VectorSource();
     const vectorLayer = new VectorLayer({
       source: vectorSource
@@ -139,8 +141,8 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       new RotateMap({ direction: "right" }),
     ];
 
-    setMapSource(mapSource);
-    setVectorLayer(vectorLayer);
+    // setMapSource(mapSource);
+    setVectorLayer([tileLayer, vectorLayer]);
     setControls(controls);
 
     setCoordinateFeatures((oldData) => ({
@@ -371,8 +373,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       <Grid container spacing={2}>
         <Grid item xs={12} sm={12} md={12} lg={12}>
           <MapComponent
-            mapSource={mapSource}
-            vectorLayer={vectorLayer}
+            mapLayers={vectorLayer}
             controls={controls}
             flightDetails={flightDetails}
           />
