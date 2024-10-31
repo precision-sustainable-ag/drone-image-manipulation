@@ -1,5 +1,5 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import {Button, Box, Grid, Typography} from '@mui/material';
+import {Box, Grid, Typography, Backdrop, CircularProgress} from '@mui/material';
 
 import GeoTIFF from 'ol/source/GeoTIFF';
 import VectorSource from 'ol/source/Vector';
@@ -23,8 +23,10 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
 
     const mapRef = useRef(null);
     // const [mapSource, setMapSource] = useState(null);
+    const [mapLayers, setMapLayers] = useState(null);
     const [vectorLayer, setVectorLayer] = useState(null);
     const [controls, setControls] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
     let gridDraw;
 
     useImperativeHandle(ref, () => ({
@@ -85,30 +87,36 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
         const controls = [new RotateMap({direction: 'left'}), new RotateMap({direction: 'right'})];
 
         // setMapSource(mapSource);
-        setVectorLayer([tileLayer, vectorLayer]);
+        setVectorLayer(vectorLayer);
+        setMapLayers([tileLayer, vectorLayer]);
         setControls(controls);
             
     }, [apiOutput]);
 
     const exportPlotImages = async () => {
       if (!vectorLayer) return;
-      
-      const features = vectorLayer.getSource().getFeatures();
-      const zip = new JSZip();
+      try {
+        setIsLoading(true);
+        const features = vectorLayer.getSource().getFeatures();
+        const zip = new JSZip();
 
-      for (const feature of features) {
+        for (const feature of features) {
           const flatCoordinates = feature.getGeometry().getFlatCoordinates();
           const gridCoordinates = [];
           for (let i = 0; i < flatCoordinates.length; i += 2) {
-              gridCoordinates.push([flatCoordinates[i], flatCoordinates[i + 1]]);
+            gridCoordinates.push([flatCoordinates[i], flatCoordinates[i + 1]]);
           }
           const name = feature.get('name');
           const imageBlob = await captureExtentAsImage(gridCoordinates);
           zip.file(`${name}.png`, imageBlob, { binary: true });
+        }
+        zip.generateAsync({type: 'blob'}).then((content) => {saveAs(content, "plot_images.zip")});
+      } catch (error) {
+        alert('Error in exporting images' + error);
+      } finally {
+        setIsLoading(false);
       }
-
-      zip.generateAsync({type: 'blob'}).then((content) => {saveAs(content, "plot_images.zip")})
-  };
+    };
 
     const captureExtentAsImage = async (gridCoords) => {
       return new Promise((resolve, reject) => {
@@ -206,12 +214,28 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
         mt={2}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
           <MapComponent
-            mapLayers={vectorLayer}
+            mapLayers={mapLayers}
             controls={controls}
             onMapInit={handleMapInit}
           />
         </Grid>
         </Grid>
+
+        <Backdrop
+          sx={{
+            color: "#ffffff",
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+          }}
+          open={isLoading}
+        >
+          <CircularProgress color="inherit" />
+          <Typography variant="h6">
+            Please wait while the data is being exported...
+          </Typography>
+        </Backdrop>
       </Box>
     )
 });

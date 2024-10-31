@@ -175,6 +175,10 @@ const PlotTable = ({state, plotMapRef}) => {
     const [rowModesModel, setRowModesModel] = useState({});
     const [openDialog, setOpenDialog] = useState(false);
     const [responseData, setResponseData] = useState("");
+    const [paginationModel, setPaginationModel] = useState({
+        pageSize: 10,
+        page: 0,
+    });
 
     const handleRowModesModelChange = (newRowModesModel) => {
         setRowModesModel(newRowModesModel);
@@ -304,6 +308,9 @@ const PlotTable = ({state, plotMapRef}) => {
                         onRowModesModelChange={handleRowModesModelChange}
                         onRowEditStop={handleRowEditStop}
                         processRowUpdate={processRowUpdate}
+                        paginationModel={paginationModel}
+                        onPaginationModelChange={setPaginationModel}
+                        pageSizeOptions={[10, 25, 50]}
                         slotProps={{
                         toolbar: { setRows, setRowModesModel },
                         }} mr={2}

@@ -48,6 +48,9 @@ function App() {
           backgroundColor: 'rgba(240,247,235,.5)',
           position: 'relative',
           width: '100%',
+          height: '657px',
+          display: 'flex',
+          flexDirection: 'column'
         }} mt={3}>
           <Grid>
             <Typography variant="h5" gutterBottom align="center">
