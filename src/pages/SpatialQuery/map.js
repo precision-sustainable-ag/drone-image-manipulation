@@ -43,7 +43,7 @@ const SpatialMap = () => {
     const [coordinates, setCoordinates] = useState([]);
 
     const mapRef = useRef(null);
-    const [mapSource, setMapSource] = useState(null);
+    // const [mapSource, setMapSource] = useState(null);
     const [vectorLayer, setVectorLayer] = useState(null);
     const [controls, setControls] = useState([]);
     const [view, setView] = useState(null);
@@ -69,9 +69,10 @@ const SpatialMap = () => {
           }
         
     };
+
     useEffect(() => {
       const field_details = require('../../shared/cc_fields_2024.json');
-        const vectorSource = new VectorSource();
+
         const boundaryStyle = new Style({
           stroke: new Stroke({
               color: 'white',
@@ -88,53 +89,64 @@ const SpatialMap = () => {
             }),
         });
         const style = [boundaryStyle, labelStyle];
+
+        const vectorSource = new VectorSource();
+        const vectorLayer = new VectorLayer({
+          source: vectorSource
+        });
+
         const osmLayer = new TileLayer({
-          title: 'OSM',
+          title: 'Open Street Map',
           type: 'base',
           visible: true,
           source: new OSM(),
         });
-        const osm2 = new TileLayer({
+        const satLayer = new TileLayer({
           title: 'Satellite View',
           type: 'base',
           visible: false,
           source: new XYZ({url: 'http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}'}),
         });
         
-        const map = new Map({
-          target: mapRef2.current,
-          layers: [
-            osm2, osmLayer,
-            new VectorLayer({
-              source: vectorSource,
-            })
-          ],
-          view: new View({
-            center: fromLonLat([-80.5, 35.0]),
-            zoom: 6,
-          }),
-        });
+        // const map = new Map({
+        //   target: mapRef2.current,
+        //   layers: [
+        //     satLayer, osmLayer,
+        //     new VectorLayer({
+        //       source: vectorSource,
+        //     })
+        //   ],
+        //   view: new View({
+        //     center: fromLonLat([-80.5, 35.0]),
+        //     zoom: 6,
+        //   }),
+        // });
         
 
         // map.addControl(new ToggleDraw({'vector_source':vectorSource, 'map_reference':map}));
         // map.addControl(layerswitcher);
+        const layerSwitcher = new LayerSwitcher({
+          activationMode: 'click',
+          // startActive: true,
+          groupSelectStyle: 'group'
+        });
+
         const controls = [
           new ToggleDraw({ vector_source: vectorSource }),
           new RotateMap({ direction: "left" }),
           new RotateMap({ direction: "right" }),
+          layerSwitcher,
         ];
-        const layerswitcher = new LayerSwitcher({
-          // activationMode: 'click',
-          startActive: false,
-        });
 
         const field_vector = new VectorLayer({
+          title: 'Field Boundaries',
+          visible: false,
           source: new VectorSource({
             format: new GeoJSON(),
             // url: 'http://152.7.196.7/cc/cc_fields_2024.geojson',
             features: new GeoJSON().readFeatures(field_details, {
               dataProjection: 'EPSG:4326',
-              featureProjection: map.getView().getProjection(),
+              featureProjection: 'EPSG:3857',
             }),
           }),
           style: function (feature) {
@@ -142,34 +154,33 @@ const SpatialMap = () => {
             return style;
           }
         });
-        map.addLayer(field_vector);
-        
-        const o1 = new TileLayer({
-          title: 'OSM',
-          type: 'base',
-          visible: true,
-          source: new OSM(),
-        });
-        const sat = new TileLayer({
-          title: 'Satellite View',
-          type: 'base',
-          visible: false,
-          source: new XYZ({url: 'http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}'}),
-        });
-        const mapSource = [sat];
-        const view = new View({
-          center: fromLonLat([0, 0]),
-          zoom: 2,
-        });
-        setMapSource([mapSource]);
-        setControls(controls);
-        setView(view);
-        // return () => {
-        //     map.setTarget(null);
-        // };
 
+        // map.addLayer(field_vector);
         
-            
+        // const o1 = new TileLayer({
+        //   title: 'OSM',
+        //   type: 'base',
+        //   visible: true,
+        //   source: new OSM(),
+        // });
+        // const sat = new TileLayer({
+        //   title: 'Satellite View',
+        //   type: 'base',
+        //   visible: false,
+        //   source: new XYZ({url: 'http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}'}),
+        // });
+        // const mapSource = [sat];
+        // const view = new View({
+        //   center: fromLonLat([0, 0]),
+        //   zoom: 2,
+        // });
+        // setMapSource([satLayer, osmLayer, field_vector]);
+        setVectorLayer([satLayer, osmLayer, field_vector, vectorLayer])
+        setControls(controls);
+        setView(new View({
+          center: fromLonLat([-80.5, 35.0]),
+          zoom: 6,
+      })); 
     }, []);
     
 
@@ -224,9 +235,10 @@ const SpatialMap = () => {
                     </Grid>
                     {/* <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef2} style={{ width: '90%', height: '400px', transform: 'translateX(5%)'}} mt={3} /> */}
                     <Grid item xs={12} sm={12} md={12} lg={12}>
-                      <MapComponent mapSource={mapSource}
-                          vectorLayer={vectorLayer}
+                      <MapComponent
+                          mapLayers={vectorLayer}
                           controls={controls}
+                          view={view}
                         />
                     </Grid>
                     <Grid item xs={12} sm={12} md={12} lg={12} align='center' mt={2} style={{display: 'flex', flexDirection:'row', alignContent: 'space-around', justifyContent: 'space-evenly'}}>
