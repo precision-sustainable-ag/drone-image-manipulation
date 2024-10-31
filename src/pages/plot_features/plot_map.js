@@ -16,6 +16,7 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import MapComponent from '../../components/MapComponent';
 import { RotateMap } from '../../components/MapControls';
+import Header from '../Header/header';
 
 const PlotMap = forwardRef(({apiOutput}, ref) => {
     // const navigate = useNavigate();
@@ -178,6 +179,7 @@ const PlotMap = forwardRef(({apiOutput}, ref) => {
             margin={5}
       >
         <Grid container spacing={2}>
+                <Header/>
                 <Grid item xs={12} md={12} lg={12}
                 style={{
                 backgroundColor: 'rgba(240,247,235,.5)',
