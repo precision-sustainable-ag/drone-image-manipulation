@@ -1,11 +1,10 @@
-import { Button, Box, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Menu, MenuItem, Divider } from '@mui/material';
+import { Button, Box, Grid, Dialog, DialogTitle, DialogContent, DialogActions, Menu, MenuItem, Divider } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
-import { DataGrid, GridRowsProp, GridColDef, GridRowEditStopReasons, GridRowModes, GridActionsCellItem } from '@mui/x-data-grid';
-import { DefaultUniform } from 'ol/webgl/Helper';
-import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { DataGrid, GridRowEditStopReasons, GridRowModes, GridActionsCellItem } from '@mui/x-data-grid';
+import React, { useEffect, useState } from 'react';
+import {useNavigate } from 'react-router-dom';
 import FileSaver from 'file-saver';
 
 const PlotTable = ({state, plotMapRef}) => {
@@ -13,7 +12,6 @@ const PlotTable = ({state, plotMapRef}) => {
     // let columns;
     // const { state } = useLocation();
     const navigate = useNavigate();
-    console.log(state);
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -34,8 +32,7 @@ const PlotTable = ({state, plotMapRef}) => {
     // });
     const initalRows = state.features.features;
     const initalRowsCopy = [...initalRows];
-    console.log(initalRowsCopy);
-    // console.log('intial rows ', initalRows);
+
     initalRowsCopy.sort((a,b) => {
         if (a['properties']['plot_num'] < b['properties']['plot_num']) {return -1;}
         else if (a['properties']['plot_num'] > b['properties']['plot_num']) {return 1;}
@@ -169,7 +166,6 @@ const PlotTable = ({state, plotMapRef}) => {
         });
       };
 
-    // const [rows, setRows] = useState(initalRows);
     const [columns, setColumns] = useState(getFilteredColumns(initalRowsCopy, allColumns));
     const [rows, setRows] = useState(initalRowsCopy);
     const [rowModesModel, setRowModesModel] = useState({});
@@ -189,12 +185,15 @@ const PlotTable = ({state, plotMapRef}) => {
             event.defaultMuiPrevented = true;
         }
     };
+    
     const handleEditClick = (id) => () => {
         setRowModesModel({...rowModesModel, [id]:{mode: GridRowModes.Edit}});
     };
+
     const handleSaveClick = (id) => () => {
         setRowModesModel({...rowModesModel, [id]:{mode: GridRowModes.View}});
     };
+
     const handleCancelClick = (id) => () => {
         setRowModesModel({
             ...rowModesModel,
@@ -220,11 +219,6 @@ const PlotTable = ({state, plotMapRef}) => {
         const blob = new Blob([responseData], { type: "text/plain;charset=utf-8" });
         FileSaver.saveAs(blob, "response.txt");
     };
-
-    // const [editedRows, setEditedRows] = useState([]);
-    // const handleCellEdit = (newRow) => {
-    //     setEditedRows((prevRows) => [...prevRows.filter(row => row.id!== newRow.id), newRow]);
-    // };
 
     const exportData = () => {
 
