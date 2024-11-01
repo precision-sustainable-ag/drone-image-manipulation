@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import {Button, Box, TextField, Grid, Typography} from '@mui/material';
+import {Button, Box, TextField, Grid, Typography, Backdrop, CircularProgress} from '@mui/material';
 
 import OSM from 'ol/source/OSM';
 import XYZ from 'ol/source/XYZ';
@@ -18,7 +18,6 @@ import {Style, Stroke, Fill, Text} from 'ol/style';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import moment from 'moment';
 import 'ol/ol.css';
 import '../../styles/App.css';
 import Header from '../Header/header';
@@ -47,27 +46,50 @@ const SpatialMap = () => {
     const [vectorLayer, setVectorLayer] = useState(null);
     const [controls, setControls] = useState([]);
     const [view, setView] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const buttonClick = async () => {
-        if (startDate.isAfter(endDate)) {
-            alert('End date needs to be after the start date');
-            return;
-            // console.log('large');
-        }
-        setStartDate(moment(startDate).format('YYYY-MM-DD'));
-        setStartDate(moment(endDate).format('YYYY-MM-DD'));
+      if (!startDate || !endDate || coordinates.length === 0) {
+        alert("Select a date range and draw the grid");
+        return;
+      }
+      if (new Date(startDate).getTime() > new Date(endDate).getTime()) {
+        alert("End date needs to be after the start date");
+        return;
+      }
 
-        const requestJson = {
-            'start_date': startDate,
-            'end_date': endDate,
-            'polygon_coordinates': coordinates,
-        };
-        try {
-            navigate('/explore', {state: requestJson});
-          } catch (error) {
-            console.log(error);
+      const requestJson = {
+        start_date: startDate,
+        end_date: endDate,
+        polygon_coordinates: coordinates,
+      };
+
+      try {
+        setIsLoading(true);
+        const response = await fetch(
+          process.env.REACT_APP_API_URL + "/flight-list",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestJson),
           }
-        
+        );
+
+        const data = await response.json();
+
+        if (data.flights && Object.keys(data.flights).length > 0) {
+          navigate("/explore", { state: data.flights });
+        } else {
+          alert("No flights found for the selected options");
+        }
+      } catch (error) {
+        console.log(error);
+        alert("Error in fetching flights");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     useEffect(() => {
@@ -280,6 +302,21 @@ const SpatialMap = () => {
             
         </Grid>
             
+        <Backdrop
+          sx={{
+            color: "#ffffff",
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+          }}
+          open={isLoading}
+        >
+          <CircularProgress color="inherit" />
+          <Typography variant="h6">
+            Fetching flight list...
+          </Typography>
+        </Backdrop>
       
         </Box>
     )

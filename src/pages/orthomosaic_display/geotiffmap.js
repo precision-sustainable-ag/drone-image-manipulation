@@ -247,6 +247,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       });
       map.addInteraction(translate);
     });
+    return gridDraw;
   };
   window.drawHandler = drawGrid;
   
