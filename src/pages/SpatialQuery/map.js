@@ -132,7 +132,12 @@ const SpatialMap = () => {
         });
 
         const controls = [
-          new ToggleDraw({ vector_source: vectorSource }),
+          new ToggleDraw({
+            vector_source: vectorSource,
+            clearData: () => {
+              setCoordinates([]);
+            },
+          }),
           new RotateMap({ direction: "left" }),
           new RotateMap({ direction: "right" }),
           layerSwitcher,
@@ -198,6 +203,7 @@ const SpatialMap = () => {
             // console.log(map.getView());
 
         });
+        return gridDraw;
     };
     window.drawHandler = drawArea;
 
