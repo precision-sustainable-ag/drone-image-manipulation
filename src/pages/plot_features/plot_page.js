@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useRef} from 'react';
 import { useLocation } from 'react-router-dom';
 import PlotMap from './plot_map';
 import PlotTable from './plot_table';

@@ -39,8 +39,6 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [respData, setRespData] = useState(null);
-
-  // const [mapSource, setMapSource] = useState(null);
   const [vectorLayer, setVectorLayer] = useState(null);
   const [controls, setControls] = useState([]);
 
@@ -146,7 +144,6 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       new RotateMap({ direction: "right" }),
     ];
 
-    // setMapSource(mapSource);
     setVectorLayer([tileLayer, vectorLayer]);
     setControls(controls);
 
@@ -206,7 +203,6 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
         }
         const newCoordinates = [firstCorner, secondCorner, thirdCorner, fourthCorner, firstCorner];
         geometry.setCoordinates([newCoordinates]);
-        // console.log('drawing ',newCoordinates);
         return geometry;
       };
     };
@@ -221,8 +217,6 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     gridDraw.on('drawend', (e) => {
       const currentRotation = map.getView().getRotation();
       e.feature.setStyle(getGridStyle(e.feature, gridCols, gridRows, 'red', currentRotation));
-      // map.removeInteraction(gridDraw);
-      // console.log('total data', coordinateFeatures);
       setCoordinateFeatures((oldData) => ({
         ...oldData,
         'rotation': currentRotation,
@@ -272,7 +266,6 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       })
     );
     const coords = feature.getGeometry().getCoordinates()[0];
-    // console.log('get grid', coords);
     const topLeftCoord = coords[0];
     const topRightCoord = coords[1];
     const bottomRightCoord = coords[2];
@@ -298,7 +291,6 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     // vertical lines
     const verticalD = [];
     for (let i = 1; i <= cols - 1; i++) {
-      // console.log(i, cols);
       lineString = new LineString([xColCoord, yColCoord]);
 
       const xColCopy = [...xColCoord];
@@ -363,7 +355,6 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       yRowCoord[0] = yRowCoord[0] - rowYRotationOffset;
       yRowCoord[1] = yRowCoord[1] + rowHeight;
     }
-    // console.log(styles);
     return styles;
   };
 

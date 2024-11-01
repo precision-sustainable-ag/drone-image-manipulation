@@ -1,35 +1,33 @@
 import { useState } from 'react';
-import logo from '../../logo.svg';
 import '../../styles/App.css';
 import GeoTIFFMap from './geotiffmap';
 import FlightList from '../FlightListSidebar/flight_list';
 import Header from '../Header/header';
-import {Button, Box, Grid, TextField, Typography} from '@mui/material';
+import {Box, Grid, TextField, Typography} from '@mui/material';
 import { useLocation } from 'react-router-dom';
 
 function App() {
 
   const {state} = useLocation();
-  // const {start_date, end_date, polygon_coordinates} = state;
-  // console.log(start_date, end_date, polygon_coordinates);
-  
 
   const [gridCols, setGridCols] = useState(2);
   const [gridRows, setGridRows] = useState(2);
-
   const [flightDetails, setFlightDetails] = useState('');
 
   const handleGridColsChange = (event) => {
     const newCols = parseInt(event.target.value, 10);
     setGridCols(newCols);
   };
+
   const handleGridRowsChange = (event) => {
     const newRows = parseInt(event.target.value, 10);
     setGridRows(newRows);
   };
+
   const handleFlightDetailsUpdate = (newFlightDetails) => {
     setFlightDetails(newFlightDetails);
-  }
+  };
+
   return (
     <Box
       style={{
