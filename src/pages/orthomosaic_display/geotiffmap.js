@@ -136,7 +136,12 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       source: vectorSource
     });
     const controls = [
-      new ToggleDraw({ vector_source: vectorSource }),
+      new ToggleDraw({
+        vector_source: vectorSource,
+        clearData: () => {
+          setCoordinateFeatures({'flight_id': flightDetails.flight_id});
+        },
+      }),
       new RotateMap({ direction: "left" }),
       new RotateMap({ direction: "right" }),
     ];
@@ -216,7 +221,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     gridDraw.on('drawend', (e) => {
       const currentRotation = map.getView().getRotation();
       e.feature.setStyle(getGridStyle(e.feature, gridCols, gridRows, 'red', currentRotation));
-      map.removeInteraction(gridDraw);
+      // map.removeInteraction(gridDraw);
       // console.log('total data', coordinateFeatures);
       setCoordinateFeatures((oldData) => ({
         ...oldData,
