@@ -30,12 +30,12 @@ server {
 
     # API endpoints
     location ~ ^/(ping|flight-list|set-grid|data/.*) {
+        proxy_pass ${REACT_APP_API_URL};
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_pass ${REACT_APP_API_URL};
     }
 }
 # TODO: Add SSL configuration (only for production)
-${SSL_CONFIG}
+# ${SSL_CONFIG}
