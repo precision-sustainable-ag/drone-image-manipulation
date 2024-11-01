@@ -57,7 +57,7 @@ function App() {
               Flights
               </Typography>
           </Grid>
-          <FlightList sendData={handleFlightDetailsUpdate} spatialQuery={state}></FlightList>
+          <FlightList sendData={handleFlightDetailsUpdate} flightList={state}></FlightList>
         </Grid>
 
         {/* right side - header, rows/cols, map, etc */}
