@@ -40,7 +40,7 @@
 .draw-buttons-div{
   display: block;
   margin: 8px;
-  margin-top: 65px;
+  margin-top: 124px;
   background-color: rgba(128, 128, 128, 0.25);
   /* width: fit-content; */
   position: absolute;
@@ -91,11 +91,11 @@
 } */
 
 .left-rotate-div {
-  margin-top: 124px;
+  margin-top: 65px;
 }
 
 .right-rotate-div {
-  margin-top: 146px;
+  margin-top: 87px;
 }
 
 .rotate-button {

@@ -110,14 +110,14 @@ const SpatialMap = () => {
         const osmLayer = new TileLayer({
           title: 'Open Street Map',
           type: 'base',
-          visible: true,
+          visible: false,
           source: new OSM(),
         });
         
         const satLayer = new TileLayer({
           title: 'Satellite View',
           type: 'base',
-          visible: false,
+          visible: true,
           source: new XYZ({url: 'http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}'}),
         });
 
@@ -132,7 +132,7 @@ const SpatialMap = () => {
 
         const cc_field_vector = new VectorLayer({
           title: 'Central Research Station',
-          visible: false,
+          visible: true,
           source: new VectorSource({
             format: new GeoJSON(),
             features: new GeoJSON().readFeatures(cc_field_details, {
@@ -148,7 +148,7 @@ const SpatialMap = () => {
 
         const srs_field_vector = new VectorLayer({
           title: 'Sandhills Research Station',
-          visible: false,
+          visible: true,
           source: new VectorSource({
             format: new GeoJSON(),
             features: new GeoJSON().readFeatures(srs_field_details, {
@@ -188,8 +188,8 @@ const SpatialMap = () => {
         setControls(controls);
         setView(
           new View({
-            center: fromLonLat([-80.5, 35.0]),
-            zoom: 6,
+            center: fromLonLat([-78.99, 35.43]),
+            zoom: 9,
           })
         );
     }, []);
