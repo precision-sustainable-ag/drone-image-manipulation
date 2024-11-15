@@ -20,11 +20,9 @@ x-environments:
   prod: &prod-env
     environment:
       NODE_ENV: production
-      # SERVER_NAME: dronepilotapp.psi.ncsu.edu
-      # SERVER_NAME: http://localhost:5000
-      DNS_RESOLVER: ""
-      # SSL_CONFIG: "ssl_certificate /etc/nginx/ssl/cert.pem; ssl_certificate_key /etc/nginx/ssl/key.pem;"
-      SSL_CONFIG: ""
+      # REACT_APP_API_URL: http://api:5000
+      # DNS_RESOLVER: ""
+      # SSL_CONFIG: ""
 
 services:
   dev-local:
@@ -56,11 +54,20 @@ services:
       context: .
       dockerfile: dev.Dockerfile
       args:
-        API_URL: http://localhost:5000
-        HOSTNAME: http://localhost:5000
+        # API_URL: http://api:5000
+        # API_URL: http://192.168.1.254:5000
+        # HOSTNAME: 192.168.1.254
+        API_URL: http://dronepilotapp.psi.ncsu.edu:5000
+        HOSTNAME: dronepilotapp.psi.ncsu.edu
+        
     ports:
-      - "3000:80"
-    
+      - "80:80"
+    networks:
+      - drone-network
     <<: *prod-env
     profiles:
       - prod
+
+networks:
+  drone-network:
+    external: true
