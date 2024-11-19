@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Backdrop, Box, Button, CircularProgress, FormControl,
-  Grid, InputLabel, Select, Modal, MenuItem, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Grid, Modal, Typography } from '@mui/material';
 
 import { Collection } from 'ol';
 import GeoTIFF from 'ol/source/GeoTIFF';
@@ -19,32 +18,19 @@ import { fromUserCoordinate, getUserProjection } from 'ol/proj';
 
 import 'ol/ol.css';
 import '../../styles/App.css';
-import FieldFeatureModal from './field_features_modal';
 import MapComponent from '../../components/MapComponent';
 import { RotateMap, ToggleDraw } from '../../components/MapControls';
 
 // TODO: Change the default EPSG:3857 projection to EPSG:4326
-const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
+const GeoTIFFMap = ({gridCols, gridRows, flightDetails, walkPattern, walkStartLocation, fieldFeatures}) => {
   const navigate = useNavigate();
   let gridDraw;
   const [coordinateFeatures, setCoordinateFeatures] = useState({});
-  const [fieldFeatures, setFieldFeatures] = useState({
-    'planting_date': null,
-    'insect_damage': null,
-    'crop_type': null,
-  });
-
-  const [walkPattern, setWalkPattern] = useState('dh');
-  const [walkStartLocation, setWalkStartLocation] = useState('tl');
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [respData, setRespData] = useState(null);
   const [vectorLayer, setVectorLayer] = useState(null);
   const [controls, setControls] = useState([]);
-
-  const handleFieldFeaturesUpdate = (newData) => {
-    setFieldFeatures(newData);
-  };
 
   const forceLoad = (d) => {
     let x = 0;
@@ -368,49 +354,13 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       }}
     >
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={12} md={12} lg={12}>
+        <Grid item xs={24} sm={24} md={24} lg={24}>
           <MapComponent
             mapLayers={vectorLayer}
             controls={controls}
-            flightDetails={flightDetails}
           />
         </Grid>
-          
-        <Grid item xs={12} sm={6} md={6} lg={6} >
-          <FormControl fullWidth style={{display: 'flex', flexDirection:'row'}}>
-              <InputLabel id='walkPatternLabel'>What is your data collection method?</InputLabel>
-              <Select fullWidth
-                  labelId='walkPatternLabel'
-                  id='walkPatternSelect'
-                  value={walkPattern}
-                  onChange={(e) => setWalkPattern(e.target.value)}
-                  sx={{mb:2, ml:1}}>
-                  <MenuItem value={'dh'}>Deadheaded</MenuItem>
-                  <MenuItem value={'st'}>Serpentine</MenuItem>
-              </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12} sm={6} md={6} lg={6} >
-          <FormControl fullWidth style={{display: 'flex', flexDirection:'row'}}>
-            <InputLabel id='walkStartLabel'>Where did you start collecting data from?</InputLabel>
-            <Select fullWidth
-              labelId='walkStartLabel'
-              id='walkStartSelect'
-              value={walkStartLocation}
-              // label='Crop Type'
-              // onChange={handleCropTypeChange}
-              onChange={(e) => setWalkStartLocation(e.target.value)}
-              sx={{mb:2, mr: 1}}>
-              <MenuItem value={'tl'}>Top left corner</MenuItem>
-              <MenuItem value={'tr'}>Top right corner</MenuItem>
-              <MenuItem value={'bl'}>Bottom left corner</MenuItem>
-              <MenuItem value={'br'}>Bottom right corner</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={6} sm={6} md={6} lg={6} align='left' sx={{mb:1}}>
-          <FieldFeatureModal setFieldFeatures={handleFieldFeaturesUpdate}></FieldFeatureModal>
-        </Grid>
+
         <Grid item xs={6} sm={6} md={6} lg={6} align='right' sx={{mb:1}}>
           <Button onClick={sendGrid}>NEXT</Button>
           <Modal

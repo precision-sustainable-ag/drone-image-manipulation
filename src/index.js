@@ -10,11 +10,17 @@ import ErrorPage from './pages/error_page';
 import PlotPage from './pages/plot_features/plot_page';
 import SpatialMap from './pages/SpatialQuery/map';
 import FeedbackComponent from './pages/Feedback/feedback';
+import DrawGrid from './pages/orthomosaic_display/drawgrid';
 
 const router = createBrowserRouter([
   {
     path: '/explore',
     element: <App />,
+    errorElement: <ErrorPage />
+  },
+  {
+    path: '/draw-grid',
+    element: <DrawGrid />,
     errorElement: <ErrorPage />
   },
   {
