@@ -13,7 +13,7 @@ const Header = () => {
 
     return (
         <Grid spacing={2} xs={12} sm={12} md={12} lg={12} 
-        align='right' backgroundColor='rgba(240,247,235,.5)'>
+        align='right' backgroundColor='#E6F5DD'>
             <Button onClick={homeButton}>Home</Button>
             <Button onClick={feedBackButton}>Feeback</Button>
         </Grid>
