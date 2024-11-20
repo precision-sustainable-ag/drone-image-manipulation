@@ -32,7 +32,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails, setCoordinateFeatures}) 
     const mapSource = new GeoTIFF({
       sources: [
         {
-          url: process.env.REACT_APP_FILE_SERVER_URL+flightDetails.research_station+'/flights/'+flightDetails.cog_path,
+          url: process.env.REACT_APP_API_URL+'/data/'+flightDetails.cog_path,
           // url: 'http://localhost:8080/cog.tif',
           crossOrigin: 'anonymous',
           // projection: 'EPSG:4326'
