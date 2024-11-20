@@ -30,7 +30,7 @@ function App() {
     const mapSource = new GeoTIFF({
       sources: [
         {
-          url: process.env.REACT_APP_FILE_SERVER_URL+'/data/'+flightDetails.cog_path,
+          url: process.env.REACT_APP_API_URL+'/data/'+flightDetails.cog_path,
           // url: 'http://localhost:8080/cog.tif',
           crossOrigin: 'anonymous',
           // projection: 'EPSG:4326'
