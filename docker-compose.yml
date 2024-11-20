@@ -53,11 +53,14 @@ services:
     build:
       context: .
       dockerfile: dev.Dockerfile
+      platforms:
+        - "linux/amd64"
       args:
         # API_URL: http://api:5000
         # API_URL: http://192.168.1.254:5000
         # HOSTNAME: 192.168.1.254
-        API_URL: http://dronepilotapp.psi.ncsu.edu:5000
+        # API_URL: http://dronepilotapp.psi.ncsu.edu:5000
+        API_URL: http://172.18.0.2:5000
         HOSTNAME: dronepilotapp.psi.ncsu.edu
         
     ports:

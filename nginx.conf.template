@@ -32,6 +32,7 @@ server {
     location ~ ^/(ping|flight-list|set-grid|data/.*) {
         add_header Access-Control-Allow-Origin *;
         proxy_pass ${REACT_APP_API_URL};
+        # proxy_pass http://localhost:5000;
         # proxy_pass http://api:5000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
