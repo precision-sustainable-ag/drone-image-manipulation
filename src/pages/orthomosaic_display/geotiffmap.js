@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { Box, Button, CircularProgress, Grid, Modal, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 
 import { Collection } from 'ol';
 import GeoTIFF from 'ol/source/GeoTIFF';
@@ -22,84 +20,11 @@ import MapComponent from '../../components/MapComponent';
 import { RotateMap, ToggleDraw } from '../../components/MapControls';
 
 // TODO: Change the default EPSG:3857 projection to EPSG:4326
-const GeoTIFFMap = ({gridCols, gridRows, flightDetails, walkPattern, walkStartLocation, fieldFeatures}) => {
-  const navigate = useNavigate();
+const GeoTIFFMap = ({gridCols, gridRows, flightDetails, setCoordinateFeatures}) => {
+
   let gridDraw;
-  const [coordinateFeatures, setCoordinateFeatures] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [respData, setRespData] = useState(null);
   const [vectorLayer, setVectorLayer] = useState(null);
   const [controls, setControls] = useState([]);
-
-  const forceLoad = (d) => {
-    let x = 0;
-
-    const iterate = (data) => {
-      for (const [key, value] of Object.entries(data)) {
-        if (key && value) {
-          if (typeof value === 'object' && value !== null) {iterate(value);} else {x += 1;}
-        }
-      }
-    };
-    iterate(d);
-    return x;
-  };
-
-  const sendGrid = async () => {
-    
-    // TODO: error handling, loading modal
-    // TODO: sending field features
-    if ([null, undefined, ''].includes(fieldFeatures['crop_type']) || [null,undefined, ''].includes(fieldFeatures['lead_scientist'])){
-      alert('Please add required details by clicking "Add Field Features"');
-      return;
-    }
-    const requestData = {
-      'flight_id': coordinateFeatures['flight_id'],
-      'coordinate_features': coordinateFeatures,
-      'data_collection_method': {
-        'start_point': walkStartLocation,
-        'pattern': walkPattern,
-      },
-      'field_features': fieldFeatures
-    }
-    try {
-      setLoading(true);
-      const response = await axios.post(process.env.REACT_APP_API_URL+'/set-grid', requestData, 
-      { headers: {
-        'Content-Type': 'application/json',
-      }});
-      setIsSubmitted(true);
-      console.log('response', response);
-      let responseData = response.data;
-      // responseData = JSON.parse(response.data.replace(/\bNaN\b/g, "null"));
-
-      if (forceLoad(responseData) > 0){
-        setRespData(responseData);
-        console.log('forceloaded');
-        setIsSubmitted(true);
-      } else {
-        throw new Error('Improper response data');
-      }
-    } catch (error) {
-      console.error('Error in sending grid', error);
-      alert('Could not process. Please try again later');
-      setIsSubmitted(false);
-
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (isSubmitted && respData && respData['features'] && respData['flight_details']) {
-      console.log('navigate');
-      setIsSubmitted(false);
-      navigate('/plot-features', {state: {...respData, rotation: coordinateFeatures.rotation}});
-    } else {
-      console.log('couldnt navigate');
-    }
-  }, [isSubmitted, respData, navigate]);
 
   useEffect(() => {
     if (!flightDetails) return;
@@ -107,7 +32,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails, walkPattern, walkStartLo
     const mapSource = new GeoTIFF({
       sources: [
         {
-          url: process.env.REACT_APP_FILE_SERVER_URL+'/data/'+flightDetails.cog_path,
+          url: process.env.REACT_APP_FILE_SERVER_URL+flightDetails.research_station+'/flights/'+flightDetails.cog_path,
           // url: 'http://localhost:8080/cog.tif',
           crossOrigin: 'anonymous',
           // projection: 'EPSG:4326'
@@ -347,49 +272,17 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails, walkPattern, walkStartLo
   return (
     <Box
       style={{
+        width: '100%',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        minHeight: '100px'
       }}
     >
-      <Grid container spacing={2}>
-        <Grid item xs={24} sm={24} md={24} lg={24}>
-          <MapComponent
-            mapLayers={vectorLayer}
-            controls={controls}
-          />
-        </Grid>
-
-        <Grid item xs={6} sm={6} md={6} lg={6} align='right' sx={{mb:1}}>
-          <Button onClick={sendGrid}>NEXT</Button>
-          <Modal
-            open={loading}
-          >
-            <Box
-              sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '50%',
-                height: '50%',
-                backgroundColor: 'white',
-                boxShadow: 24,
-                p: 4,
-                borderRadius: '8px',
-                textAlign: 'center',
-                maxHeight: '100px',
-              }}
-            >
-              <CircularProgress />
-              <Typography>Calculating vegetation indices</Typography>
-            </Box>
-          </Modal>
-        </Grid> 
-        
-      </Grid>
-      
+      <MapComponent
+        mapLayers={vectorLayer}
+        controls={controls}
+        mapSize={{ width: '100%', height: '100%' }}
+      />
     </Box>
   );
 };
