@@ -49,13 +49,19 @@ export class RotateMap extends Control {
 export class ToggleDraw extends Control {
   constructor(opt_options) {
     const options = opt_options || {};
-    const button = document.createElement("button");
-    button.className = "toggle-button";
-    button.innerHTML = "Draw";
+
+    const drawButton = document.createElement("button");
+    drawButton.className = "draw-buttons";
+    drawButton.innerHTML = "Draw";
+
+    const clearButton = document.createElement("button");
+    clearButton.className = "draw-buttons";
+    clearButton.innerHTML = "Clear";
 
     const element = document.createElement("div");
-    element.className = "toggle-draw";
-    element.appendChild(button);
+    element.className = "draw-buttons-div";
+    element.appendChild(drawButton);
+    element.appendChild(clearButton);
 
     super({
       element: element,
@@ -63,13 +69,49 @@ export class ToggleDraw extends Control {
     });
 
     this.vectorSource = options["vector_source"];
+    this.clearData = options["clearData"]; // function to clear any data that is set when a grid is drawn
+    this.drawInteraction = null;
+    this.isDrawing = false;
+    this.drawButton = drawButton;
 
-    button.addEventListener("click", this.handleToggleDraw.bind(this), false);
+    drawButton.addEventListener("click", this.handleToggleDraw.bind(this), false);
+    clearButton.addEventListener("click", this.handleClearGrid.bind(this), false);
   }
+
+  drawCleanup() {
+    const map = this.getMap();
+    if (this.drawInteraction && map) {
+      map.removeInteraction(this.drawInteraction);
+      this.drawInteraction = null;
+      this.isDrawing = false;
+      this.drawButton.classList.remove("active");
+    }
+  }
+
   handleToggleDraw() {
     const map = this.getMap();
     if (map) {
-      window.drawHandler(this.vectorSource, map);
+      // If user is not drawing, start drawing
+      if (!this.isDrawing) {
+        this.drawInteraction = window.drawHandler(this.vectorSource, map);
+        this.isDrawing = true;
+        this.drawButton.classList.add("active");
+        // When drawing ends
+        this.drawInteraction.on("drawend", () => {
+          this.drawCleanup();
+        });
+      } else {
+        // When user cancels drawing before it is finished
+        this.drawCleanup();
+      }
+    }
+  }
+
+  handleClearGrid() {
+    if (this.vectorSource) {
+      this.vectorSource.clear();
+    } if (this.clearData) {
+      this.clearData();
     }
   }
 }

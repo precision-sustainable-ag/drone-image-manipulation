@@ -37,19 +37,20 @@
   }
 }
 
-.toggle-draw{
+.draw-buttons-div{
   display: block;
   margin: 8px;
-  margin-top: 65px;
+  margin-top: 124px;
   background-color: rgba(128, 128, 128, 0.25);
   /* width: fit-content; */
   position: absolute;
   border-radius: 4px;
 }
 
-.toggle-button {
+.draw-buttons {
   display: block;
   margin: 1px;
+  margin-bottom: 2px;
   padding: 0;
   color: #666666;
   font-weight: bold;
@@ -62,6 +63,14 @@
   background-color: white;
   border: 1px solid transparent;
   border-radius: 2px;
+}
+
+.draw-buttons:hover {
+  border: 1px solid #666666;
+}
+
+.draw-buttons.active {
+  border: 2px solid green;
 }
 
 .rotate-div {
@@ -82,11 +91,11 @@
 } */
 
 .left-rotate-div {
-  margin-top: 97px;
+  margin-top: 65px;
 }
 
 .right-rotate-div {
-  margin-top: 119px;
+  margin-top: 87px;
 }
 
 .rotate-button {

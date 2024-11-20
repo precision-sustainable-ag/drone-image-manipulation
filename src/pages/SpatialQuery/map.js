@@ -1,31 +1,25 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import {Button, Box, TextField, Grid, Typography} from '@mui/material';
+import {Button, Box, TextField, Grid, Typography, Backdrop, CircularProgress} from '@mui/material';
 
 import OSM from 'ol/source/OSM';
 import XYZ from 'ol/source/XYZ';
 import GeoJSON from 'ol/format/GeoJSON';
 import TileLayer from 'ol/layer/Tile';
-import {Map, View} from 'ol';
+import {View} from 'ol';
 import {fromLonLat} from 'ol/proj';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
-import {Control} from 'ol/control';
 import  Draw, { createBox }from 'ol/interaction/Draw';
-import Translate from 'ol/interaction/Translate';
-import {Style, Stroke, Fill, Text} from 'ol/style';
+import {Style, Stroke, Text} from 'ol/style';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import moment from 'moment';
 import 'ol/ol.css';
 import '../../styles/App.css';
 import Header from '../Header/header';
 import LayerSwitcher from 'ol-layerswitcher';
-import { BaseLayerOptions, GroupLayerOptions } from 'ol-layerswitcher';
 import LayerGroup from 'ol/layer/Group';
-// import * as field_details from '../../shared/cc_fields_2024.geojson';
 import 'ol-layerswitcher/dist/ol-layerswitcher.css';
 import '../../styles/App.css';
 import MapComponent from '../../components/MapComponent';
@@ -35,43 +29,61 @@ import { ToggleDraw, RotateMap } from '../../components/MapControls';
 const SpatialMap = () => {
     const navigate = useNavigate();
 
-    const mapRef2 = useRef(null);
     let gridDraw;
 
     const [startDate, setStartDate] = useState();
     const [endDate, setEndDate] = useState();
     const [coordinates, setCoordinates] = useState([]);
-
-    const mapRef = useRef(null);
-    const [mapSource, setMapSource] = useState(null);
     const [vectorLayer, setVectorLayer] = useState(null);
     const [controls, setControls] = useState([]);
     const [view, setView] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const buttonClick = async () => {
-        if (startDate.isAfter(endDate)) {
-            alert('End date needs to be after the start date');
-            return;
-            // console.log('large');
-        }
-        setStartDate(moment(startDate).format('YYYY-MM-DD'));
-        setStartDate(moment(endDate).format('YYYY-MM-DD'));
+      if (!startDate || !endDate || coordinates.length === 0) {
+        alert("Select a date range and draw the grid");
+        return;
+      }
+      if (new Date(startDate).getTime() > new Date(endDate).getTime()) {
+        alert("End date needs to be after the start date");
+        return;
+      }
 
-        const requestJson = {
-            'start_date': startDate,
-            'end_date': endDate,
-            'polygon_coordinates': coordinates,
-        };
-        try {
-            navigate('/explore', {state: requestJson});
-          } catch (error) {
-            console.log(error);
+      const requestJson = {
+        start_date: startDate,
+        end_date: endDate,
+        polygon_coordinates: coordinates,
+      };
+
+      try {
+        setIsLoading(true);
+        const response = await fetch(
+          process.env.REACT_APP_API_URL + "/flight-list",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestJson),
           }
-        
+        );
+
+        const data = await response.json();
+
+        if (data.flights && Object.keys(data.flights).length > 0) {
+          navigate("/explore", { state: data.flights });
+        } else {
+          alert("No flights found for the selected options");
+        }
+      } catch (error) {
+        console.log(error);
+        alert("Error in fetching flights");
+      } finally {
+        setIsLoading(false);
+      }
     };
+
     useEffect(() => {
-      const field_details = require('../../shared/cc_fields_2024.json');
-        const vectorSource = new VectorSource();
         const boundaryStyle = new Style({
           stroke: new Stroke({
               color: 'white',
@@ -88,53 +100,44 @@ const SpatialMap = () => {
             }),
         });
         const style = [boundaryStyle, labelStyle];
-        const osmLayer = new TileLayer({
-          title: 'OSM',
-          type: 'base',
-          visible: true,
-          source: new OSM(),
+
+        const vectorSource = new VectorSource();
+        const vectorLayer = new VectorLayer({
+          source: vectorSource
         });
-        const osm2 = new TileLayer({
-          title: 'Satellite View',
+
+        // Map Layers
+        const osmLayer = new TileLayer({
+          title: 'Open Street Map',
           type: 'base',
           visible: false,
+          source: new OSM(),
+        });
+        
+        const satLayer = new TileLayer({
+          title: 'Satellite View',
+          type: 'base',
+          visible: true,
           source: new XYZ({url: 'http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}'}),
         });
-        
-        const map = new Map({
-          target: mapRef2.current,
-          layers: [
-            osm2, osmLayer,
-            new VectorLayer({
-              source: vectorSource,
-            })
-          ],
-          view: new View({
-            center: fromLonLat([-80.5, 35.0]),
-            zoom: 6,
-          }),
-        });
-        
 
-        // map.addControl(new ToggleDraw({'vector_source':vectorSource, 'map_reference':map}));
-        // map.addControl(layerswitcher);
-        const controls = [
-          new ToggleDraw({ vector_source: vectorSource }),
-          new RotateMap({ direction: "left" }),
-          new RotateMap({ direction: "right" }),
-        ];
-        const layerswitcher = new LayerSwitcher({
-          // activationMode: 'click',
-          startActive: false,
+        const mapGroup = new LayerGroup({
+          title: 'Map',
+          layers: [osmLayer, satLayer]
         });
 
-        const field_vector = new VectorLayer({
+        //Field Vector Layers
+        const cc_field_details = require('../../shared/cc_fields_2024.json');
+        const srs_field_details = require('../../shared/srs_fields_2024.json');
+
+        const cc_field_vector = new VectorLayer({
+          title: 'Central Research Station',
+          visible: true,
           source: new VectorSource({
             format: new GeoJSON(),
-            // url: 'http://152.7.196.7/cc/cc_fields_2024.geojson',
-            features: new GeoJSON().readFeatures(field_details, {
+            features: new GeoJSON().readFeatures(cc_field_details, {
               dataProjection: 'EPSG:4326',
-              featureProjection: map.getView().getProjection(),
+              featureProjection: 'EPSG:3857',
             }),
           }),
           style: function (feature) {
@@ -142,36 +145,54 @@ const SpatialMap = () => {
             return style;
           }
         });
-        map.addLayer(field_vector);
-        
-        const o1 = new TileLayer({
-          title: 'OSM',
-          type: 'base',
-          visible: true,
-          source: new OSM(),
-        });
-        const sat = new TileLayer({
-          title: 'Satellite View',
-          type: 'base',
-          visible: false,
-          source: new XYZ({url: 'http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}'}),
-        });
-        const mapSource = [sat];
-        const view = new View({
-          center: fromLonLat([0, 0]),
-          zoom: 2,
-        });
-        setMapSource([mapSource]);
-        setControls(controls);
-        setView(view);
-        // return () => {
-        //     map.setTarget(null);
-        // };
 
-        
-            
+        const srs_field_vector = new VectorLayer({
+          title: 'Sandhills Research Station',
+          visible: true,
+          source: new VectorSource({
+            format: new GeoJSON(),
+            features: new GeoJSON().readFeatures(srs_field_details, {
+              dataProjection: 'EPSG:4326',
+              featureProjection: 'EPSG:3857',
+            }),
+          }),
+          style: function (feature) {
+            labelStyle.getText().setText(`${feature.get('field')}`);
+            return style;
+          }
+        });
+
+        const fieldVectorLayerGroup = new LayerGroup({
+          title: 'Field Boundaries',
+          layers: [cc_field_vector, srs_field_vector]
+        });
+
+        const controls = [
+          new ToggleDraw({
+            vector_source: vectorSource,
+            clearData: () => {
+              setCoordinates([]);
+            },
+          }),
+          new RotateMap({ direction: "left" }),
+          new RotateMap({ direction: "right" }),
+          new LayerSwitcher({
+            activationMode: 'click',
+            groupSelectStyle: 'none',
+            reverse: false,
+            tipLabel: 'Toggle Layers'
+          }),
+        ];
+
+        setVectorLayer([mapGroup, fieldVectorLayerGroup, vectorLayer]);
+        setControls(controls);
+        setView(
+          new View({
+            center: fromLonLat([-78.99, 35.43]),
+            zoom: 9,
+          })
+        );
     }, []);
-    
 
     const drawArea = (source, map) => {
       console.log(map.getView().getProjection());
@@ -184,9 +205,8 @@ const SpatialMap = () => {
         map.addInteraction(gridDraw);
         gridDraw.on('drawend', (e) => {
             setCoordinates(e.feature.getGeometry().getCoordinates());
-            // console.log(map.getView());
-
         });
+        return gridDraw;
     };
     window.drawHandler = drawArea;
 
@@ -200,9 +220,6 @@ const SpatialMap = () => {
       }}
       margin={5}
     >
-      {/* <Grid> */}
-        
-      {/* </Grid> */}
         <Grid container spacing={2}>
         <Header/>
                 <Grid
@@ -224,9 +241,10 @@ const SpatialMap = () => {
                     </Grid>
                     {/* <Grid item xs={12} sm={12} md={12} lg={12} id="map" ref={mapRef2} style={{ width: '90%', height: '400px', transform: 'translateX(5%)'}} mt={3} /> */}
                     <Grid item xs={12} sm={12} md={12} lg={12}>
-                      <MapComponent mapSource={mapSource}
-                          vectorLayer={vectorLayer}
+                      <MapComponent
+                          mapLayers={vectorLayer}
                           controls={controls}
+                          view={view}
                         />
                     </Grid>
                     <Grid item xs={12} sm={12} md={12} lg={12} align='center' mt={2} style={{display: 'flex', flexDirection:'row', alignContent: 'space-around', justifyContent: 'space-evenly'}}>
@@ -262,6 +280,21 @@ const SpatialMap = () => {
             
         </Grid>
             
+        <Backdrop
+          sx={{
+            color: "#ffffff",
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+          }}
+          open={isLoading}
+        >
+          <CircularProgress color="inherit" />
+          <Typography variant="h6">
+            Fetching flight list...
+          </Typography>
+        </Backdrop>
       
         </Box>
     )

@@ -1,35 +1,33 @@
 import { useState } from 'react';
-import logo from '../../logo.svg';
 import '../../styles/App.css';
 import GeoTIFFMap from './geotiffmap';
 import FlightList from '../FlightListSidebar/flight_list';
 import Header from '../Header/header';
-import {Button, Box, Grid, TextField, Typography} from '@mui/material';
+import {Box, Grid, TextField, Typography} from '@mui/material';
 import { useLocation } from 'react-router-dom';
 
 function App() {
 
   const {state} = useLocation();
-  // const {start_date, end_date, polygon_coordinates} = state;
-  // console.log(start_date, end_date, polygon_coordinates);
-  
 
   const [gridCols, setGridCols] = useState(2);
   const [gridRows, setGridRows] = useState(2);
-
   const [flightDetails, setFlightDetails] = useState('');
 
   const handleGridColsChange = (event) => {
     const newCols = parseInt(event.target.value, 10);
     setGridCols(newCols);
   };
+
   const handleGridRowsChange = (event) => {
     const newRows = parseInt(event.target.value, 10);
     setGridRows(newRows);
   };
+
   const handleFlightDetailsUpdate = (newFlightDetails) => {
     setFlightDetails(newFlightDetails);
-  }
+  };
+
   return (
     <Box
       style={{
@@ -48,13 +46,16 @@ function App() {
           backgroundColor: 'rgba(240,247,235,.5)',
           position: 'relative',
           width: '100%',
+          height: '657px',
+          display: 'flex',
+          flexDirection: 'column'
         }} mt={3}>
           <Grid>
             <Typography variant="h5" gutterBottom align="center">
               Flights
               </Typography>
           </Grid>
-          <FlightList sendData={handleFlightDetailsUpdate} spatialQuery={state}></FlightList>
+          <FlightList sendData={handleFlightDetailsUpdate} flightList={state}></FlightList>
         </Grid>
 
         {/* right side - header, rows/cols, map, etc */}

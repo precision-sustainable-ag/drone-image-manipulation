@@ -1,18 +1,17 @@
-import { Button, Box, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Menu, MenuItem, Divider } from '@mui/material';
+import { Button, Box, Grid, Dialog, DialogTitle, DialogContent, DialogActions, Menu, MenuItem, Divider } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
-import { DataGrid, GridRowsProp, GridColDef, GridRowEditStopReasons, GridRowModes, GridActionsCellItem } from '@mui/x-data-grid';
-import { DefaultUniform } from 'ol/webgl/Helper';
-import React, { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { DataGrid, GridRowEditStopReasons, GridRowModes, GridActionsCellItem } from '@mui/x-data-grid';
+import React, { useEffect, useState } from 'react';
+import {useNavigate } from 'react-router-dom';
 import FileSaver from 'file-saver';
 
 const PlotTable = ({state, plotMapRef}) => {
     // let rows;
     // let columns;
     // const { state } = useLocation();
-    console.log(state);
+    const navigate = useNavigate();
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -33,15 +32,14 @@ const PlotTable = ({state, plotMapRef}) => {
     // });
     const initalRows = state.features.features;
     const initalRowsCopy = [...initalRows];
-    console.log(initalRowsCopy);
-    // console.log('intial rows ', initalRows);
+
     initalRowsCopy.sort((a,b) => {
         if (a['properties']['plot_num'] < b['properties']['plot_num']) {return -1;}
         else if (a['properties']['plot_num'] > b['properties']['plot_num']) {return 1;}
         else return 0;
     });
 
-    const columns = [
+    const allColumns = [
         {
             field: 'plot_num',
             headerName: 'Plot Number',
@@ -146,11 +144,37 @@ const PlotTable = ({state, plotMapRef}) => {
         }
         
     ]
-    // const [rows, setRows] = useState(initalRows);
+
+    const getFilteredColumns = (rows, allCols) => {
+        return allCols.filter((column) => {
+          // Keep plot_num, plot_name and actions columns
+          if (
+            column.field === "plot_num" ||
+            column.field === "plot_name" ||
+            column.field === "actions"
+          ) {
+            return true;
+          }
+    
+          // If the column has any non-null, non-undefined, non-empty values, include that column
+          return rows.some((row) => {
+            const value = column.valueGetter
+              ? column.valueGetter({ row })
+              : row.properties[column.field];
+            return value !== null && value !== undefined && value !== "";
+          });
+        });
+      };
+
+    const [columns, setColumns] = useState(getFilteredColumns(initalRowsCopy, allColumns));
     const [rows, setRows] = useState(initalRowsCopy);
     const [rowModesModel, setRowModesModel] = useState({});
     const [openDialog, setOpenDialog] = useState(false);
     const [responseData, setResponseData] = useState("");
+    const [paginationModel, setPaginationModel] = useState({
+        pageSize: 10,
+        page: 0,
+    });
 
     const handleRowModesModelChange = (newRowModesModel) => {
         setRowModesModel(newRowModesModel);
@@ -161,12 +185,15 @@ const PlotTable = ({state, plotMapRef}) => {
             event.defaultMuiPrevented = true;
         }
     };
+    
     const handleEditClick = (id) => () => {
         setRowModesModel({...rowModesModel, [id]:{mode: GridRowModes.Edit}});
     };
+
     const handleSaveClick = (id) => () => {
         setRowModesModel({...rowModesModel, [id]:{mode: GridRowModes.View}});
     };
+
     const handleCancelClick = (id) => () => {
         setRowModesModel({
             ...rowModesModel,
@@ -191,15 +218,6 @@ const PlotTable = ({state, plotMapRef}) => {
     const handleDownload = () => {
         const blob = new Blob([responseData], { type: "text/plain;charset=utf-8" });
         FileSaver.saveAs(blob, "response.txt");
-    };
-
-    // const [editedRows, setEditedRows] = useState([]);
-    // const handleCellEdit = (newRow) => {
-    //     setEditedRows((prevRows) => [...prevRows.filter(row => row.id!== newRow.id), newRow]);
-    // };
-
-    const sendToAPI = () => {
-        // console.log(rows);
     };
 
     const exportData = () => {
@@ -284,6 +302,9 @@ const PlotTable = ({state, plotMapRef}) => {
                         onRowModesModelChange={handleRowModesModelChange}
                         onRowEditStop={handleRowEditStop}
                         processRowUpdate={processRowUpdate}
+                        paginationModel={paginationModel}
+                        onPaginationModelChange={setPaginationModel}
+                        pageSizeOptions={[10, 25, 50]}
                         slotProps={{
                         toolbar: { setRows, setRowModesModel },
                         }} mr={2}
@@ -309,7 +330,7 @@ const PlotTable = ({state, plotMapRef}) => {
                         <Divider />
                         <MenuItem onClick={exportAll}>EXPORT ALL</MenuItem>
                     </Menu>
-                    <Button variant='outlined' onClick={sendToAPI}>DONE</Button>
+                    <Button variant='outlined' onClick={() => { navigate('/')} }>DONE</Button>
                 </Grid>
                 
             </Grid>

@@ -10,6 +10,7 @@ import { Draw } from 'ol/interaction';
 import Translate from 'ol/interaction/Translate';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
+import WebGLTileLayer from 'ol/layer/WebGLTile';
 import LineString from 'ol/geom/LineString';
 import { getBottomLeft, getTopLeft, getTopRight, getBottomRight, getCenter, boundingExtent } from 'ol/extent';
 import {Style, Stroke, Fill} from 'ol/style';
@@ -38,8 +39,6 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [respData, setRespData] = useState(null);
-
-  const [mapSource, setMapSource] = useState(null);
   const [vectorLayer, setVectorLayer] = useState(null);
   const [controls, setControls] = useState([]);
 
@@ -129,18 +128,23 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
         },
       ],
     });
+    const tileLayer = new WebGLTileLayer({source: mapSource});
     const vectorSource = new VectorSource();
     const vectorLayer = new VectorLayer({
       source: vectorSource
     });
     const controls = [
-      new ToggleDraw({ vector_source: vectorSource }),
+      new ToggleDraw({
+        vector_source: vectorSource,
+        clearData: () => {
+          setCoordinateFeatures({'flight_id': flightDetails.flight_id});
+        },
+      }),
       new RotateMap({ direction: "left" }),
       new RotateMap({ direction: "right" }),
     ];
 
-    setMapSource(mapSource);
-    setVectorLayer(vectorLayer);
+    setVectorLayer([tileLayer, vectorLayer]);
     setControls(controls);
 
     setCoordinateFeatures((oldData) => ({
@@ -199,7 +203,6 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
         }
         const newCoordinates = [firstCorner, secondCorner, thirdCorner, fourthCorner, firstCorner];
         geometry.setCoordinates([newCoordinates]);
-        // console.log('drawing ',newCoordinates);
         return geometry;
       };
     };
@@ -214,8 +217,6 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     gridDraw.on('drawend', (e) => {
       const currentRotation = map.getView().getRotation();
       e.feature.setStyle(getGridStyle(e.feature, gridCols, gridRows, 'red', currentRotation));
-      map.removeInteraction(gridDraw);
-      // console.log('total data', coordinateFeatures);
       setCoordinateFeatures((oldData) => ({
         ...oldData,
         'rotation': currentRotation,
@@ -240,6 +241,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       });
       map.addInteraction(translate);
     });
+    return gridDraw;
   };
   window.drawHandler = drawGrid;
   
@@ -264,7 +266,6 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       })
     );
     const coords = feature.getGeometry().getCoordinates()[0];
-    // console.log('get grid', coords);
     const topLeftCoord = coords[0];
     const topRightCoord = coords[1];
     const bottomRightCoord = coords[2];
@@ -290,7 +291,6 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
     // vertical lines
     const verticalD = [];
     for (let i = 1; i <= cols - 1; i++) {
-      // console.log(i, cols);
       lineString = new LineString([xColCoord, yColCoord]);
 
       const xColCopy = [...xColCoord];
@@ -355,7 +355,6 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       yRowCoord[0] = yRowCoord[0] - rowYRotationOffset;
       yRowCoord[1] = yRowCoord[1] + rowHeight;
     }
-    // console.log(styles);
     return styles;
   };
 
@@ -371,8 +370,7 @@ const GeoTIFFMap = ({gridCols, gridRows, flightDetails}) => {
       <Grid container spacing={2}>
         <Grid item xs={12} sm={12} md={12} lg={12}>
           <MapComponent
-            mapSource={mapSource}
-            vectorLayer={vectorLayer}
+            mapLayers={vectorLayer}
             controls={controls}
             flightDetails={flightDetails}
           />
