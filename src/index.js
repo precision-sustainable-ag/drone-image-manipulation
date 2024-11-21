@@ -11,6 +11,8 @@ import PlotPage from './pages/plot_features/plot_page';
 import SpatialMap from './pages/SpatialQuery/map';
 import FeedbackComponent from './pages/Feedback/feedback';
 import DrawGrid from './pages/orthomosaic_display/drawgrid';
+import { ThemeProvider } from '@mui/material';
+import { PSATheme } from 'shared-react-components/src';
 
 const router = createBrowserRouter([
   {
@@ -40,7 +42,9 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router = {router} />
+    <ThemeProvider theme={PSATheme}>
+      <RouterProvider router = {router} />
+    </ThemeProvider>
   </React.StrictMode>
 )
 
