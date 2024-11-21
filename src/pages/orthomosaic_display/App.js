@@ -10,6 +10,7 @@ import WebGLTileLayer from 'ol/layer/WebGLTile';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 import { RotateMap } from '../../components/MapControls';
+import Footer from "../../components/Footer";
 
 function App() {
 
@@ -59,25 +60,14 @@ function App() {
         minHeight: "100vh",
       }}
     >
-      <Box
-        component="header"
-        sx={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-        }}
-      >
-        <Header />
-      </Box>
+      <Header />
 
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          mt: "37px",
-          mb: "65px",
+          mt: "52px",
+          mb: "52px",
           display: "flex",
           overflow: "hidden",
           minHeight: 0,
@@ -90,7 +80,7 @@ function App() {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            height: "calc(100vh - 102px)",
+            height: "calc(100vh - 104px)",
           }}
         >
           <Typography
@@ -116,7 +106,7 @@ function App() {
             <FlightList
               sendData={handleFlightDetailsUpdate}
               flightList={state}
-            ></FlightList>
+            />
           </Box>
         </Box>
 
@@ -142,37 +132,20 @@ function App() {
         </Box>
       </Box>
 
-      <Box
-        component="footer"
-        sx={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          backgroundColor: "#E6F5DD",
-          py: 2,
-          display: "flex",
-          justifyContent: "flex-end",
-          px: 2,
+      <Footer
+        prevFunc={() => {
+          navigate("/");
         }}
-      >
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            if (!flightDetails) {
-              alert("Select a flight to proceed");
-              return;
-            }
-            navigate("/draw-grid", {
-              state: { flightDetails },
-            });
-          }}
-        >
-          NEXT
-        </Button>
-      </Box>
+        nextFunc={() => {
+          if (!flightDetails) {
+            alert("Select a flight to proceed");
+            return;
+          }
+          navigate("/draw-grid", {
+            state: { flightDetails, flightList: state },
+          });
+        }}
+      />
     </Box>
   );
 }

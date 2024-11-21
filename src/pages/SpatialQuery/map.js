@@ -24,6 +24,7 @@ import 'ol-layerswitcher/dist/ol-layerswitcher.css';
 import '../../styles/App.css';
 import MapComponent from '../../components/MapComponent';
 import { ToggleDraw, RotateMap } from '../../components/MapControls';
+import Footer from '../../components/Footer';
 
 
 const SpatialMap = () => {
@@ -273,9 +274,7 @@ const SpatialMap = () => {
                             </div>
                         </LocalizationProvider>
                     </Grid>
-                    <Grid item xs={12} sm={12} md={12} lg={12} align='right' mt={2}>
-                        <Button onClick={buttonClick}>NEXT</Button>
-                    </Grid>
+                    <Footer nextFunc = {buttonClick} />
                 </Grid>
             
         </Grid>

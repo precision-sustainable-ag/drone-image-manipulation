@@ -5,7 +5,6 @@ import GeoTIFFMap from "./geotiffmap";
 import Header from "../Header/header";
 import {
   Box,
-  Button,
   CircularProgress,
   FormControl,
   Grid,
@@ -18,6 +17,7 @@ import {
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import FieldFeatureModal from "./field_features_modal";
+import Footer from "../../components/Footer";
 
 function DrawGrid() {
   const { state } = useLocation();
@@ -150,26 +150,15 @@ function DrawGrid() {
       }}
     >
       {/* HEADER */}
-      <Box
-        component="header"
-        sx={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-        }}
-      >
-        <Header />
-      </Box>
+      <Header />
 
       {/* MAIN */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          mt: "37px",
-          mb: "65px",
+          mt: "52px",
+          mb: "52px",
           display: "flex",
           overflow: "hidden",
           minHeight: 0,
@@ -182,7 +171,7 @@ function DrawGrid() {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            height: "calc(100vh - 102px)",
+            height: "calc(100vh - 104px)",
           }}
         >
           <Typography
@@ -294,47 +283,34 @@ function DrawGrid() {
       </Box>
 
       {/* FOOTER */}
-      <Box
-        component="footer"
-        sx={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          backgroundColor: "#E6F5DD",
-          py: 2,
-          display: "flex",
-          justifyContent: "flex-end",
-          px: 2,
+      <Footer
+        prevFunc={() => {
+          navigate("/explore", { state: state.flightList });
         }}
-      >
-        <Button variant="contained" color="primary" onClick={sendGrid}>
-          NEXT
-        </Button>
+        nextFunc={sendGrid}
+      />
 
-        <Modal open={loading}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "50%",
-              height: "50%",
-              backgroundColor: "white",
-              boxShadow: 24,
-              p: 4,
-              borderRadius: "8px",
-              textAlign: "center",
-              maxHeight: "100px",
-            }}
-          >
-            <CircularProgress />
-            <Typography>Calculating vegetation indices</Typography>
-          </Box>
-        </Modal>
-      </Box>
+      <Modal open={loading}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "50%",
+            height: "50%",
+            backgroundColor: "white",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: "8px",
+            textAlign: "center",
+            maxHeight: "100px",
+          }}
+        >
+          <CircularProgress />
+          <Typography>Calculating vegetation indices</Typography>
+        </Box>
+      </Modal>
     </Box>
   );
 }

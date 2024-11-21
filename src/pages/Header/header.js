@@ -1,5 +1,5 @@
-import React, {useState,  useEffect} from 'react';
-import {Button, Box, Grid, TextField, Typography} from '@mui/material';
+import React from 'react';
+import {Button, Box} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
@@ -12,11 +12,24 @@ const Header = () => {
     };
 
     return (
-        <Grid spacing={2} xs={12} sm={12} md={12} lg={12} 
-        align='right' backgroundColor='#E6F5DD'>
-            <Button onClick={homeButton}>Home</Button>
-            <Button onClick={feedBackButton}>Feeback</Button>
-        </Grid>
+    <Box
+      component="header"
+      sx={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        backgroundColor: "#E6F5DD",
+        py: 1,
+        display: "flex",
+        justifyContent: "flex-end",
+        px: 2,
+      }}
+    >
+      <Button onClick={homeButton}>Home</Button>
+      <Button onClick={feedBackButton}>Feeback</Button>
+    </Box>
     );
 };
 export default Header;
