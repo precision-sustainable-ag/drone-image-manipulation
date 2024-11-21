@@ -3,7 +3,7 @@ import '../../styles/App.css';
 import GeoTIFF from 'ol/source/GeoTIFF';
 import FlightList from '../FlightListSidebar/flight_list';
 import Header from '../Header/header';
-import {Box, Button, Typography} from '@mui/material';
+import {Box, Typography} from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MapComponent from '../../components/MapComponent';
 import WebGLTileLayer from 'ol/layer/WebGLTile';
@@ -145,6 +145,7 @@ function App() {
             state: { flightDetails, flightList: state },
           });
         }}
+        nextDisabled={!flightDetails}
       />
     </Box>
   );

@@ -288,6 +288,10 @@ function DrawGrid() {
           navigate("/explore", { state: state.flightList });
         }}
         nextFunc={sendGrid}
+        nextDisabled={
+          [null, undefined, ""].includes(fieldFeatures["crop_type"]) ||
+          [null, undefined, ""].includes(fieldFeatures["lead_scientist"])
+        }
       />
 
       <Modal open={loading}>

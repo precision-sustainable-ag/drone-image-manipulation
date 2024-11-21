@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {Button, Box, TextField, Grid, Typography, Backdrop, CircularProgress} from '@mui/material';
+import {Box, TextField, Grid, Typography, Backdrop, CircularProgress} from '@mui/material';
 
 import OSM from 'ol/source/OSM';
 import XYZ from 'ol/source/XYZ';
@@ -274,7 +274,7 @@ const SpatialMap = () => {
                             </div>
                         </LocalizationProvider>
                     </Grid>
-                    <Footer nextFunc = {buttonClick} />
+                    <Footer nextFunc = {buttonClick} nextDisabled={!startDate || !endDate || coordinates.length === 0} />
                 </Grid>
             
         </Grid>
