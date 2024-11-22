@@ -315,6 +315,20 @@ const SpatialMap = () => {
         nextFunc={buttonClick}
         nextDisabled={!startDate || !endDate || coordinates.length === 0}
       />
+
+      <Backdrop
+        sx={{
+          color: "#ffffff",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+        <Typography variant="h6">Fetching flight list...</Typography>
+      </Backdrop>
     </Box>
   );
 };
