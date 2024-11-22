@@ -21,7 +21,7 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />
   },
   {
-    path: '/draw-grid',
+    path: '/draw-plots',
     element: <DrawGrid />,
     errorElement: <ErrorPage />
   },

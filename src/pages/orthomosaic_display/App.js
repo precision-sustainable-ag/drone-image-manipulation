@@ -141,7 +141,7 @@ function App() {
             alert("Select a flight to proceed");
             return;
           }
-          navigate("/draw-grid", {
+          navigate("/draw-plots", {
             state: { flightDetails, flightList: state },
           });
         }}
