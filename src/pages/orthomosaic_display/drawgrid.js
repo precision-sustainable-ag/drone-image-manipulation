@@ -18,6 +18,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import FieldFeatureModal from "./field_features_modal";
 import Footer from "../../components/Footer";
+import FlightAccordion from "../../components/FlightAccordion";
 
 function DrawGrid() {
   const { state } = useLocation();
@@ -158,12 +159,13 @@ function DrawGrid() {
         sx={{
           flexGrow: 1,
           mt: "52px",
-          mb: "52px",
+          mb: "59px",
           display: "flex",
           overflow: "hidden",
           minHeight: 0,
         }}
       >
+        {/* LEFT COLUMN - CREATE GRID */}
         <Box
           sx={{
             width: "30%",
@@ -171,39 +173,50 @@ function DrawGrid() {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            height: "calc(100vh - 104px)",
+            height: "calc(100vh - 127px)", // (top and bottom margin + top and bottom padding = 52+59+16+0 = 143px (py:2 -> py:16px))
+            px: 2,
+            pt: 2,
+            overflowY: "auto",
           }}
         >
           <Typography
             variant="h5"
             gutterBottom
-            align="center"
-            sx={{
-              position: "sticky",
-              top: 0,
-              zIndex: 10,
-              py: 1,
-            }}
+            align="left"
           >
             Create your grid
           </Typography>
-          <Box
-            sx={{
-              overflowY: "auto",
-              flexGrow: 1,
-              px: 1,
-            }}
-          >
-            <Box sx={{ px: 2 }}>
-              <TextField
-                label="Cols"
-                type="number"
-                value={gridCols}
-                onChange={handleGridColsChange}
-                inputProps={{ min: 1 }}
-                size="small"
-                sx={{ mb: 2 }}
-              />
+          <Typography variant="h8" gutterBottom align="left">
+            First, set your grid dimensions, and data collection method. Next,
+            hit “Draw” and click and drag on the map to place your grid. [Add
+            other instructions here on how to manipulate the grid.]
+          </Typography>
+
+          {/* Selected mission */}
+          <Box sx={{ pt: 2 }}>
+            <Typography variant="h6" gutterBottom align="left">
+              Selected Mission
+            </Typography>
+            <FlightAccordion flightDetails={state.flightDetails} />
+          </Box>
+
+          {/* Grid settings */}
+          <Box sx={{ pt: 2, width: "80%" }}>
+            <Typography variant="h6" align="left">
+              Grid Settings & Data
+            </Typography>
+            <Typography variant="h8" align="left">
+              What are your grid dimensions?
+            </Typography>
+
+            {/* Grid dimensions */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                py: 2,
+              }}
+            >
               <TextField
                 label="Rows"
                 type="number"
@@ -211,33 +224,49 @@ function DrawGrid() {
                 onChange={handleGridRowsChange}
                 inputProps={{ min: 1 }}
                 size="small"
-                sx={{ mb: 2 }}
               />
-              <FormControl fullWidth sx={{ mb: 2 }}>
-                <InputLabel id="walkPatternLabel">
-                  What is your data collection method?
-                </InputLabel>
+              <Typography variant="h6" sx={{ px: 3 }}>
+                X
+              </Typography>
+              <TextField
+                label="Cols"
+                type="number"
+                value={gridCols}
+                onChange={handleGridColsChange}
+                inputProps={{ min: 1 }}
+                size="small"
+              />
+            </Box>
+
+            <Typography variant="h8" align="left">
+              What is your data collection method?
+            </Typography>
+
+            {/* Data collections method */}
+            <Box sx={{ py: 1 }}>
+              <FormControl fullWidth variant="outlined" sx={{ my: 1 }}>
+                <InputLabel id="walkPatternLabel">Collection Method</InputLabel>
                 <Select
                   fullWidth
                   labelId="walkPatternLabel"
                   id="walkPatternSelect"
                   value={walkPattern}
                   onChange={(e) => setWalkPattern(e.target.value)}
+                  label="Collection Method"
                 >
                   <MenuItem value={"dh"}>Deadheaded</MenuItem>
                   <MenuItem value={"st"}>Serpentine</MenuItem>
                 </Select>
               </FormControl>
-              <FormControl fullWidth sx={{ mb: 2 }}>
-                <InputLabel id="walkStartLabel">
-                  Where did you start collecting data from?
-                </InputLabel>
+              <FormControl fullWidth variant="outlined" sx={{ my: 1 }}>
+                <InputLabel id="walkStartLabel">Collection Start</InputLabel>
                 <Select
                   fullWidth
                   labelId="walkStartLabel"
                   id="walkStartSelect"
                   value={walkStartLocation}
                   onChange={(e) => setWalkStartLocation(e.target.value)}
+                  label="Collection Start"
                 >
                   <MenuItem value={"tl"}>Top left corner</MenuItem>
                   <MenuItem value={"tr"}>Top right corner</MenuItem>
@@ -245,24 +274,17 @@ function DrawGrid() {
                   <MenuItem value={"br"}>Bottom right corner</MenuItem>
                 </Select>
               </FormControl>
-              <Grid
-                item
-                xs={6}
-                sm={6}
-                md={6}
-                lg={6}
-                align="left"
-                sx={{ mb: 1 }}
-              >
-                <FieldFeatureModal
-                  setFieldFeatures={handleFieldFeaturesUpdate}
-                ></FieldFeatureModal>
-              </Grid>
             </Box>
+
+            <Grid item xs={6} sm={6} md={6} lg={6} align="left" sx={{ mb: 1 }}>
+              <FieldFeatureModal
+                setFieldFeatures={handleFieldFeaturesUpdate}
+              ></FieldFeatureModal>
+            </Grid>
           </Box>
         </Box>
 
-        {/* right side -  map */}
+        {/* RIGHT COLUMN - MAP */}
         <Box
           sx={{
             width: "70%",

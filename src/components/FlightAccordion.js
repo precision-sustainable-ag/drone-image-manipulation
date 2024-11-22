@@ -48,13 +48,15 @@ const FlightAccordion = ({ flightDetails, onClick }) => {
       expanded={expanded}
       onChange={handleAccordionChange}
       detailsContent={
-        <Button
-          key={flightDetails?.flight_id}
-          id={flightDetails?.flight_id}
-          onClick={onClick}
-        >
-          {"View"}
-        </Button>
+        onClick ? (
+          <Button
+            key={flightDetails?.flight_id}
+            id={flightDetails?.flight_id}
+            onClick={onClick}
+          >
+            {"View"}
+          </Button>
+        ) : null
       }
       summaryContent={
         <Box
