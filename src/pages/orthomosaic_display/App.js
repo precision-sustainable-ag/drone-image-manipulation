@@ -67,7 +67,7 @@ function App() {
         sx={{
           flexGrow: 1,
           mt: "52px",
-          mb: "52px",
+          mb: "59px",
           display: "flex",
           overflow: "hidden",
           minHeight: 0,
@@ -80,7 +80,7 @@ function App() {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            height: "calc(100vh - 104px)",
+            height: "calc(100vh - 111px)",
           }}
         >
           <Typography
