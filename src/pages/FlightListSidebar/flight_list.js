@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import {Button, Grid } from '@mui/material';
+import {Box, Grid } from '@mui/material';
+import FlightAccordion from '../../components/FlightAccordion';
 
 const FlightList = ({sendData, flightList}) => {
     
@@ -18,8 +19,9 @@ const FlightList = ({sendData, flightList}) => {
             {Object.entries(flightDict).length > 0 &&
                 Object.entries(flightDict).map(([flight_id, value]) => {
                 return (
-                <Button key={flight_id} id={flight_id} onClick={clickFlightID}>{value['display_name']}
-                </Button>
+                    <Box sx={{padding: '3px'}}>
+                        <FlightAccordion flightDetails={value} onClick={clickFlightID} />
+                    </Box>
                 );
             })}
             
