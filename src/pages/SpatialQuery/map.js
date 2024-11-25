@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Box,
   TextField,
-  Grid,
   Typography,
   Backdrop,
   CircularProgress,
@@ -239,6 +238,7 @@ const SpatialMap = () => {
           display: "flex",
           overflow: "hidden",
           minHeight: 0,
+          height: "calc(100vh - 104px)",
         }}
       >
         <Box
@@ -247,8 +247,7 @@ const SpatialMap = () => {
             backgroundColor: "rgba(240,247,235,.5)",
             display: "flex",
             flexDirection: "column",
-            overflow: "hidden",
-            height: "calc(100vh - 104px)",
+            overflow: "auto",
             p: 2,
           }}
         >
