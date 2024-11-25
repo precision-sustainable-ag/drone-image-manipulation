@@ -239,16 +239,19 @@ const SpatialMap = () => {
           overflow: "hidden",
           minHeight: 0,
           height: "calc(100vh - 104px)",
+          paddingLeft: "5%",
+          paddingRight: "5%",
+          backgroundColor: "rgba(240,247,235,.5)",
         }}
       >
         <Box
           sx={{
-            width: "30%",
-            backgroundColor: "rgba(240,247,235,.5)",
+            width: "40%",
+
             display: "flex",
             flexDirection: "column",
             overflow: "auto",
-            p: 2,
+            padding: "14px",
           }}
         >
           <Typography variant="h4" gutterBottom align="left">
@@ -294,12 +297,8 @@ const SpatialMap = () => {
 
         <Box
           sx={{
-            width: "70%",
-            backgroundColor: "rgba(240,247,235,.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            p: 2,
+            width: "60%",
+            padding: "14px",
           }}
         >
           <MapComponent
