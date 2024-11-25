@@ -31,7 +31,7 @@ import "../../styles/App.css";
 import MapComponent from "../../components/MapComponent";
 import { ToggleDraw, RotateMap } from "../../components/MapControls";
 import Footer from "../../components/Footer";
-
+import spatialQueryVideo from "../../assets/videos/spatial_query_eg.mp4";
 const SpatialMap = () => {
   const navigate = useNavigate();
 
@@ -262,12 +262,23 @@ const SpatialMap = () => {
           </Typography>
           <div
             style={{
-              backgroundColor: "#D9D9D9",
-              width: "100%",
-              height: "100px",
               marginTop: "10px",
+              position: "relative",
             }}
-          ></div>
+          >
+            <video
+              src={spatialQueryVideo}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain", // Ensures the whole video is visible without cropping
+                display: "block",
+              }}
+              muted
+              loop
+              autoPlay
+            />
+          </div>
           <Typography variant="body1" gutterBottom align="left" mt={2}>
             Next, select the dates you’d like to see missions within.
           </Typography>
