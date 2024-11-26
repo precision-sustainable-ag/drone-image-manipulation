@@ -203,7 +203,6 @@ const SpatialMap = () => {
   }, []);
 
   const drawArea = (source, map) => {
-    console.log(map.getView().getProjection());
     gridDraw = new Draw({
       source: source,
       type: "Circle",
