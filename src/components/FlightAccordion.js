@@ -61,14 +61,8 @@ const FlightAccordion = ({ flightDetails, expanded, onClick }) => {
 
           <DataContainer
             icon={CameraIcon}
-            label={"Camera Make"}
-            value={flightDetails?.camera_make}
-          />
-
-          <DataContainer
-            icon={CameraIcon}
-            label={"Camera Model"}
-            value={flightDetails?.camera_model}
+            label={"Camera Details"}
+            value={`${flightDetails?.camera_make} - ${flightDetails?.camera_model}`}
           />
 
           <DataContainer
