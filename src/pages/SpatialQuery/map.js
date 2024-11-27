@@ -16,7 +16,17 @@ import { View } from "ol";
 import { fromLonLat } from "ol/proj";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
-import Draw, { createBox } from "ol/interaction/Draw";
+import {
+  getBottomLeft,
+  getTopLeft,
+  getTopRight,
+  getBottomRight,
+  getCenter,
+  boundingExtent,
+} from "ol/extent";
+import { Polygon, MultiPoint } from "ol/geom";
+import { fromUserCoordinate, getUserProjection } from "ol/proj";
+import Draw from "ol/interaction/Draw";
 import { Style, Stroke, Text } from "ol/style";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -203,10 +213,66 @@ const SpatialMap = () => {
   }, []);
 
   const drawArea = (source, map) => {
+    function geoFunc() {
+      return function (coordinates, geometry, projection) {
+        const extent = boundingExtent(
+          /** @type {LineCoordType} */ ([
+            coordinates[0],
+            coordinates[coordinates.length - 1],
+          ]).map(function (coordinate) {
+            return fromUserCoordinate(coordinate, projection);
+          })
+        );
+        const boxCoordinates = [
+          [
+            getBottomLeft(extent),
+            getBottomRight(extent),
+            getTopRight(extent),
+            getTopLeft(extent),
+            getBottomLeft(extent),
+          ],
+        ];
+        if (geometry) {
+          geometry.setCoordinates(boxCoordinates);
+        } else {
+          geometry = new Polygon(boxCoordinates);
+        }
+        const userProjection = getUserProjection();
+        if (userProjection) {
+          geometry.transform(projection, userProjection);
+        }
+        let secondCorner;
+        let fourthCorner;
+
+        const firstCorner = coordinates[0];
+        const thirdCorner = coordinates[1];
+
+        const currentRotation = map.getView().getRotation();
+        secondCorner = [thirdCorner[0], firstCorner[1]];
+        fourthCorner = [firstCorner[0], thirdCorner[1]];
+        if (currentRotation !== 0) {
+          const verticesToRotate = new MultiPoint([secondCorner, fourthCorner]);
+          const anchor = getCenter(verticesToRotate.getExtent());
+          verticesToRotate.rotate(2 * currentRotation, anchor);
+          secondCorner = verticesToRotate.getCoordinates()[0];
+          fourthCorner = verticesToRotate.getCoordinates()[1];
+        }
+        const newCoordinates = [
+          firstCorner,
+          secondCorner,
+          thirdCorner,
+          fourthCorner,
+          firstCorner,
+        ];
+        geometry.setCoordinates([newCoordinates]);
+        return geometry;
+      };
+    }
+
     gridDraw = new Draw({
       source: source,
       type: "Circle",
-      geometryFunction: createBox(),
+      geometryFunction: geoFunc(),
     });
 
     map.addInteraction(gridDraw);
@@ -233,11 +299,11 @@ const SpatialMap = () => {
         sx={{
           flexGrow: 1,
           mt: "52px",
-          mb: "52px",
+          mb: "59px",
           display: "flex",
           overflow: "hidden",
           minHeight: 0,
-          height: "calc(100vh - 104px)",
+          height: "calc(100vh - 111px)",
           backgroundColor: "rgba(240,247,235,.5)",
         }}
       >
@@ -247,7 +313,7 @@ const SpatialMap = () => {
             display: "flex",
             flexDirection: "column",
             overflow: "auto",
-            p:2
+            p: 2,
           }}
         >
           <Typography variant="h4" gutterBottom align="left">
@@ -308,7 +374,7 @@ const SpatialMap = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            p:2
+            p: 2,
           }}
         >
           <MapComponent
