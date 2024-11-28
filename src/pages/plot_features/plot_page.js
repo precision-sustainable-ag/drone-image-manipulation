@@ -35,7 +35,7 @@ const PlotPage = () => {
         sx={{
           flexGrow: 1,
           mt: "52px",
-          mb: "52px",
+          mb: "59px",
           display: "flex",
           overflow: "auto",
           minHeight: 0,
@@ -52,8 +52,7 @@ const PlotPage = () => {
             display: "flex",
             flexDirection: "column",
             overflow: "auto",
-            padding: "15px",
-            gap: "10px",
+            maxHeight: "calc(100vh - 111px)",
           }}
         >
           <PlotTable state={state} plotMapRef={plotMapRef} />

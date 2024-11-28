@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FileSaver from "file-saver";
 import {
+  Box,
   Button,
   Dialog,
   DialogTitle,
@@ -284,71 +285,84 @@ const PlotTable = ({ state, plotMapRef }) => {
   }, []);
 
   return (
-    <>
-      <Typography variant="h4">Your Plot</Typography>
-      <Typography variant="body1" gutterBottom>
-        Your plot is now ready. You can see the map data here, and export a full
-        data set with the button below.
-      </Typography>
-      <PSAFigmaButton
-        text="Export Map and Data"
-        buttonType="LightButton"
-        buttonSx={{ backgroundColor: "#516B42" }}
-        textSx={{ color: "white" }}
-        onClick={handleClick}
-        icon={<ExpandMoreIcon sx={{ color: "white" }} />}
-        rightIcon={true}
-      />
-      <Menu
-        id="basic-menu"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        MenuListProps={{ "aria-labelledby": "basic-button" }}
-        slotProps={{
-          paper: {
-            sx: {
-              width: anchorEl ? `${anchorEl.offsetWidth}px` : "auto",
-              backgroundColor: "rgba(240,247,235)",
+    <Box
+      style={{
+        padding: "15px",
+        overflowY: "auto", // enable vertical scrolling if the table's content exceeds the container
+        maxHeight: "100%", // ensures the table container doesn't exceed its parent height
+      }}
+    >
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+        <Typography variant="h4">Your Plot</Typography>
+        <Typography variant="body1" gutterBottom>
+          Your plot is now ready. You can see the map data here, and export a
+          full data set with the button below.
+        </Typography>
+        <PSAFigmaButton
+          text="Export Map and Data"
+          buttonType="LightButton"
+          buttonSx={{ backgroundColor: "#516B42" }}
+          textSx={{ color: "white" }}
+          onClick={handleClick}
+          icon={<ExpandMoreIcon sx={{ color: "white" }} />}
+          rightIcon={true}
+        />
+        <Menu
+          id="basic-menu"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          MenuListProps={{ "aria-labelledby": "basic-button" }}
+          slotProps={{
+            paper: {
+              sx: {
+                width: anchorEl ? `${anchorEl.offsetWidth}px` : "auto",
+                backgroundColor: "rgba(240,247,235)",
+              },
             },
-          },
-        }}
-      >
-        <MenuItem onClick={() => setOpenDialog(true)}>
-          EXPORT TABLE AS BRAPI REQUEST
-        </MenuItem>
-        <MenuItem onClick={exportTableAsCSV}>EXPORT TABLE AS CSV</MenuItem>
-        <MenuItem onClick={exportMetadataAsCSV}>
-          EXPORT METADATA AS CSV
-        </MenuItem>
-        <MenuItem onClick={() => plotMapRef.current.exportPlotImages()}>
-          EXPORT PLOT IMAGES
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={exportAll}>EXPORT ALL</MenuItem>
-      </Menu>
-      <Typography variant="body1" gutterBottom>
-        Selected Mission
-      </Typography>
-      <FlightAccordion flightDetails={state.flight_details} />
-      <DataGrid rows={rows} columns={columns} disableSelectionOnClick />
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Export BrAPI Request</DialogTitle>
-        <DialogContent dividers>
-          <pre>
-            <code>{responseData}</code>
-          </pre>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDownloadBrAPIRequest} color="primary">
-            Download...
-          </Button>
-          <Button onClick={handleCloseDialog} color="primary">
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
+          }}
+        >
+          <MenuItem onClick={() => setOpenDialog(true)}>
+            EXPORT TABLE AS BRAPI REQUEST
+          </MenuItem>
+          <MenuItem onClick={exportTableAsCSV}>EXPORT TABLE AS CSV</MenuItem>
+          <MenuItem onClick={exportMetadataAsCSV}>
+            EXPORT METADATA AS CSV
+          </MenuItem>
+          <MenuItem onClick={() => plotMapRef.current.exportPlotImages()}>
+            EXPORT PLOT IMAGES
+          </MenuItem>
+          <Divider />
+          <MenuItem onClick={exportAll}>EXPORT ALL</MenuItem>
+        </Menu>
+        <Typography variant="body1" gutterBottom>
+          Selected Mission
+        </Typography>
+        <FlightAccordion flightDetails={state.flight_details} />
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          autoHeight={true}
+          disableSelectionOnClick
+        />
+        <Dialog open={openDialog} onClose={handleCloseDialog}>
+          <DialogTitle>Export BrAPI Request</DialogTitle>
+          <DialogContent dividers>
+            <pre>
+              <code>{responseData}</code>
+            </pre>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDownloadBrAPIRequest} color="primary">
+              Download...
+            </Button>
+            <Button onClick={handleCloseDialog} color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    </Box>
   );
 };
 
