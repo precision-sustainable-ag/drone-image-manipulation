@@ -53,7 +53,7 @@ const PlotPage = () => {
             flexDirection: "column",
             overflow: "auto",
             padding: "15px",
-            gap: "25px",
+            gap: "10px",
           }}
         >
           <PlotTable state={state} plotMapRef={plotMapRef} />
