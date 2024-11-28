@@ -37,7 +37,7 @@ const PlotPage = () => {
           mt: "52px",
           mb: "52px",
           display: "flex",
-          overflow: "hidden",
+          overflow: "auto",
           minHeight: 0,
           height: "calc(100vh - 104px)",
           backgroundColor: "rgba(240,247,235,.5)",
@@ -45,7 +45,10 @@ const PlotPage = () => {
       >
         <Box
           sx={{
-            width: "30%",
+            width: {
+              md: "50%",
+              lg: "30%",
+            },
             display: "flex",
             flexDirection: "column",
             overflow: "auto",
@@ -58,7 +61,10 @@ const PlotPage = () => {
 
         <Box
           sx={{
-            width: "70%",
+            width: {
+              md: "50%",
+              lg: "70%",
+            },
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
