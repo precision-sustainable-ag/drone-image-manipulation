@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import FileSaver from "file-saver";
 import {
   Button,
-  Box,
-  Grid,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -14,14 +12,8 @@ import {
   Divider,
   Typography,
   TextField,
-  IconButton,
 } from "@mui/material";
-import {
-  DataGrid,
-  GridRowEditStopReasons,
-  GridRowModes,
-  GridActionsCellItem,
-} from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
@@ -30,7 +22,6 @@ import { PSAFigmaButton } from "shared-react-components/src";
 import FlightAccordion from "../../components/FlightAccordion";
 
 const PlotTable = ({ state, plotMapRef }) => {
-  const navigate = useNavigate();
   const [editingRowId, setEditingRowId] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
