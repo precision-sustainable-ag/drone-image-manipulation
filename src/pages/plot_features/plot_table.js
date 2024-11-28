@@ -344,6 +344,7 @@ const PlotTable = ({ state, plotMapRef }) => {
           columns={columns}
           autoHeight={true}
           disableSelectionOnClick
+          hideFooterSelectedRowCount
         />
         <Dialog open={openDialog} onClose={handleCloseDialog}>
           <DialogTitle>Export BrAPI Request</DialogTitle>
