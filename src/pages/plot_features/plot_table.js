@@ -275,13 +275,17 @@ const PlotTable = ({ state, plotMapRef }) => {
   };
 
   const exportAll = () => {
+    handleDownloadBrAPIRequest();
+    exportTableAsCSV();
+    exportMetadataAsCSV();
+    plotMapRef.current.exportPlotImages();
+  };
+
+  const handleDownloadBrAPIRequest = () => {
     FileSaver.saveAs(
       new Blob([responseData], { type: "text/plain;charset=utf-8" }),
       "response.txt"
     );
-    exportTableAsCSV();
-    exportMetadataAsCSV();
-    plotMapRef.current.exportPlotImages();
   };
 
   useEffect(() => {
@@ -345,15 +349,7 @@ const PlotTable = ({ state, plotMapRef }) => {
           </pre>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() =>
-              FileSaver.saveAs(
-                new Blob([responseData], { type: "text/plain;charset=utf-8" }),
-                "response.txt"
-              )
-            }
-            color="primary"
-          >
+          <Button onClick={handleDownloadBrAPIRequest} color="primary">
             Download...
           </Button>
           <Button onClick={handleCloseDialog} color="primary">
