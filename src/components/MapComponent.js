@@ -12,7 +12,7 @@ const MapComponent = ({
   interactions,
   view,
   onMapInit,
-  mapSize = { width: "100%", height: "400px" }
+  mapSize = { width: "100%", height: "100vh" }
 }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
