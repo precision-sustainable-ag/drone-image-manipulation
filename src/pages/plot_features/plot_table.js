@@ -33,6 +33,10 @@ const PlotTable = ({ state, plotMapRef }) => {
   );
   const [openDialog, setOpenDialog] = useState(false);
   const [responseData, setResponseData] = useState("");
+  const [paginationModel, setPaginationModel] = useState({
+    pageSize: 10,
+    page: 0,
+  });
 
   const open = Boolean(anchorEl);
 
@@ -343,6 +347,9 @@ const PlotTable = ({ state, plotMapRef }) => {
           rows={rows}
           columns={columns}
           autoHeight={true}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[10, 25, 50]}
           disableSelectionOnClick
           hideFooterSelectedRowCount
         />
