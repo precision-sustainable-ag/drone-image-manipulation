@@ -41,8 +41,6 @@
   display: block;
   margin: 8px;
   margin-top: 124px;
-  background-color: rgba(128, 128, 128, 0.25);
-  /* width: fit-content; */
   position: absolute;
   border-radius: 4px;
 }

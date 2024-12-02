@@ -45,10 +45,7 @@ const PlotPage = () => {
       >
         <Box
           sx={{
-            width: {
-              md: "50%",
-              lg: "30%",
-            },
+            width: "30%",
             display: "flex",
             flexDirection: "column",
             overflow: "auto",
@@ -60,10 +57,7 @@ const PlotPage = () => {
 
         <Box
           sx={{
-            width: {
-              md: "50%",
-              lg: "70%",
-            },
+            width: "70%",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

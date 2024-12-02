@@ -172,6 +172,10 @@ const PlotTable = ({ state, plotMapRef }) => {
         headerAlign: "center",
         align: "center",
         valueGetter: (params) => params.row.properties.ndvi,
+        renderCell: (params) => {
+          const value = params.row.properties.ndvi;
+          return value !== null && value !== undefined ? value.toFixed(5) : "";
+        },
         flex: 1,
       },
       {
@@ -180,6 +184,10 @@ const PlotTable = ({ state, plotMapRef }) => {
         headerAlign: "center",
         align: "center",
         valueGetter: (params) => params.row.properties.lai,
+        renderCell: (params) => {
+          const value = params.row.properties.lai;
+          return value !== null && value !== undefined ? value.toFixed(5) : "";
+        },
         flex: 1,
       },
       {
@@ -188,6 +196,10 @@ const PlotTable = ({ state, plotMapRef }) => {
         headerAlign: "center",
         align: "center",
         valueGetter: (params) => params.row.properties.gli,
+        renderCell: (params) => {
+          const value = params.row.properties.gli;
+          return value !== null && value !== undefined ? value.toFixed(5) : "";
+        },
         flex: 1,
       },
       {
@@ -196,6 +208,10 @@ const PlotTable = ({ state, plotMapRef }) => {
         headerAlign: "center",
         align: "center",
         valueGetter: (params) => params.row.properties.vari,
+        renderCell: (params) => {
+          const value = params.row.properties.vari;
+          return value !== null && value !== undefined ? value.toFixed(5) : "";
+        },
         flex: 1,
       },
     ],
