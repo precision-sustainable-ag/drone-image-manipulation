@@ -1,116 +1,152 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import '../../styles/App.css';
-import GeoTIFFMap from './geotiffmap';
+import GeoTIFF from 'ol/source/GeoTIFF';
 import FlightList from '../FlightListSidebar/flight_list';
 import Header from '../Header/header';
-import {Box, Grid, TextField, Typography} from '@mui/material';
-import { useLocation } from 'react-router-dom';
+import {Box, Typography} from '@mui/material';
+import { useLocation, useNavigate } from 'react-router-dom';
+import MapComponent from '../../components/MapComponent';
+import WebGLTileLayer from 'ol/layer/WebGLTile';
+import VectorSource from 'ol/source/Vector';
+import VectorLayer from 'ol/layer/Vector';
+import { RotateMap } from '../../components/MapControls';
+import Footer from "../../components/Footer";
 
 function App() {
 
   const {state} = useLocation();
+  const navigate = useNavigate();
 
-  const [gridCols, setGridCols] = useState(2);
-  const [gridRows, setGridRows] = useState(2);
   const [flightDetails, setFlightDetails] = useState('');
-
-  const handleGridColsChange = (event) => {
-    const newCols = parseInt(event.target.value, 10);
-    setGridCols(newCols);
-  };
-
-  const handleGridRowsChange = (event) => {
-    const newRows = parseInt(event.target.value, 10);
-    setGridRows(newRows);
-  };
+  const [vectorLayer, setVectorLayer] = useState(null);
+  const [controls, setControls] = useState([]);
 
   const handleFlightDetailsUpdate = (newFlightDetails) => {
     setFlightDetails(newFlightDetails);
   };
 
+  useEffect(() => {
+    if (!flightDetails) return;
+
+    const mapSource = new GeoTIFF({
+      sources: [
+        {
+          url: process.env.REACT_APP_API_URL+'/data/'+flightDetails.cog_path,
+          // url: 'http://localhost:8080/cog.tif',
+          crossOrigin: 'anonymous',
+          // projection: 'EPSG:4326'
+        },
+      ],
+    });
+    const tileLayer = new WebGLTileLayer({source: mapSource});
+    const vectorSource = new VectorSource();
+    const vectorLayer = new VectorLayer({
+      source: vectorSource
+    });
+    const controls = [
+      new RotateMap({ direction: "left" }),
+      new RotateMap({ direction: "right" }),
+    ];
+
+    setVectorLayer([tileLayer, vectorLayer]);
+    setControls(controls);
+  }, [flightDetails]);
+
   return (
     <Box
       style={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100px'
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
       }}
-      margin={5}
     >
-      <Grid container spacing={2}>
-        {/* left column */}
-        <Header/>
-        <Grid item xs={12} md={3} lg={2}
-        style={{
-          backgroundColor: 'rgba(240,247,235,.5)',
-          position: 'relative',
-          width: '100%',
-          height: '657px',
-          display: 'flex',
-          flexDirection: 'column'
-        }} mt={3}>
-          <Grid>
-            <Typography variant="h5" gutterBottom align="center">
-              Flights
-              </Typography>
-          </Grid>
-          <FlightList sendData={handleFlightDetailsUpdate} flightList={state}></FlightList>
-        </Grid>
+      <Header />
 
-        {/* right side - header, rows/cols, map, etc */}
-        <Grid item xs={12} md={9} lg={10}>
-          <Grid
-          style={{
-            backgroundColor: 'rgba(240,247,235,.5)',
-            position: 'relative',
-            width: '100%',
-            left: '50%',
-            transform: 'translateX(-50%)',
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          mt: "52px",
+          mb: "59px",
+          display: "flex",
+          overflow: "hidden",
+          minHeight: 0,
+        }}
+      >
+        <Box
+          sx={{
+            width: "30%",
+            backgroundColor: "rgba(240,247,235,.5)",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            height: "calc(100vh - 111px)",
           }}
-          mt={1}>
-
-            <Grid item xs={12} sm={12} md={12} lg={12}>
-              <Typography variant="h4" gutterBottom align="center">
-              Cloud Optimized GeoTIFF (COG)
-              </Typography>
-            </Grid>
-      
-            <Grid item xs={12} sm={12} md={12} lg={12} marginBottom={'15px'} align="center">
-              <TextField
-                label='Cols'
-                type='number'
-                value={gridCols}
-                onChange={handleGridColsChange}
-                inputProps={{min:1}}
-                size='small'
-                style={{marginLeft:'10px', marginRight:'5px'}}
-              />
-              <TextField
-                label='Rows'
-                type='number'
-                value={gridRows}
-                onChange={handleGridRowsChange}
-                inputProps={{min:1}}
-                size='small'
-                style={{marginLeft:'5px', marginRight:'5px'}}
-              />
-            </Grid>
-
-          </Grid>
-          <Grid style={{
-              backgroundColor: 'rgba(240,247,235,.5)',
-              position: 'relative',
-              width: '100%',
-              left: '50%',
-              transform: 'translateX(-50%)',
+        >
+          <Typography
+            variant="h5"
+            gutterBottom
+            align="center"
+            sx={{
+              position: "sticky",
+              top: 0,
+              zIndex: 10,
+              py: 1,
             }}
-            mt={1}>
-            <GeoTIFFMap gridCols={gridCols} gridRows={gridRows} flightDetails={flightDetails}/>
-          </Grid>
-        </Grid>
+          >
+            Flights
+          </Typography>
+          <Box
+            sx={{
+              overflowY: "auto",
+              flexGrow: 1,
+              px: 1,
+            }}
+          >
+            <FlightList
+              sendData={handleFlightDetailsUpdate}
+              flightList={state}
+            />
+          </Box>
+        </Box>
 
-      </Grid>    
+        <Box
+          sx={{
+            width: "70%",
+            backgroundColor: "rgba(240,247,235,.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 2,
+          }}
+        >
+          {flightDetails ? (
+            <MapComponent
+              mapLayers={vectorLayer}
+              controls={controls}
+              mapSize={{ width: "100%", height: "100%" }}
+            />
+          ) : (
+            "Select a mission from the list"
+          )}
+        </Box>
+      </Box>
+
+      <Footer
+        prevFunc={() => {
+          navigate("/");
+        }}
+        nextFunc={() => {
+          if (!flightDetails) {
+            alert("Select a flight to proceed");
+            return;
+          }
+          navigate("/draw-plots", {
+            state: { flightDetails, flightList: state },
+          });
+        }}
+        nextDisabled={!flightDetails}
+      />
     </Box>
   );
 }

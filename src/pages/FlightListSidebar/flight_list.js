@@ -1,14 +1,15 @@
-import React, {useState} from 'react';
-import {Button, Grid } from '@mui/material';
+import React, {useEffect, useState} from 'react';
+import {Box, Grid } from '@mui/material';
+import FlightAccordion from '../../components/FlightAccordion';
 
 const FlightList = ({sendData, flightList}) => {
     
     const [flightDict, setFlightDict] = useState(flightList);
-    
-    const clickFlightID = (event) => {
-        const flight_id = event.target.id;
-        sendData(flightDict[flight_id]);
-    }
+    const [selectedFlight, setSelectedFlight] = useState(null);
+
+    useEffect(() => {
+        sendData(selectedFlight);
+    }, [selectedFlight]);
     
     return (
         <Grid item xs={12} sm={12} md={12} lg={12} style={{
@@ -18,8 +19,17 @@ const FlightList = ({sendData, flightList}) => {
             {Object.entries(flightDict).length > 0 &&
                 Object.entries(flightDict).map(([flight_id, value]) => {
                 return (
-                <Button key={flight_id} id={flight_id} onClick={clickFlightID}>{value['display_name']}
-                </Button>
+                    <Box key={flight_id} sx={{padding: '3px'}}>
+                        <FlightAccordion
+                            flightDetails={value}
+                            expanded={selectedFlight?.flight_id === value.flight_id}
+                            onClick={() => {
+                            setSelectedFlight((prevSelected) =>
+                                prevSelected?.flight_id === value.flight_id ? null : value
+                            );
+                            }}
+                        />
+                    </Box>
                 );
             })}
             
