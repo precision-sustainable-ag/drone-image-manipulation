@@ -52,7 +52,7 @@
   margin: 1px;
   margin-bottom: 2px;
   padding: 0;
-  color: #666666;
+  color: white;
   font-weight: bold;
   text-decoration: none;
   font-size: inherit;
@@ -60,7 +60,7 @@
   height: 1.375em;
   width: 3.375em;
   line-height: .4em;
-  background-color: white;
+  background-color: #5376EA;
   border: 1px solid transparent;
   border-radius: 2px;
 }

@@ -13,6 +13,7 @@ import FeedbackComponent from './pages/Feedback/feedback';
 import DrawGrid from './pages/orthomosaic_display/drawgrid';
 import { ThemeProvider } from '@mui/material';
 import { PSATheme } from 'shared-react-components/src';
+import '@fontsource/ibm-plex-sans';
 
 const router = createBrowserRouter([
   {
