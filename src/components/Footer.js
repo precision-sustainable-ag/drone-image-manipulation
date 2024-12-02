@@ -25,7 +25,7 @@ const Footer = ({ prevFunc, prevDisabled, nextFunc, nextDisabled }) => {
         <PSAFigmaButton
           icon={<PrevIcon sx={{ color: "white" }} />}
           leftIcon
-          text="Prev"
+          text="Back"
           variant="standard"
           buttonSx={
             !prevDisabled

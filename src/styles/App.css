@@ -48,17 +48,21 @@
 }
 
 .draw-buttons {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 1px;
   margin-bottom: 2px;
   padding: 0;
   color: white;
   font-weight: bold;
   text-decoration: none;
-  font-size: inherit;
+  font-size: 0.875em;
   text-align: center;
-  height: 1.375em;
-  width: 3.375em;
+  height: 1.75em;
+  width: auto;
+  min-width: 3.375em;
+  padding: 0 0.1em;
   line-height: .4em;
   background-color: #5376EA;
   border: 1px solid transparent;

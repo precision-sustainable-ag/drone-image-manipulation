@@ -328,18 +328,26 @@ const SpatialMap = () => {
               position: "relative",
             }}
           >
-            <video
-              src={spatialQueryVideo}
-              style={{
+            <Box
+              sx={{
                 width: "100%",
-                height: "100%",
-                objectFit: "contain", // Ensures the whole video is visible without cropping
-                display: "block",
+                overflow: "hidden",
+                maxWidth: "500px",
               }}
-              muted
-              loop
-              autoPlay
-            />
+            >
+              <video
+                src={spatialQueryVideo}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain", // Ensures the whole video is visible without cropping
+                  display: "block",
+                }}
+                muted
+                loop
+                autoPlay
+              />
+            </Box>
           </div>
           <Typography variant="body1" gutterBottom align="left" mt={2}>
             Next, select the dates you’d like to see missions within.

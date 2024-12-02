@@ -8,6 +8,17 @@ const FlightList = ({sendData, flightList}) => {
     const [selectedFlight, setSelectedFlight] = useState(null);
 
     useEffect(() => {
+      // Sort in descending order of mission start time
+      const sortedFlights = Object.entries(flightList).sort(
+        ([, a], [, b]) =>
+          new Date(b.mission_start_time) - new Date(a.mission_start_time)
+      );
+
+      const sortedFlightDict = Object.fromEntries(sortedFlights);
+      setFlightDict(sortedFlightDict);
+    }, [flightList]);
+
+    useEffect(() => {
         sendData(selectedFlight);
     }, [selectedFlight]);
     

@@ -1,4 +1,6 @@
 import { Control } from "ol/control";
+import ReactDOMServer from "react-dom/server"
+import PolylineOutlinedIcon from '@mui/icons-material/PolylineOutlined';
 
 const leftRotate = require("../assets/images/rotate-left.png");
 const rightRotate = require("../assets/images/rotate-right.png");
@@ -52,7 +54,8 @@ export class ToggleDraw extends Control {
 
     const drawButton = document.createElement("button");
     drawButton.className = "draw-buttons";
-    drawButton.innerHTML = "Draw";
+    const iconString = ReactDOMServer.renderToString(<PolylineOutlinedIcon />);
+    drawButton.innerHTML = `Draw${iconString}`;
 
     const clearButton = document.createElement("button");
     clearButton.className = "draw-buttons";

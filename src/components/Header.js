@@ -28,13 +28,18 @@ const Header = () => {
         px: 2,
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "center"}}>
         <img
-          src="/header-logo.png"
+          src="/ncsu-logo.png"
           alt="NC State Logo"
           style={{ width: "120px", height: "35px" }}
         />
-        <Typography variant="h6" sx={{ color: "#516B42" }}>
+        <img
+          src="/usda-logo.png"
+          alt="USDA Logo"
+          style={{ width: "36px", height: "25px" }}
+        />
+        <Typography variant="h6" sx={{ color: "#516B42", marginLeft: 2 }}>
           Site Title
         </Typography>
       </Box>
