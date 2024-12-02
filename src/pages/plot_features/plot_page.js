@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PlotMap from "./plot_map";
 import PlotTable from "./plot_table";
 import { Box } from "@mui/material";
-import Header from "../Header/header";
+import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 
 const PlotPage = () => {

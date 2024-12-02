@@ -33,7 +33,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import "ol/ol.css";
 import "../../styles/App.css";
-import Header from "../Header/header";
+import Header from "../../components/Header";
 import LayerSwitcher from "ol-layerswitcher";
 import LayerGroup from "ol/layer/Group";
 import "ol-layerswitcher/dist/ol-layerswitcher.css";

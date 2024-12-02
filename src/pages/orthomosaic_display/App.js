@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import '../../styles/App.css';
 import GeoTIFF from 'ol/source/GeoTIFF';
 import FlightList from '../FlightListSidebar/flight_list';
-import Header from '../Header/header';
+import Header from "../../components/Header";
 import {Box, Typography} from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MapComponent from '../../components/MapComponent';

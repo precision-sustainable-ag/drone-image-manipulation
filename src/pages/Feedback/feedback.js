@@ -11,7 +11,7 @@ import {
   FormGroup,
   FormControlLabel,
 } from '@mui/material';
-import Header from '../Header/header';
+import Header from "../../components/Header";
 
 const FeedbackComponent = () => {
 //   const consentRedux = useSelector((stateRedux) => stateRedux.userData.consent);

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "../../styles/App.css";
 import GeoTIFFMap from "./geotiffmap";
-import Header from "../Header/header";
+import Header from "../../components/Header";
 import {
   Box,
   CircularProgress,
