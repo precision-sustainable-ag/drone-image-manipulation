@@ -71,7 +71,16 @@ const FieldFeatureModal = ({setFieldFeatures}) => {
 
   return (
     <div>
-      <Button onClick={handleOpen}>Add field features</Button>
+      <Button
+        onClick={handleOpen}
+        sx={{
+          color: "black",
+          textDecoration: "underline",
+          "&:hover": { textDecoration: "underline" },
+        }}
+      >
+        + Add field features
+      </Button>
       <Modal
         open={open}
         onClose={handleClose}

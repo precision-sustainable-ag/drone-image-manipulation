@@ -312,7 +312,9 @@ function DrawGrid() {
         nextFunc={sendGrid}
         nextDisabled={
           [null, undefined, ""].includes(fieldFeatures["crop_type"]) ||
-          [null, undefined, ""].includes(fieldFeatures["lead_scientist"])
+          [null, undefined, ""].includes(fieldFeatures["lead_scientist"]) ||
+          !coordinateFeatures.box ||
+          coordinateFeatures.box.length === 0
         }
       />
 
