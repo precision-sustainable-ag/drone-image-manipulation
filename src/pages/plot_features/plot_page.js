@@ -39,7 +39,7 @@ const PlotPage = () => {
           display: "flex",
           overflow: "auto",
           minHeight: 0,
-          height: "calc(100vh - 104px)",
+          height: "calc(100vh - 111px)",
           backgroundColor: "rgba(240,247,235,.5)",
         }}
       >

@@ -290,18 +290,22 @@ const PlotTable = ({ state, plotMapRef }) => {
 
   return (
     <Box
-      style={{
-        padding: "15px",
+      sx={{
+        p: 2,
         overflowY: "auto", // enable vertical scrolling if the table's content exceeds the container
         maxHeight: "100%", // ensures the table container doesn't exceed its parent height
       }}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-        <Typography variant="h4">Your Plot</Typography>
-        <Typography variant="body1" gutterBottom>
-          Your plot is now ready. You can see the map data here, and export a
-          full data set with the button below.
-        </Typography>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box>
+          <Typography variant="h4" gutterBottom>
+            Your Plot
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            Your plot is now ready. You can see the map data here, and export a
+            full data set with the button below.
+          </Typography>
+        </Box>
         <PSAFigmaButton
           text="Export Map and Data"
           buttonType="LightButton"
@@ -339,10 +343,12 @@ const PlotTable = ({ state, plotMapRef }) => {
           <Divider />
           <MenuItem onClick={exportAll}>EXPORT ALL</MenuItem>
         </Menu>
-        <Typography variant="body1" gutterBottom>
-          Selected Mission
-        </Typography>
-        <FlightAccordion flightDetails={state.flight_details} />
+        <Box>
+          <Typography variant="body1" gutterBottom>
+            Selected Mission
+          </Typography>
+          <FlightAccordion flightDetails={state.flight_details} />
+        </Box>
         <DataGrid
           rows={rows}
           columns={columns}
@@ -362,7 +368,7 @@ const PlotTable = ({ state, plotMapRef }) => {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleDownloadBrAPIRequest} color="primary">
-              Download...
+              Download
             </Button>
             <Button onClick={handleCloseDialog} color="primary">
               Close
