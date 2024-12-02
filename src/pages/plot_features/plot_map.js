@@ -7,8 +7,6 @@ import React, {
   useState,
 } from "react";
 import {
-  Box,
-  Grid,
   Typography,
   Backdrop,
   CircularProgress,
@@ -29,7 +27,6 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import MapComponent from "../../components/MapComponent";
 import { RotateMap } from "../../components/MapControls";
-import Header from "../Header/header";
 
 const PlotMap = forwardRef(({ apiOutput }, ref) => {
   // const navigate = useNavigate();
@@ -40,7 +37,6 @@ const PlotMap = forwardRef(({ apiOutput }, ref) => {
   const [vectorLayer, setVectorLayer] = useState(null);
   const [controls, setControls] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  let gridDraw;
 
   useImperativeHandle(ref, () => ({
     exportPlotImages,
