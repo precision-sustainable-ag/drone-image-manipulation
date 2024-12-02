@@ -74,7 +74,7 @@ const FlightAccordion = ({ flightDetails, expanded, onClick }) => {
           <DataContainer
             icon={CommentIcon}
             label={"Comments"}
-            value={flightDetails?.comment}
+            value={flightDetails?.comments}
           />
         </Box>
       }
