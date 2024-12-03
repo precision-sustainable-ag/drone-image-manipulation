@@ -42,7 +42,7 @@ import MapComponent from "../../components/MapComponent";
 import { ToggleDraw, RotateMap } from "../../components/MapControls";
 import Footer from "../../components/Footer";
 import spatialQueryVideo from "../../assets/videos/spatial_query_eg.mp4";
-const SpatialMap = () => {
+const FindMissions = () => {
   const navigate = useNavigate();
 
   let gridDraw;
@@ -416,4 +416,4 @@ const SpatialMap = () => {
   );
 };
 
-export default SpatialMap;
+export default FindMissions;

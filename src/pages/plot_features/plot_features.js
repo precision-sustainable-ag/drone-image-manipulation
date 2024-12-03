@@ -6,7 +6,7 @@ import { Box } from "@mui/material";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 
-const PlotPage = () => {
+const PlotFeatures = () => {
   const location = useLocation();
   const { state } = location;
   const plotMapRef = useRef(null);
@@ -76,4 +76,4 @@ const PlotPage = () => {
     </Box>
   );
 };
-export default PlotPage;
+export default PlotFeatures;

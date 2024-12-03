@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import '../../styles/App.css';
 import GeoTIFF from 'ol/source/GeoTIFF';
-import FlightList from '../FlightListSidebar/flight_list';
+import FlightList from './flight_list';
 import Header from "../../components/Header";
 import {Box, Typography} from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -12,7 +12,7 @@ import VectorLayer from 'ol/layer/Vector';
 import { RotateMap } from '../../components/MapControls';
 import Footer from "../../components/Footer";
 
-function App() {
+function Explore() {
 
   const {state} = useLocation();
   const navigate = useNavigate();
@@ -151,4 +151,4 @@ function App() {
   );
 }
 
-export default App;
+export default Explore;

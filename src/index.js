@@ -2,33 +2,33 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './styles/index.css';
 import reportWebVitals from './reportWebVitals';
-
-// import {BrowserRouter, Route, RouterProvider, Switch} from 'react-router-dom';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import App from './pages/orthomosaic_display/App';
-import ErrorPage from './pages/error_page';
-import PlotPage from './pages/plot_features/plot_page';
-import SpatialMap from './pages/SpatialQuery/map';
-import FeedbackComponent from './pages/Feedback/feedback';
-import DrawGrid from './pages/orthomosaic_display/drawgrid';
 import { ThemeProvider } from '@mui/material';
 import { PSATheme } from 'shared-react-components/src';
 import '@fontsource/ibm-plex-sans';
 
+// import {BrowserRouter, Route, RouterProvider, Switch} from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import FindMissions from './pages/find_missions/find_missions';
+import Explore from './pages/explore/explore';
+import DrawPlots from './pages/draw_plots/draw_plots';
+import PlotFeatures from './pages/plot_features/plot_features';
+import ErrorPage from './pages/error_page';
+import FeedbackComponent from './pages/Feedback/feedback';
+
 const router = createBrowserRouter([
   {
     path: '/explore',
-    element: <App />,
+    element: <Explore />,
     errorElement: <ErrorPage />
   },
   {
     path: '/draw-plots',
-    element: <DrawGrid />,
+    element: <DrawPlots />,
     errorElement: <ErrorPage />
   },
   {
     path: '/plot-features',
-    element: <PlotPage />,
+    element: <PlotFeatures />,
   },
   {
     path: '/feedback',
@@ -36,7 +36,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/',
-    element: <SpatialMap />,
+    element: <FindMissions />,
     errorElement: <ErrorPage />
   }
 ]);

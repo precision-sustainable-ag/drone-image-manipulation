@@ -20,7 +20,7 @@ import FieldFeatureModal from "./field_features_modal";
 import Footer from "../../components/Footer";
 import FlightAccordion from "../../components/FlightAccordion";
 
-function DrawGrid() {
+function DrawPlots() {
   const { state } = useLocation();
   const navigate = useNavigate();
 
@@ -343,4 +343,4 @@ function DrawGrid() {
   );
 }
 
-export default DrawGrid;
+export default DrawPlots;
