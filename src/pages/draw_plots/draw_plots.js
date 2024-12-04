@@ -184,19 +184,18 @@ function DrawPlots() {
           </Typography>
           <Typography variant="body1" gutterBottom align="left">
             First, set your grid dimensions, and data collection method. Next,
-            hit “Draw” and click and drag on the map to place your grid. [Add
-            other instructions here on how to manipulate the grid.]
+            hit “Draw” and click and drag on the map to place your grid.
           </Typography>
           <Typography variant="body1" align="left">
             Rotate the map view using one of these methods:
           </Typography>
           <Box component="ul" sx={{ pl: 2, margin: 0 }}>
             <Typography component="li" variant="body1">
-              Click the rotation buttons in the top-left corner to rotate in
-              5-degree increments
+              Click the rotation buttons in the top-left corner of the map to
+              rotate in 5-degree increments.
             </Typography>
             <Typography component="li" variant="body1">
-              Hold Shift + drag with your mouse for precise rotation control
+              Hold Shift + drag with your mouse for precise rotation control.
             </Typography>
           </Box>
 
