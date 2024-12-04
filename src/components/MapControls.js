@@ -41,8 +41,8 @@ export class RotateMap extends Control {
     view.animate({
       rotation:
         this.direction === "left"
-          ? rotation - Math.PI / 20
-          : rotation + Math.PI / 20,
+          ? rotation - Math.PI / 36 // 180/36 = 5 degrees on each rotation
+          : rotation + Math.PI / 36,
       duration: 250,
     });
   }

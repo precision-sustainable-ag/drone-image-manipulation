@@ -179,18 +179,26 @@ function DrawPlots() {
             overflowY: "auto",
           }}
         >
-          <Typography
-            variant="h5"
-            gutterBottom
-            align="left"
-          >
+          <Typography variant="h5" gutterBottom align="left">
             Create your grid
           </Typography>
-          <Typography variant="h8" gutterBottom align="left">
+          <Typography variant="body1" gutterBottom align="left">
             First, set your grid dimensions, and data collection method. Next,
             hit “Draw” and click and drag on the map to place your grid. [Add
             other instructions here on how to manipulate the grid.]
           </Typography>
+          <Typography variant="body1" align="left">
+            Rotate the map view using one of these methods:
+          </Typography>
+          <Box component="ul" sx={{ pl: 2, margin: 0 }}>
+            <Typography component="li" variant="body1">
+              Click the rotation buttons in the top-left corner to rotate in
+              5-degree increments
+            </Typography>
+            <Typography component="li" variant="body1">
+              Hold Shift + drag with your mouse for precise rotation control
+            </Typography>
+          </Box>
 
           {/* Selected mission */}
           <Box sx={{ pt: 2 }}>
@@ -205,7 +213,7 @@ function DrawPlots() {
             <Typography variant="h6" align="left">
               Grid Settings & Data
             </Typography>
-            <Typography variant="h8" align="left">
+            <Typography variant="body1" align="left">
               What are your grid dimensions?
             </Typography>
 
@@ -215,6 +223,7 @@ function DrawPlots() {
                 display: "flex",
                 justifyContent: "space-between",
                 py: 2,
+                alignItems: "center",
               }}
             >
               <TextField
@@ -225,7 +234,7 @@ function DrawPlots() {
                 inputProps={{ min: 1 }}
                 size="small"
               />
-              <Typography variant="h6" sx={{ px: 3 }}>
+              <Typography variant="body1" sx={{ px: 3 }}>
                 X
               </Typography>
               <TextField
@@ -238,7 +247,7 @@ function DrawPlots() {
               />
             </Box>
 
-            <Typography variant="h8" align="left">
+            <Typography variant="body1" align="left">
               What is your data collection method?
             </Typography>
 
