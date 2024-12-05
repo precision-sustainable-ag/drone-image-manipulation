@@ -105,9 +105,16 @@ function DrawPlots() {
         }
       );
       setIsSubmitted(true);
-      console.log("response", response);
       let responseData = response.data;
-      // responseData = JSON.parse(response.data.replace(/\bNaN\b/g, "null"));
+      if (typeof responseData === "string") {
+        try {
+          responseData = responseData.replace(/\bNaN\b/g, "null");
+          responseData = JSON.parse(responseData);
+        } catch (parseError) {
+          console.error("Error parsing response data:", parseError);
+          throw new Error("Could not parse response data");
+        }
+      }
 
       if (forceLoad(responseData) > 0) {
         setRespData(responseData);
