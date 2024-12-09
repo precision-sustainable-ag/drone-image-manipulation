@@ -93,6 +93,19 @@ function DrawPlots() {
       },
       field_features: fieldFeatures,
     };
+
+    if (
+      !coordinateFeatures.vertical ||
+      coordinateFeatures.vertical.length === 0 ||
+      !coordinateFeatures.horizontal ||
+      coordinateFeatures.horizontal.length === 0
+    ) {
+      alert(
+        "Grid data is incomplete. Please ensure the vertical and horizontal values are properly populated."
+      );
+      return;
+    }
+    
     try {
       setLoading(true);
       const response = await axios.post(
