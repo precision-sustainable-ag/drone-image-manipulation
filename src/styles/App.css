@@ -37,31 +37,42 @@
   }
 }
 
-.toggle-draw{
+.draw-buttons-div{
   display: block;
   margin: 8px;
-  margin-top: 65px;
-  background-color: rgba(128, 128, 128, 0.25);
-  /* width: fit-content; */
+  margin-top: 124px;
   position: absolute;
   border-radius: 4px;
 }
 
-.toggle-button {
-  display: block;
+.draw-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 1px;
+  margin-bottom: 2px;
   padding: 0;
-  color: #666666;
+  color: white;
   font-weight: bold;
   text-decoration: none;
-  font-size: inherit;
+  font-size: 0.875em;
   text-align: center;
-  height: 1.375em;
-  width: 3.375em;
+  height: 1.75em;
+  width: auto;
+  min-width: 3.375em;
+  padding: 0 0.1em;
   line-height: .4em;
-  background-color: white;
+  background-color: #5376EA;
   border: 1px solid transparent;
   border-radius: 2px;
+}
+
+.draw-buttons:hover {
+  border: 1px solid #666666;
+}
+
+.draw-buttons.active {
+  border: 2px solid green;
 }
 
 .rotate-div {
@@ -70,12 +81,23 @@
   border-radius: 2px;
 }
 
+.layer-switcher {
+  top: 10px !important;
+}
+/* .layer-switcher.shown.layer-switcher-activation-mode-click {
+  padding-right: 34px;
+}
+.layer-switcher.shown.layer-switcher-activation-mode-click > button {
+  right: 0;
+  border-left: 0;
+} */
+
 .left-rotate-div {
-  margin-top: 97px;
+  margin-top: 65px;
 }
 
 .right-rotate-div {
-  margin-top: 119px;
+  margin-top: 87px;
 }
 
 .rotate-button {

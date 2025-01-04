@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { Map } from "ol";
-import WebGLTileLayer from "ol/layer/WebGLTile";
 import {
   defaults as defaultInteractions,
   DragRotateAndZoom,
@@ -8,30 +7,25 @@ import {
 import { defaults as defaultControls } from "ol/control";
 
 const MapComponent = ({
-  mapSource,
-  vectorLayer,
+  mapLayers,
   controls,
   interactions,
   view,
   onMapInit,
+  mapSize = { width: "100%", height: "100vh" }
 }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
 
   useEffect(() => {
-    if (!mapRef.current || !mapSource || !vectorLayer) return;
+    if (!mapRef.current || !mapLayers) return;
 
     const map = new Map({
       target: mapRef.current,
-      layers: [
-        new WebGLTileLayer({
-          source: mapSource,
-        }),
-        vectorLayer,
-      ],
+      layers: mapLayers,
       controls: defaultControls().extend(controls),
       interactions: interactions || defaultInteractions().extend([new DragRotateAndZoom()]),
-      view: view ? view : mapSource?.getView(),
+      view: view ? view : mapLayers[0]?.getSource().getView(),
     });
 
     mapInstanceRef.current = map;
@@ -46,13 +40,13 @@ const MapComponent = ({
         mapInstanceRef.current = null;
       }
     };
-  }, [mapSource, vectorLayer, controls, interactions, view, onMapInit]);
+  }, [mapLayers, controls, interactions, view, onMapInit]);
 
   return (
     <div
       className="map"
       ref={mapRef}
-      style={{ width: "100%", height: "400px" }}
+      style={mapSize}
     />
   );
 };

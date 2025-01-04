@@ -1,27 +1,34 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './styles/index.css';
-// import App from './pages/orthomosaic_display/App';
 import reportWebVitals from './reportWebVitals';
+import { ThemeProvider } from '@mui/material';
+import { PSATheme } from 'shared-react-components/src';
+import '@fontsource/ibm-plex-sans';
 
 // import {BrowserRouter, Route, RouterProvider, Switch} from 'react-router-dom';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import App from './pages/orthomosaic_display/App';
+import FindMissions from './pages/find_missions/find_missions';
+import Explore from './pages/explore/explore';
+import DrawPlots from './pages/draw_plots/draw_plots';
+import PlotFeatures from './pages/plot_features/plot_features';
 import ErrorPage from './pages/error_page';
-import PlotTable from './pages/plot_features/plot_table';
-import PlotPage from './pages/plot_features/plot_page';
-import SpatialMap from './pages/SpatialQuery/map';
 import FeedbackComponent from './pages/Feedback/feedback';
 
 const router = createBrowserRouter([
   {
     path: '/explore',
-    element: <App />,
+    element: <Explore />,
+    errorElement: <ErrorPage />
+  },
+  {
+    path: '/draw-plots',
+    element: <DrawPlots />,
     errorElement: <ErrorPage />
   },
   {
     path: '/plot-features',
-    element: <PlotPage />,
+    element: <PlotFeatures />,
   },
   {
     path: '/feedback',
@@ -29,14 +36,16 @@ const router = createBrowserRouter([
   },
   {
     path: '/',
-    element: <SpatialMap />,
+    element: <FindMissions />,
     errorElement: <ErrorPage />
   }
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router = {router} />
+    <ThemeProvider theme={PSATheme}>
+      <RouterProvider router = {router} />
+    </ThemeProvider>
   </React.StrictMode>
 )
 
