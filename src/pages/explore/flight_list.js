@@ -22,6 +22,11 @@ const FlightList = ({sendData, flightList}) => {
         sendData(selectedFlight);
     }, [selectedFlight]);
     
+    // If flight list list no longer contains selected flight, remove it
+    useEffect(() => {
+      if (!flightList.includes(selectedFlight)) setSelectedFlight(null);
+    }, [flightList]);
+    
     return (
         <Grid item xs={12} sm={12} md={12} lg={12} style={{
              overflow: 'auto',

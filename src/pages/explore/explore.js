@@ -117,13 +117,12 @@ function Explore() {
         >
           <Typography
             variant="h5"
-            gutterBottom
             align="center"
             sx={{
               position: "sticky",
               top: 0,
               zIndex: 10,
-              py: 1,
+              pt: 1,
             }}
           >
             Flights
@@ -132,9 +131,6 @@ function Explore() {
             <Typography
               variant="body1"
               sx={{
-                position: "sticky",
-                paddingTop: 0,
-                zIndex: 10,
                 py: 1,
                 fontSize: "1.15rem",
               }}
