@@ -3,7 +3,7 @@ import '../../styles/App.css';
 import GeoTIFF from 'ol/source/GeoTIFF';
 import FlightList from './flight_list';
 import Header from "../../components/Header";
-import {Box, Typography} from '@mui/material';
+import {Box, Grid, TextField, Typography} from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MapComponent from '../../components/MapComponent';
 import WebGLTileLayer from 'ol/layer/WebGLTile';
@@ -17,12 +17,24 @@ function Explore() {
   const {state} = useLocation();
   const navigate = useNavigate();
 
+  const flightList = state ? Object.values(state) : [];
   const [flightDetails, setFlightDetails] = useState('');
   const [vectorLayer, setVectorLayer] = useState(null);
   const [controls, setControls] = useState([]);
+  const [filteredFlights, setFilteredFlights] = useState(flightList);
+  const [filters, setFilters] = useState({
+    mission_start_time: "",
+    research_station: "",
+    cloudiness: "",
+    pilot_name: "",
+  });
 
   const handleFlightDetailsUpdate = (newFlightDetails) => {
     setFlightDetails(newFlightDetails);
+  };
+
+  const handleFilterChange = (field, value) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
   };
 
   useEffect(() => {
@@ -51,6 +63,26 @@ function Explore() {
     setVectorLayer([tileLayer, vectorLayer]);
     setControls(controls);
   }, [flightDetails]);
+
+  useEffect(() => {
+    const filtered = flightList.filter((flight) => {
+      const { pilot_name, cloudiness, mission_start_time, research_station } =
+        filters;
+      return (
+        (!mission_start_time ||
+          flight.mission_start_time.includes(mission_start_time)) &&
+        (!research_station ||
+          flight.research_station
+            .toLowerCase()
+            .includes(research_station.toLowerCase())) &&
+        (!cloudiness ||
+          flight.cloudiness.toLowerCase().includes(cloudiness.toLowerCase())) &&
+        (!pilot_name ||
+          flight.pilot_name.toLowerCase().includes(pilot_name.toLowerCase()))
+      );
+    });
+    setFilteredFlights(filtered);
+  }, [filters]);
 
   return (
     <Box
@@ -96,6 +128,69 @@ function Explore() {
           >
             Flights
           </Typography>
+          <Box sx={{ px: 2, py: 1 }}>
+            <Typography
+              variant="body1"
+              sx={{
+                position: "sticky",
+                paddingTop: 0,
+                zIndex: 10,
+                py: 1,
+                fontSize: "1.15rem",
+              }}
+            >
+              Filter By:
+            </Typography>
+            <Grid container spacing={2}>
+              {/* First Row */}
+              <Grid item xs={6}>
+                <TextField
+                  label="Date"
+                  value={filters.mission_start_time}
+                  onChange={(e) =>
+                    handleFilterChange("mission_start_time", e.target.value)
+                  }
+                  size="small"
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Research Station"
+                  value={filters.research_station}
+                  onChange={(e) =>
+                    handleFilterChange("research_station", e.target.value)
+                  }
+                  size="small"
+                  fullWidth
+                />
+              </Grid>
+
+              {/* Second Row */}
+              <Grid item xs={6}>
+                <TextField
+                  label="Cloudiness"
+                  value={filters.cloudiness}
+                  onChange={(e) =>
+                    handleFilterChange("cloudiness", e.target.value)
+                  }
+                  size="small"
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Pilot Name"
+                  value={filters.pilot_name}
+                  onChange={(e) =>
+                    handleFilterChange("pilot_name", e.target.value)
+                  }
+                  size="small"
+                  fullWidth
+                />
+              </Grid>
+            </Grid>
+          </Box>
           <Box
             sx={{
               overflowY: "auto",
@@ -105,7 +200,7 @@ function Explore() {
           >
             <FlightList
               sendData={handleFlightDetailsUpdate}
-              flightList={state}
+              flightList={filteredFlights}
             />
           </Box>
         </Box>
@@ -142,7 +237,7 @@ function Explore() {
             return;
           }
           navigate("/draw-plots", {
-            state: { flightDetails, flightList: state },
+            state: { flightDetails, flightList },
           });
         }}
         nextDisabled={!flightDetails}
