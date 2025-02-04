@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -7,52 +7,184 @@ import {
   Backdrop,
   CircularProgress,
 } from "@mui/material";
-
-import OSM from "ol/source/OSM";
-import XYZ from "ol/source/XYZ";
-import GeoJSON from "ol/format/GeoJSON";
-import TileLayer from "ol/layer/Tile";
-import { View } from "ol";
-import { fromLonLat } from "ol/proj";
-import VectorSource from "ol/source/Vector";
-import VectorLayer from "ol/layer/Vector";
-import {
-  getBottomLeft,
-  getTopLeft,
-  getTopRight,
-  getBottomRight,
-  getCenter,
-  boundingExtent,
-} from "ol/extent";
-import { Polygon, MultiPoint } from "ol/geom";
-import { fromUserCoordinate, getUserProjection } from "ol/proj";
-import Draw from "ol/interaction/Draw";
-import { Style, Stroke, Text } from "ol/style";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import "ol/ol.css";
 import "../../styles/App.css";
 import Header from "../../components/Header";
-import LayerSwitcher from "ol-layerswitcher";
-import LayerGroup from "ol/layer/Group";
-import "ol-layerswitcher/dist/ol-layerswitcher.css";
-import "../../styles/App.css";
-import MapComponent from "../../components/MapComponent";
-import { ToggleDraw, RotateMap } from "../../components/MapControls";
 import Footer from "../../components/Footer";
 import spatialQueryVideo from "../../assets/videos/spatial_query_eg.mp4";
+import { fromLonLat } from "ol/proj";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import DrawRectangle from "mapbox-gl-draw-rectangle-mode";
+
 const FindMissions = () => {
   const navigate = useNavigate();
+  const cc_field_details = require("../../shared/cc_fields_2024.json");
+  const srs_field_details = require("../../shared/srs_fields_2024.json");
+  const mapRef = useRef();
+  const mapContainerRef = useRef();
 
-  let gridDraw;
+  useEffect(() => {
+    const INITIAL_CENTER = [-78.99, 35.43];
+    const INITIAL_ZOOM = 7;
+    mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
+
+    mapRef.current = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      center: INITIAL_CENTER,
+      zoom: INITIAL_ZOOM,
+      style: "mapbox://styles/mapbox/satellite-streets-v12",
+    });
+    mapRef.current.addControl(new mapboxgl.NavigationControl(), "top-left");
+
+    mapRef.current.on("load", async () => {
+      const addFieldLayoutLayer = (
+        field_data,
+        name,
+        markerCoords,
+        markerText
+      ) => {
+        mapRef.current.addSource(name, {
+          type: "geojson", // Ensure 'geojson' type is used
+          data: field_data, // Your JSON object
+        });
+
+        mapRef.current.addLayer({
+          id: `${name}-fill`,
+          type: "fill",
+          source: name,
+          layout: {},
+          paint: {
+            "fill-color": "#0080ff",
+            "fill-opacity": 0.1,
+          },
+        });
+
+        mapRef.current.addLayer({
+          id: `${name}-outline`,
+          type: "line",
+          source: name,
+          layout: {},
+          paint: {
+            "line-color": "#ffffff",
+            "line-width": 2,
+          },
+        });
+
+        mapRef.current.addLayer({
+          id: `${name}-labels`,
+          type: "symbol",
+          source: name,
+          layout: {
+            "text-field": ["get", "field"],
+            "text-size": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              13.99,
+              0,
+              14,
+              8,
+              15,
+              10,
+              16,
+              12,
+            ],
+            "text-anchor": "center",
+          },
+          paint: {
+            "text-color": "#ffffff",
+          },
+        });
+
+        if (markerCoords) {
+          const marker = new mapboxgl.Marker({ color: "red" })
+            .setLngLat(markerCoords)
+            .addTo(mapRef.current);
+
+          const popup = new mapboxgl.Popup({
+            offset: 25,
+            closeButton: false,
+            closeOnClick: false,
+          }).setHTML(`<h4>${markerText}</h4>`);
+
+          marker.getElement().addEventListener("mouseenter", () => {
+            popup.setLngLat(marker.getLngLat()).addTo(mapRef.current);
+          });
+
+          marker.getElement().addEventListener("mouseleave", () => {
+            popup.remove();
+          });
+
+          marker.getElement().addEventListener("click", () => {
+            mapRef.current.flyTo({
+              center: markerCoords,
+              zoom: 14.66,
+              essential: true,
+            });
+          });
+        }
+      };
+
+      addFieldLayoutLayer(
+        srs_field_details,
+        "srs",
+        [-79.6808, 35.1876],
+        "Sandhills Research Station"
+      );
+      addFieldLayoutLayer(
+        cc_field_details,
+        "cc",
+        [-78.5025, 35.6689],
+        "Central Research Station"
+      );
+
+      const draw = new MapboxDraw({
+        displayControlsDefault: false,
+        controls: {
+          rectangle: true,
+          polygon: true,
+          trash: true,
+        },
+        modes: {
+          ...MapboxDraw.modes,
+          draw_rectangle: DrawRectangle,
+        },
+      });
+
+      mapRef.current.on("draw.modechange", (event) => {
+        if (event.mode === "draw_polygon") {
+          const data = draw.getAll();
+
+          if (data.features.length > 1) {
+            // If more than one feature exists, delete the previous ones
+            draw.deleteAll();
+          }
+          draw.changeMode("draw_rectangle");
+        }
+      });
+
+      mapRef.current.on("draw.create", (event) => {
+        setCoordinates([
+          event.features[0].geometry.coordinates[0].map((coord) =>
+            fromLonLat(coord)
+          ),
+        ]);
+      });
+      mapRef.current.addControl(draw);
+    });
+
+    return () => {
+      mapRef.current.remove();
+    };
+  }, [srs_field_details, cc_field_details]);
 
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
   const [coordinates, setCoordinates] = useState([]);
-  const [vectorLayer, setVectorLayer] = useState(null);
-  const [controls, setControls] = useState([]);
-  const [view, setView] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const buttonClick = async () => {
@@ -98,190 +230,6 @@ const FindMissions = () => {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    const boundaryStyle = new Style({
-      stroke: new Stroke({
-        color: "white",
-        width: 2,
-      }),
-    });
-    const labelStyle = new Style({
-      text: new Text({
-        font: "13px Calibri,sans-serif",
-        stroke: new Stroke({
-          color: "#fff",
-          width: 3,
-        }),
-      }),
-    });
-    const style = [boundaryStyle, labelStyle];
-
-    const vectorSource = new VectorSource();
-    const vectorLayer = new VectorLayer({
-      source: vectorSource,
-    });
-
-    // Map Layers
-    const osmLayer = new TileLayer({
-      title: "Open Street Map",
-      type: "base",
-      visible: false,
-      source: new OSM(),
-    });
-
-    const satLayer = new TileLayer({
-      title: "Satellite View",
-      type: "base",
-      visible: true,
-      source: new XYZ({
-        url: "http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}",
-      }),
-    });
-
-    const mapGroup = new LayerGroup({
-      title: "Map",
-      layers: [osmLayer, satLayer],
-    });
-
-    //Field Vector Layers
-    const cc_field_details = require("../../shared/cc_fields_2024.json");
-    const srs_field_details = require("../../shared/srs_fields_2024.json");
-
-    const cc_field_vector = new VectorLayer({
-      title: "Central Research Station",
-      visible: true,
-      source: new VectorSource({
-        format: new GeoJSON(),
-        features: new GeoJSON().readFeatures(cc_field_details, {
-          dataProjection: "EPSG:4326",
-          featureProjection: "EPSG:3857",
-        }),
-      }),
-      style: function (feature) {
-        labelStyle.getText().setText(`${feature.get("field")}`);
-        return style;
-      },
-    });
-
-    const srs_field_vector = new VectorLayer({
-      title: "Sandhills Research Station",
-      visible: true,
-      source: new VectorSource({
-        format: new GeoJSON(),
-        features: new GeoJSON().readFeatures(srs_field_details, {
-          dataProjection: "EPSG:4326",
-          featureProjection: "EPSG:3857",
-        }),
-      }),
-      style: function (feature) {
-        labelStyle.getText().setText(`${feature.get("field")}`);
-        return style;
-      },
-    });
-
-    const fieldVectorLayerGroup = new LayerGroup({
-      title: "Field Boundaries",
-      layers: [cc_field_vector, srs_field_vector],
-    });
-
-    const controls = [
-      new ToggleDraw({
-        vector_source: vectorSource,
-        clearData: () => {
-          setCoordinates([]);
-        },
-      }),
-      new RotateMap({ direction: "left" }),
-      new RotateMap({ direction: "right" }),
-      new LayerSwitcher({
-        activationMode: "click",
-        groupSelectStyle: "none",
-        reverse: false,
-        tipLabel: "Toggle Layers",
-      }),
-    ];
-
-    setVectorLayer([mapGroup, fieldVectorLayerGroup, vectorLayer]);
-    setControls(controls);
-    setView(
-      new View({
-        center: fromLonLat([-78.99, 35.43]),
-        zoom: 9,
-      })
-    );
-  }, []);
-
-  const drawArea = (source, map) => {
-    function geoFunc() {
-      return function (coordinates, geometry, projection) {
-        const extent = boundingExtent(
-          /** @type {LineCoordType} */ ([
-            coordinates[0],
-            coordinates[coordinates.length - 1],
-          ]).map(function (coordinate) {
-            return fromUserCoordinate(coordinate, projection);
-          })
-        );
-        const boxCoordinates = [
-          [
-            getBottomLeft(extent),
-            getBottomRight(extent),
-            getTopRight(extent),
-            getTopLeft(extent),
-            getBottomLeft(extent),
-          ],
-        ];
-        if (geometry) {
-          geometry.setCoordinates(boxCoordinates);
-        } else {
-          geometry = new Polygon(boxCoordinates);
-        }
-        const userProjection = getUserProjection();
-        if (userProjection) {
-          geometry.transform(projection, userProjection);
-        }
-        let secondCorner;
-        let fourthCorner;
-
-        const firstCorner = coordinates[0];
-        const thirdCorner = coordinates[1];
-
-        const currentRotation = map.getView().getRotation();
-        secondCorner = [thirdCorner[0], firstCorner[1]];
-        fourthCorner = [firstCorner[0], thirdCorner[1]];
-        if (currentRotation !== 0) {
-          const verticesToRotate = new MultiPoint([secondCorner, fourthCorner]);
-          const anchor = getCenter(verticesToRotate.getExtent());
-          verticesToRotate.rotate(2 * currentRotation, anchor);
-          secondCorner = verticesToRotate.getCoordinates()[0];
-          fourthCorner = verticesToRotate.getCoordinates()[1];
-        }
-        const newCoordinates = [
-          firstCorner,
-          secondCorner,
-          thirdCorner,
-          fourthCorner,
-          firstCorner,
-        ];
-        geometry.setCoordinates([newCoordinates]);
-        return geometry;
-      };
-    }
-
-    gridDraw = new Draw({
-      source: source,
-      type: "Circle",
-      geometryFunction: geoFunc(),
-    });
-
-    map.addInteraction(gridDraw);
-    gridDraw.on("drawend", (e) => {
-      setCoordinates(e.feature.getGeometry().getCoordinates());
-    });
-    return gridDraw;
-  };
-  window.drawHandler = drawArea;
 
   return (
     <Box
@@ -385,11 +333,10 @@ const FindMissions = () => {
             p: 2,
           }}
         >
-          <MapComponent
-            mapLayers={vectorLayer}
-            controls={controls}
-            view={view}
-            mapSize={{ width: "100%", height: "100%" }}
+          <div
+            id="map-container"
+            ref={mapContainerRef}
+            style={{ width: "100%", height: "100%" }}
           />
         </Box>
       </Box>
