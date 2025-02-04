@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../../styles/App.css";
-import GeoTIFFMap from "./geotiffmap";
-import Header from "../../components/Header";
 import {
   Box,
   CircularProgress,
@@ -15,8 +13,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useLocation, useNavigate } from "react-router-dom";
+import "../../styles/App.css";
+import GeoTIFFMap from "./geotiffmap";
 import FieldFeatureModal from "./field_features_modal";
+import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import FlightAccordion from "../../components/FlightAccordion";
 
@@ -26,6 +26,10 @@ function DrawPlots() {
 
   const [gridCols, setGridCols] = useState(2);
   const [gridRows, setGridRows] = useState(2);
+  const [plotLength, setPlotLength] = useState(10);
+  const [plotWidth, setPlotWidth] = useState(10);
+  const [alleywaySize, setAlleywaySize] = useState(0);
+
   const [walkPattern, setWalkPattern] = useState("dh");
   const [walkStartLocation, setWalkStartLocation] = useState("tl");
   const [fieldFeatures, setFieldFeatures] = useState({
@@ -33,6 +37,7 @@ function DrawPlots() {
     insect_damage: null,
     crop_type: null,
   });
+
   const [coordinateFeatures, setCoordinateFeatures] = useState({});
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -46,6 +51,21 @@ function DrawPlots() {
   const handleGridRowsChange = (event) => {
     const newRows = parseInt(event.target.value, 10);
     setGridRows(newRows);
+  };
+
+  const handlePlotLengthChange = (event) => {
+    const newPlotLength = parseFloat(event.target.value) || 0;
+    setPlotLength(newPlotLength);
+  };
+
+  const handlePlotWidthChange = (event) => {
+    const newPlotWidth = parseFloat(event.target.value) || 0;
+    setPlotWidth(newPlotWidth);
+  };
+
+  const handleAlleywaySizeChange = (event) => {
+    const newAlleywaySize = parseInt(event.target.value, 10) || 0;
+    setAlleywaySize(newAlleywaySize);
   };
 
   const handleFieldFeaturesUpdate = (newData) => {
@@ -105,7 +125,7 @@ function DrawPlots() {
       );
       return;
     }
-    
+
     try {
       setLoading(true);
       const response = await axios.post(
@@ -266,6 +286,42 @@ function DrawPlots() {
               />
             </Box>
 
+            {/* Plot dimensions */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                py: 2,
+                alignItems: "center",
+              }}
+            >
+              <TextField
+                label="Plot length"
+                type="number"
+                value={plotLength}
+                onChange={handlePlotLengthChange}
+                inputProps={{ min: 0, step: "0.01" }}
+                size="small"
+              />
+              <TextField
+                label="Plot width"
+                type="number"
+                value={plotWidth}
+                onChange={handlePlotWidthChange}
+                inputProps={{ min: 0, step: "0.01" }}
+                size="small"
+                sx={{ mx: 3 }}
+              />
+              <TextField
+                label="Alleyway size"
+                type="number"
+                value={alleywaySize}
+                onChange={handleAlleywaySizeChange}
+                inputProps={{ min: 0 }}
+                size="small"
+              />
+            </Box>
+
             <Typography variant="body1" align="left">
               What is your data collection method?
             </Typography>
@@ -326,6 +382,9 @@ function DrawPlots() {
           <GeoTIFFMap
             gridCols={gridCols}
             gridRows={gridRows}
+            plotLength={plotLength}
+            plotWidth={plotWidth}
+            alleywaySize={alleywaySize}
             flightDetails={state.flightDetails}
             setCoordinateFeatures={handleCoordinateFeaturesUpdate}
           />

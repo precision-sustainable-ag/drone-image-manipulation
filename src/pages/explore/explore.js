@@ -1,25 +1,22 @@
-import { useEffect, useState } from 'react';
-import '../../styles/App.css';
-import GeoTIFF from 'ol/source/GeoTIFF';
-import FlightList from './flight_list';
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Box, Typography } from "@mui/material";
+import "../../styles/App.css";
+import FlightList from "./flight_list";
 import Header from "../../components/Header";
-import {Box, Typography} from '@mui/material';
-import { useLocation, useNavigate } from 'react-router-dom';
-import MapComponent from '../../components/MapComponent';
-import WebGLTileLayer from 'ol/layer/WebGLTile';
-import VectorSource from 'ol/source/Vector';
-import VectorLayer from 'ol/layer/Vector';
-import { RotateMap } from '../../components/MapControls';
 import Footer from "../../components/Footer";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 function Explore() {
-
-  const {state} = useLocation();
+  const { state } = useLocation();
   const navigate = useNavigate();
+  const mapRef = useRef();
+  const mapContainerRef = useRef();
 
-  const [flightDetails, setFlightDetails] = useState('');
-  const [vectorLayer, setVectorLayer] = useState(null);
-  const [controls, setControls] = useState([]);
+  const [flightDetails, setFlightDetails] = useState("");
+  // const INITIAL_CENTER = [-78.99, 35.43];
+  // const INITIAL_ZOOM = 7;
 
   const handleFlightDetailsUpdate = (newFlightDetails) => {
     setFlightDetails(newFlightDetails);
@@ -27,29 +24,72 @@ function Explore() {
 
   useEffect(() => {
     if (!flightDetails) return;
+    mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
 
-    const mapSource = new GeoTIFF({
-      sources: [
-        {
-          url: process.env.REACT_APP_API_URL+'/data/'+flightDetails.cog_path,
-          // url: 'http://localhost:8080/cog.tif',
-          crossOrigin: 'anonymous',
-          // projection: 'EPSG:4326'
+    mapRef.current = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      // center: INITIAL_CENTER,
+      // zoom: INITIAL_ZOOM,
+      // style: "mapbox://styles/mapbox/satellite-streets-v12",
+      style: {
+        version: 8,
+        sources: {},
+        layers: [],
+      },
+    });
+    mapRef.current.addControl(new mapboxgl.NavigationControl(), "top-left");
+
+    mapRef.current.on("load", async () => {
+      const response = await fetch(
+        `http://localhost:8000/metadata/${flightDetails.cog_path}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch metadata");
+      }
+      const metadata = await response.json();
+
+      mapRef.current.addSource("cog-source", {
+        type: "raster",
+        tiles: [
+          `http://localhost:8000/cog/tiles/WebMercatorQuad/{z}/{x}/{y}?` +
+            `url=${process.env.REACT_APP_API_URL}/data/${flightDetails.cog_path}` +
+            `&format=png` +
+            `&bidx=1&bidx=2&bidx=3` + // Specify RGB bands
+            `&resampling=bilinear`, // Use bilinear resampling for better quality
+        ],
+        tileSize: 256,
+        minzoom: metadata.minzoom,
+        maxzoom: metadata.maxzoom,
+        bounds: metadata.geographic_bounds,
+      });
+
+      mapRef.current.addLayer({
+        id: "cog-layer",
+        type: "raster",
+        source: "cog-source",
+        paint: {
+          "raster-opacity": 1,
+          "raster-resampling": "linear",
         },
-      ],
-    });
-    const tileLayer = new WebGLTileLayer({source: mapSource});
-    const vectorSource = new VectorSource();
-    const vectorLayer = new VectorLayer({
-      source: vectorSource
-    });
-    const controls = [
-      new RotateMap({ direction: "left" }),
-      new RotateMap({ direction: "right" }),
-    ];
+      });
 
-    setVectorLayer([tileLayer, vectorLayer]);
-    setControls(controls);
+      // Fit map to bounds
+      mapRef.current.fitBounds(metadata.geographic_bounds, {
+        padding: 50,
+        duration: 1000,
+      });
+
+      // Set minimum and maximum zoom based on the bounds
+      const minZoom = Math.log2(
+        360 / (metadata.geographic_bounds[2] - metadata.geographic_bounds[0])
+      );
+      mapRef.current.setMinZoom(minZoom);
+      mapRef.current.setMaxZoom(metadata.maxzoom);
+    });
+
+    return () => {
+      mapRef.current.remove();
+    };
   }, [flightDetails]);
 
   return (
@@ -121,10 +161,10 @@ function Explore() {
           }}
         >
           {flightDetails ? (
-            <MapComponent
-              mapLayers={vectorLayer}
-              controls={controls}
-              mapSize={{ width: "100%", height: "100%" }}
+            <div
+              id="map-container"
+              ref={mapContainerRef}
+              style={{ width: "100%", height: "100%" }}
             />
           ) : (
             "Select a mission from the list"
