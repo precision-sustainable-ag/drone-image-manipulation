@@ -11,9 +11,6 @@ const PlotFeatures = () => {
   const { state } = location;
   const plotMapRef = useRef(null);
   const navigate = useNavigate();
-  console.log("plot page", state);
-  console.log("plot page", state["features"]);
-  console.log("plot page", state["flight_details"]);
 
   if (!state || !state.features || !state.flight_details) {
     return <div>Loading...</div>;
