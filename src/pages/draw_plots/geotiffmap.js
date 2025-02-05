@@ -5,7 +5,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import DrawRectangle from "mapbox-gl-draw-rectangle-mode";
-import createGrid from "../../utils/mapUtils";
+import { createGrid, reorderGrid } from "../../utils/mapUtils";
 
 // TODO: Change the default EPSG:3857 projection to EPSG:4326
 const GeoTIFFMap = ({
@@ -13,8 +13,12 @@ const GeoTIFFMap = ({
   gridRows,
   plotLength,
   plotWidth,
-  alleywaySize,
+  lengthAlleywaySize,
+  widthAlleywaySize,
   flightDetails,
+  walkPattern,
+  walkStartLocation,
+  setCoordinateFeatures,
 }) => {
   const mapRef = useRef();
   const mapContainerRef = useRef();
@@ -40,6 +44,10 @@ const GeoTIFFMap = ({
       // }
       drawRef.current.changeMode("draw_line_string");
     }
+  };
+
+  const handleDrawUpdateAndDelete = (event) => {
+    setCoordinateFeatures(drawRef.current.getAll());
   };
 
   useEffect(() => {
@@ -69,8 +77,8 @@ const GeoTIFFMap = ({
       mapRef.current.addSource("cog-source", {
         type: "raster",
         tiles: [
-          `http://localhost:8000/cog/tiles/WebMercatorQuad/{z}/{x}/{y}?` +
-            `url=${process.env.REACT_APP_API_URL}/data/${flightDetails.cog_path}` +
+          `${process.env.REACT_APP_TILING_SERVER_URL}/cog/tiles/WebMercatorQuad/{z}/{x}/{y}?` +
+            `url=http://host.docker.internal:8080/data/${flightDetails.cog_path}` +
             `&format=png` +
             `&bidx=1&bidx=2&bidx=3` + // Specify RGB bands
             `&resampling=bilinear`, // Use bilinear resampling for better quality
@@ -120,12 +128,16 @@ const GeoTIFFMap = ({
 
       mapRef.current.on("draw.create", handleDrawCreate);
       mapRef.current.on("draw.modechange", handleModeChange);
+      mapRef.current.on("draw.update", handleDrawUpdateAndDelete);
+      mapRef.current.on("draw.delete", handleDrawUpdateAndDelete);
     });
 
     return () => {
       if (mapRef.current) {
         mapRef.current.off("draw.create", handleDrawCreate);
         mapRef.current.off("draw.modechange", handleModeChange);
+        mapRef.current.off("draw.update", handleDrawUpdateAndDelete);
+        mapRef.current.off("draw.delete", handleDrawUpdateAndDelete);
         mapRef.current.remove();
       }
     };
@@ -140,7 +152,8 @@ const GeoTIFFMap = ({
           gridRows,
           plotLength,
           plotWidth,
-          alleywaySize
+          lengthAlleywaySize,
+          widthAlleywaySize
         );
 
         drawRef.current.deleteAll();
@@ -150,7 +163,15 @@ const GeoTIFFMap = ({
           return;
         }
 
-        gridCells.forEach((cell, index) => {
+        const orderedGrid = reorderGrid(
+          gridCells,
+          gridRows,
+          gridCols,
+          walkPattern,
+          walkStartLocation
+        );
+
+        orderedGrid.forEach((cell, index) => {
           drawRef.current.add({
             type: "Feature",
             geometry: {
@@ -159,14 +180,17 @@ const GeoTIFFMap = ({
             },
             properties: {
               id: `grid-cell-${index}`,
+              name: `Plot ${index + 1}`,
+              plot_num: index + 1,
             },
           });
         });
+        handleDrawUpdateAndDelete();
       } catch (error) {
         console.error("Grid generation error:", error);
       }
     }
-  }, [baseline, gridCols, gridRows, plotLength, plotWidth, alleywaySize]);
+  }, [baseline, gridCols, gridRows, plotLength, plotWidth, lengthAlleywaySize, widthAlleywaySize, walkPattern, walkStartLocation]);
 
   return (
     <Box

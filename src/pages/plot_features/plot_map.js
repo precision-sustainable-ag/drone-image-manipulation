@@ -1,6 +1,5 @@
 import React, {
   forwardRef,
-  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -11,117 +10,147 @@ import {
   Backdrop,
   CircularProgress,
 } from "@mui/material";
-
-import GeoTIFF from "ol/source/GeoTIFF";
-import VectorSource from "ol/source/Vector";
-import VectorLayer from "ol/layer/Vector";
-import WebGLTileLayer from "ol/layer/WebGLTile";
-import { Style, Stroke, Text } from "ol/style";
-import GeoJSON from "ol/format/GeoJSON";
-import { Polygon } from "ol/geom";
-
-import "ol/ol.css";
 import "../../styles/App.css";
-
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import MapComponent from "../../components/MapComponent";
-import { RotateMap } from "../../components/MapControls";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import geoUtils from "../../utils/geoUtils";
 
 const PlotMap = forwardRef(({ apiOutput }, ref) => {
-  // const navigate = useNavigate();
 
-  const mapRef = useRef(null);
-  // const [mapSource, setMapSource] = useState(null);
-  const [mapLayers, setMapLayers] = useState(null);
-  const [vectorLayer, setVectorLayer] = useState(null);
-  const [controls, setControls] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [flightDetails] = useState(apiOutput["flight_details"] || {});
+  const [metadata, setMetadata] = useState(null);
 
   useImperativeHandle(ref, () => ({
     exportPlotImages,
   }));
 
-  const handleMapInit = useCallback((mapInstance) => {
-    mapRef.current = mapInstance;
-  }, []);
+  const mapRef = useRef();
+  const mapContainerRef = useRef();
 
   useEffect(() => {
-    if (!apiOutput) return;
+    if (!flightDetails) return;
 
-    const mapSource = new GeoTIFF({
-      sources: [
-        {
-          url:
-            process.env.REACT_APP_API_URL +
-            "/data/" +
-            apiOutput["flight_details"]["cog_path"],
-          crossOrigin: "anonymous",
-          // projection: 'EPSG:4326'
-        },
-      ],
-    });
-    const tileLayer = new WebGLTileLayer({ source: mapSource });
-    const geoJSONFormat = new GeoJSON();
-    const geoJSONFeature = geoJSONFormat.readFeatures(apiOutput["features"]);
+    mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
 
-    // console.log(customFeat);
-    const vectorSource = new VectorSource({
-      // features: [customFeat]
-      features: geoJSONFeature,
-      // features: new Collection(apiOutput['features']),
-    });
-
-    const boundaryStyle = new Style({
-      stroke: new Stroke({
-        color: "white",
-        width: 2,
-      }),
-    });
-    const labelStyle = new Style({
-      text: new Text({
-        font: "13px Calibri,sans-serif",
-        stroke: new Stroke({
-          color: "#fff",
-          width: 3,
-        }),
-      }),
-    });
-    const style = [boundaryStyle, labelStyle];
-    const vectorLayer = new VectorLayer({
-      source: vectorSource,
-      style: function (feature) {
-        labelStyle.getText().setText(`${feature.get("name")}`);
-        return style;
+    mapRef.current = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: {
+        version: 8,
+        sources: {},
+        layers: [],
+        glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
       },
-      // style: customStyleFunction // Apply the custom style function
     });
-    const controls = [
-      new RotateMap({ direction: "left" }),
-      new RotateMap({ direction: "right" }),
-    ];
+    mapRef.current.addControl(new mapboxgl.NavigationControl(), "top-left");
 
-    // setMapSource(mapSource);
-    setVectorLayer(vectorLayer);
-    setMapLayers([tileLayer, vectorLayer]);
-    setControls(controls);
-  }, [apiOutput]);
+    mapRef.current.on("load", async () => {
+      const response = await fetch(
+        `http://localhost:8000/metadata/${flightDetails.cog_path}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch metadata");
+      }
+      const metadata = await response.json();
+      setMetadata(metadata);
+
+      mapRef.current.addSource("cog-source", {
+        type: "raster",
+        tiles: [
+          `http://localhost:8000/cog/tiles/WebMercatorQuad/{z}/{x}/{y}?` +
+            `url=http://host.docker.internal:8080/data/${flightDetails.cog_path}` +
+            `&format=png` +
+            `&bidx=1&bidx=2&bidx=3` + // Specify RGB bands
+            `&resampling=bilinear`, // Use bilinear resampling for better quality
+        ],
+        tileSize: 256,
+        minzoom: metadata.minzoom,
+        maxzoom: metadata.maxzoom,
+        bounds: metadata.geographic_bounds,
+      });
+
+      mapRef.current.addLayer({
+        id: "cog-layer",
+        type: "raster",
+        source: "cog-source",
+        paint: {
+          "raster-opacity": 1,
+        },
+      });
+
+      mapRef.current.addSource("grids", {
+        type: "geojson",
+        data: apiOutput.features, // Use the grid data directly
+      });
+
+      // Add a layer to show grid boundaries
+      mapRef.current.addLayer({
+        id: "grid-layer",
+        type: "line",
+        source: "grids",
+        paint: {
+          "line-color": "white",
+          "line-width": 2,
+        },
+      });
+
+      mapRef.current.addLayer({
+        id: `grids-labels`,
+        type: "symbol",
+        source: "grids",
+        layout: {
+          "text-field": ["get", "name"],
+          "text-size": 12,
+          "text-anchor": "center",
+        },
+        paint: {
+          "text-color": "#ffffff",
+          // "text-halo-color": "#ffffff",
+          // "text-halo-width": 1
+        },
+      });
+
+      // Fit map to bounds
+      mapRef.current.fitBounds(metadata.geographic_bounds, {
+        padding: 50,
+        duration: 1000,
+      });
+
+      // Set minimum and maximum zoom based on the bounds
+      const minZoom = Math.log2(
+        360 / (metadata.geographic_bounds[2] - metadata.geographic_bounds[0])
+      );
+      mapRef.current.setMinZoom(minZoom);
+      mapRef.current.setMaxZoom(metadata.maxzoom);
+    });
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+      }
+    };
+  }, [apiOutput.features, flightDetails]);
 
   const exportPlotImages = async () => {
-    if (!vectorLayer) return;
+    if (!mapRef.current || !apiOutput.features) return;
+    const layersToHide = ["grid-layer", "grids-labels"];
+    
     try {
       setIsLoading(true);
-      const features = vectorLayer.getSource().getFeatures();
+      layersToHide.forEach((layer) => {
+        if (mapRef.current.getLayer(layer)) {
+          mapRef.current.setLayoutProperty(layer, "visibility", "none");
+        }
+      });
+
       const zip = new JSZip();
 
-      for (const feature of features) {
-        const flatCoordinates = feature.getGeometry().getFlatCoordinates();
-        const gridCoordinates = [];
-        for (let i = 0; i < flatCoordinates.length; i += 2) {
-          gridCoordinates.push([flatCoordinates[i], flatCoordinates[i + 1]]);
-        }
-        const name = feature.get("name");
-        const imageBlob = await captureExtentAsImage(gridCoordinates);
+      for (const feature of apiOutput.features.features) {
+        const coordinates = feature.geometry.coordinates[0];
+        const imageBlob = await capturePolygonAsImage(coordinates);
+        const name = feature.properties.name || `grid-cell-${Date.now()}`;
         zip.file(`${name}.png`, imageBlob, { binary: true });
       }
       zip.generateAsync({ type: "blob" }).then((content) => {
@@ -130,85 +159,94 @@ const PlotMap = forwardRef(({ apiOutput }, ref) => {
     } catch (error) {
       alert("Error in exporting images" + error);
     } finally {
+      layersToHide.forEach((layer) => {
+        if (mapRef.current.getLayer(layer)) {
+          mapRef.current.setLayoutProperty(layer, "visibility", "visible");
+        }
+      });
+      mapRef.current.fitBounds(metadata.geographic_bounds, {
+        padding: 50,
+        duration: 1000,
+      });
       setIsLoading(false);
     }
   };
 
-  const captureExtentAsImage = async (gridCoords) => {
+  const capturePolygonAsImage = async (coordinates) => {
+    const bounds = coordinates.reduce(
+      (bounds, coord) => {
+        const [lng, lat] = coord;
+        return [
+          Math.min(bounds[0], lng),
+          Math.min(bounds[1], lat),
+          Math.max(bounds[2], lng),
+          Math.max(bounds[3], lat),
+        ];
+      },
+      [Infinity, Infinity, -Infinity, -Infinity]
+    );
+
+    // Calculate angle of the plot
+    const start = coordinates[0];
+    const end = coordinates[1];
+    const centerLat = (start[1] + end[1]) / 2;
+    const dxMeters = geoUtils.lonToMeters(end[0] - start[0], centerLat);
+    const dyMeters = geoUtils.latToMeters(end[1] - start[1]);
+    const angle = geoUtils.toDegrees(Math.atan2(dyMeters, dxMeters));
+
+    // Fit map to this plot and angle
+    mapRef.current.fitBounds(bounds, { duration: 0 });
+    mapRef.current.setBearing(-angle);
+    await new Promise((resolve) => {
+      mapRef.current.once("idle", resolve);
+    });
+
+    // Map geographic coordinates to pixel coordinates and calculate the bounds accordingly
+    const pixelCoords = coordinates.map((coord) =>
+      mapRef.current.project(coord)
+    );
+    const minX = Math.min(...pixelCoords.map((p) => p.x));
+    const maxX = Math.max(...pixelCoords.map((p) => p.x));
+    const minY = Math.min(...pixelCoords.map((p) => p.y));
+    const maxY = Math.max(...pixelCoords.map((p) => p.y));
+
+    const width = Math.ceil(maxX - minX);
+    const height = Math.ceil(maxY - minY);
+
     return new Promise((resolve, reject) => {
-      if (!mapRef.current) return reject(new Error("Map not initialized"));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d");
+      const mapCanvas = mapRef.current.getCanvas();
 
-      const map = mapRef.current;
-      const currentView = map.getView();
-      const currentCenter = currentView.getCenter();
-      const currentZoom = currentView.getZoom();
-      const currentRotation = currentView.getRotation();
-
-      const polygon = new Polygon([gridCoords]);
-      map.getView().setRotation(apiOutput.rotation);
-      map.getView().fit(polygon, { size: map.getSize() });
-
-      map.once("rendercomplete", () => {
-        const mapCanvas = map.getViewport().querySelector("canvas");
-
-        // Calculate pixel coordinates from actual coordinates
-        const gridPixels = gridCoords.map((coord) =>
-          map.getPixelFromCoordinate(coord)
+      if (mapCanvas) {
+        context.drawImage(
+          mapCanvas,
+          minX,
+          minY,
+          width,
+          height,
+          0,
+          0,
+          width,
+          height
         );
-
-        const topLeftPixel = gridPixels[0];
-        const bottomRightPixel = gridPixels[2];
-
-        // Calculate width and height of the area
-        const pixelRatio = window.devicePixelRatio || 1;
-        const width = Math.ceil(
-          (bottomRightPixel[0] - topLeftPixel[0]) * pixelRatio
-        );
-        const height = Math.ceil(
-          (bottomRightPixel[1] - topLeftPixel[1]) * pixelRatio
-        );
-
-        // Create a new canvas and context for the plot image
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const context = canvas.getContext("2d");
-
-        if (mapCanvas) {
-          context.drawImage(
-            mapCanvas,
-            topLeftPixel[0] * pixelRatio,
-            topLeftPixel[1] * pixelRatio,
-            width,
-            height,
-            0,
-            0,
-            width,
-            height
-          );
-
-          canvas.toBlob((blob) => {
-            resolve(blob);
-            map.getView().setCenter(currentCenter);
-            map.getView().setZoom(currentZoom);
-            map.getView().setRotation(currentRotation);
-          }, "image/png");
-        } else {
-          reject(new Error("Canvas element not found"));
-        }
-      });
-
-      map.renderSync();
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, "image/png");
+      } else {
+        reject(new Error("Canvas element not found"));
+      }
     });
   };
 
   return (
     <React.Fragment>
-      <MapComponent
-        mapLayers={mapLayers}
-        controls={controls}
-        onMapInit={handleMapInit}
-        mapSize={{ width: "100%", height: "100%" }}
+      <div
+        id="map-container"
+        ref={mapContainerRef}
+        style={{ width: "100%", height: "100%" }}
       />
 
       <Backdrop

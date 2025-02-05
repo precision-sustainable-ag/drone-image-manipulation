@@ -28,7 +28,8 @@ function DrawPlots() {
   const [gridRows, setGridRows] = useState(2);
   const [plotLength, setPlotLength] = useState(10);
   const [plotWidth, setPlotWidth] = useState(10);
-  const [alleywaySize, setAlleywaySize] = useState(0);
+  const [lengthAlleywaySize, setLengthAlleywaySize] = useState(0);
+  const [widthAlleywaySize, setWidthAlleywaySize] = useState(0);
 
   const [walkPattern, setWalkPattern] = useState("dh");
   const [walkStartLocation, setWalkStartLocation] = useState("tl");
@@ -63,9 +64,14 @@ function DrawPlots() {
     setPlotWidth(newPlotWidth);
   };
 
-  const handleAlleywaySizeChange = (event) => {
-    const newAlleywaySize = parseInt(event.target.value, 10) || 0;
-    setAlleywaySize(newAlleywaySize);
+  const handleLengthAlleywaySizeChange = (event) => {
+    const newLengthAlleywaySize = parseInt(event.target.value, 10) || 0;
+    setLengthAlleywaySize(newLengthAlleywaySize);
+  };
+
+  const handleWidthAlleywaySizeChange = (event) => {
+    const newWidthAlleywaySize = parseInt(event.target.value, 10) || 0;
+    setWidthAlleywaySize(newWidthAlleywaySize);
   };
 
   const handleFieldFeaturesUpdate = (newData) => {
@@ -105,23 +111,25 @@ function DrawPlots() {
       return;
     }
     const requestData = {
-      flight_id: coordinateFeatures["flight_id"],
+      flight_id: state.flightDetails.flight_id,
       coordinate_features: coordinateFeatures,
       data_collection_method: {
         start_point: walkStartLocation,
         pattern: walkPattern,
       },
       field_features: fieldFeatures,
+      grid_dimensions: {
+        cols: gridCols,
+        rows: gridRows,
+      }
     };
 
     if (
-      !coordinateFeatures.vertical ||
-      coordinateFeatures.vertical.length === 0 ||
-      !coordinateFeatures.horizontal ||
-      coordinateFeatures.horizontal.length === 0
+      !coordinateFeatures.features ||
+      coordinateFeatures.features.length === 0
     ) {
       alert(
-        "Grid data is incomplete. Please ensure the vertical and horizontal values are properly populated."
+        "Grid data is incomplete. Please ensure to create a grid before moving to the next page."
       );
       return;
     }
@@ -293,6 +301,7 @@ function DrawPlots() {
                 justifyContent: "space-between",
                 py: 2,
                 alignItems: "center",
+                gap: 1,
               }}
             >
               <TextField
@@ -310,13 +319,32 @@ function DrawPlots() {
                 onChange={handlePlotWidthChange}
                 inputProps={{ min: 0, step: "0.01" }}
                 size="small"
-                sx={{ mx: 3 }}
+              />
+            </Box>
+
+            {/* Alleyway dimensions */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                py: 2,
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              <TextField
+                label="Length-wise alleyway"
+                type="number"
+                value={lengthAlleywaySize}
+                onChange={handleLengthAlleywaySizeChange}
+                inputProps={{ min: 0 }}
+                size="small"
               />
               <TextField
-                label="Alleyway size"
+                label="Width-wise alleyway"
                 type="number"
-                value={alleywaySize}
-                onChange={handleAlleywaySizeChange}
+                value={widthAlleywaySize}
+                onChange={handleWidthAlleywaySizeChange}
                 inputProps={{ min: 0 }}
                 size="small"
               />
@@ -384,8 +412,11 @@ function DrawPlots() {
             gridRows={gridRows}
             plotLength={plotLength}
             plotWidth={plotWidth}
-            alleywaySize={alleywaySize}
+            lengthAlleywaySize={lengthAlleywaySize}
+            widthAlleywaySize={widthAlleywaySize}
             flightDetails={state.flightDetails}
+            walkPattern={walkPattern}
+            walkStartLocation={walkStartLocation}
             setCoordinateFeatures={handleCoordinateFeaturesUpdate}
           />
         </Box>
@@ -400,8 +431,8 @@ function DrawPlots() {
         nextDisabled={
           [null, undefined, ""].includes(fieldFeatures["crop_type"]) ||
           [null, undefined, ""].includes(fieldFeatures["lead_scientist"]) ||
-          !coordinateFeatures.box ||
-          coordinateFeatures.box.length === 0
+          !coordinateFeatures.features ||
+          coordinateFeatures.features.length === 0
         }
       />
 

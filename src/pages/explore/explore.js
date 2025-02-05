@@ -52,7 +52,7 @@ function Explore() {
         type: "raster",
         tiles: [
           `http://localhost:8000/cog/tiles/WebMercatorQuad/{z}/{x}/{y}?` +
-            `url=${process.env.REACT_APP_API_URL}/data/${flightDetails.cog_path}` +
+            `url=http://host.docker.internal:8080/data/${flightDetails.cog_path}` +
             `&format=png` +
             `&bidx=1&bidx=2&bidx=3` + // Specify RGB bands
             `&resampling=bilinear`, // Use bilinear resampling for better quality
