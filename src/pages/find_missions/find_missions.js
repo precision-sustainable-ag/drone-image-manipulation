@@ -19,6 +19,8 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import DrawRectangle from "mapbox-gl-draw-rectangle-mode";
+import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
+import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 
 const FindMissions = () => {
   const navigate = useNavigate();
@@ -39,6 +41,19 @@ const FindMissions = () => {
       style: "mapbox://styles/mapbox/satellite-streets-v12",
     });
     mapRef.current.addControl(new mapboxgl.NavigationControl(), "top-left");
+
+    const geocoder = new MapboxGeocoder({
+      accessToken: mapboxgl.accessToken,
+      placeholder: "Search for an address...",
+      marker: false,
+      flyTo: {
+        bearing: 0,
+        speed: 2,
+        curve: 1,
+      },
+      countries: "us",
+    });
+    mapRef.current.addControl(geocoder, "top");
 
     mapRef.current.on("load", async () => {
       const addFieldLayoutLayer = (
