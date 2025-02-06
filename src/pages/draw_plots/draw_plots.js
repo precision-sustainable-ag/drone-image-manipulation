@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Box,
+  Button,
   CircularProgress,
   FormControl,
   Grid,
@@ -40,6 +41,7 @@ function DrawPlots() {
   });
 
   const [coordinateFeatures, setCoordinateFeatures] = useState({});
+  const [uploadedGeojson, setUploadedGeojson] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [respData, setRespData] = useState(null);
@@ -80,6 +82,23 @@ function DrawPlots() {
 
   const handleCoordinateFeaturesUpdate = (newData) => {
     setCoordinateFeatures(newData);
+  };
+
+  const handleFileUpload = (event) => {
+    console.log(event)
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const geojson = JSON.parse(e.target.result);
+        setUploadedGeojson(geojson);
+      } catch (error) {
+        console.error("Invalid GeoJSON file:", error);
+      }
+    };
+    reader.readAsText(file);
   };
 
   const forceLoad = (d) => {
@@ -393,6 +412,26 @@ function DrawPlots() {
                 setFieldFeatures={handleFieldFeaturesUpdate}
               ></FieldFeatureModal>
             </Grid>
+
+            <input
+              type="file"
+              accept=".geojson,.json"
+              style={{ display: "none" }}
+              id="upload-shapefile"
+              onChange={handleFileUpload}
+            />
+            <label htmlFor="upload-shapefile">
+              <Button
+                component="span"
+                sx={{
+                  color: "black",
+                  textDecoration: "underline",
+                  "&:hover": { textDecoration: "underline" },
+                }}
+              >
+                + Upload shape file
+              </Button>
+            </label>
           </Box>
         </Box>
 
@@ -418,6 +457,7 @@ function DrawPlots() {
             walkPattern={walkPattern}
             walkStartLocation={walkStartLocation}
             setCoordinateFeatures={handleCoordinateFeaturesUpdate}
+            uploadedGeojson={uploadedGeojson}
           />
         </Box>
       </Box>

@@ -285,11 +285,24 @@ const PlotTable = ({ state, plotMapRef }) => {
     handleClose();
   };
 
+  const exportShapefile = () => {
+    if (!state.features || state.features.features.length === 0) {
+      console.error("No features available to export");
+      return;
+    }
+    const blob = new Blob([JSON.stringify(state.features, null, 2)], {
+      type: "application/json",
+    });
+    FileSaver.saveAs(blob, `${state.flight_details.flight_id}.geojson`);
+    handleClose();
+  };  
+
   const exportAll = () => {
     handleDownloadBrAPIRequest();
     exportTableAsCSV();
     exportMetadataAsCSV();
     plotMapRef.current.exportPlotImages();
+    exportShapefile();
   };
 
   const handleDownloadBrAPIRequest = () => {
@@ -354,6 +367,9 @@ const PlotTable = ({ state, plotMapRef }) => {
           </MenuItem>
           <MenuItem onClick={() => plotMapRef.current.exportPlotImages()}>
             EXPORT PLOT IMAGES
+          </MenuItem>
+          <MenuItem onClick={exportShapefile}>
+            EXPORT SHAPEFILE
           </MenuItem>
           <Divider />
           <MenuItem onClick={exportAll}>EXPORT ALL</MenuItem>
