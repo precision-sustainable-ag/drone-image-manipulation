@@ -19,6 +19,7 @@ const GeoTIFFMap = ({
   walkPattern,
   walkStartLocation,
   setCoordinateFeatures,
+  uploadedGeojson
 }) => {
   const mapRef = useRef();
   const mapContainerRef = useRef();
@@ -192,6 +193,49 @@ const GeoTIFFMap = ({
     }
   }, [baseline, gridCols, gridRows, plotLength, plotWidth, lengthAlleywaySize, widthAlleywaySize, walkPattern, walkStartLocation]);
 
+  useEffect(() => {
+    if (!uploadedGeojson || !mapRef.current || !drawRef.current) return;
+
+    // Ensure uploadedGeojson is a FeatureCollection with features array
+    if (
+      uploadedGeojson.type !== "FeatureCollection" ||
+      !Array.isArray(uploadedGeojson.features)
+    ) {
+      console.error("Invalid GeoJSON format:", uploadedGeojson);
+      return;
+    }
+
+    setBaseLine([]);
+    drawRef.current.deleteAll();
+
+    uploadedGeojson.features.forEach(({ type, geometry, properties }) => {
+      if (!geometry || !properties) {
+        console.warn("Skipping invalid feature:", {
+          type,
+          geometry,
+          properties,
+        });
+        return;
+      }
+
+      /**
+       * Reconstruct each GeoJSON feature by retaining only the 'id', 'name', and 'plot_num' properties.
+       * The 'geometry' is preserved as is.
+       */
+      drawRef.current.add({
+        type,
+        geometry,
+        properties: {
+          id: properties.id,
+          name: properties.name,
+          plot_num: properties.plot_num,
+        },
+      });
+    });
+
+    handleDrawUpdateAndDelete();
+  }, [uploadedGeojson]);
+  
   return (
     <Box
       style={{
