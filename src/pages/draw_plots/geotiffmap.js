@@ -79,7 +79,7 @@ const GeoTIFFMap = ({
         type: "raster",
         tiles: [
           `${process.env.REACT_APP_TILING_SERVER_URL}/cog/tiles/WebMercatorQuad/{z}/{x}/{y}?` +
-            `url=http://host.docker.internal:8080/data/${flightDetails.cog_path}` +
+            `url=${metadata.url}` +
             `&format=png` +
             `&bidx=1&bidx=2&bidx=3` + // Specify RGB bands
             `&resampling=bilinear`, // Use bilinear resampling for better quality
