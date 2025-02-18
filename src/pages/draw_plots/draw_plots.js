@@ -67,12 +67,12 @@ function DrawPlots() {
   };
 
   const handleLengthAlleywaySizeChange = (event) => {
-    const newLengthAlleywaySize = parseInt(event.target.value, 10) || 0;
+    const newLengthAlleywaySize = parseFloat(event.target.value) || 0;
     setLengthAlleywaySize(newLengthAlleywaySize);
   };
 
   const handleWidthAlleywaySizeChange = (event) => {
-    const newWidthAlleywaySize = parseInt(event.target.value, 10) || 0;
+    const newWidthAlleywaySize = parseFloat(event.target.value) || 0;
     setWidthAlleywaySize(newWidthAlleywaySize);
   };
 
@@ -324,19 +324,19 @@ function DrawPlots() {
               }}
             >
               <TextField
-                label="Plot length"
+                label="Plot length (meters)"
                 type="number"
                 value={plotLength}
                 onChange={handlePlotLengthChange}
-                inputProps={{ min: 0, step: "0.01" }}
+                inputProps={{ min: 0, step: "0.1" }}
                 size="small"
               />
               <TextField
-                label="Plot width"
+                label="Plot width (meters)"
                 type="number"
                 value={plotWidth}
                 onChange={handlePlotWidthChange}
-                inputProps={{ min: 0, step: "0.01" }}
+                inputProps={{ min: 0, step: "0.1" }}
                 size="small"
               />
             </Box>
@@ -352,19 +352,19 @@ function DrawPlots() {
               }}
             >
               <TextField
-                label="Length-wise alleyway"
+                label="Length-wise alleyway (meters)"
                 type="number"
                 value={lengthAlleywaySize}
                 onChange={handleLengthAlleywaySizeChange}
-                inputProps={{ min: 0 }}
+                inputProps={{ min: 0, step: "0.1" }}
                 size="small"
               />
               <TextField
-                label="Width-wise alleyway"
+                label="Width-wise alleyway (meters)"
                 type="number"
                 value={widthAlleywaySize}
                 onChange={handleWidthAlleywaySizeChange}
-                inputProps={{ min: 0 }}
+                inputProps={{ min: 0, step: "0.1" }}
                 size="small"
               />
             </Box>
