@@ -49,7 +49,34 @@ const GeoTIFFMap = ({
 
   const handleDrawUpdateAndDelete = (event) => {
     setCoordinateFeatures(drawRef.current.getAll());
+    updateLabels();
   };
+
+  const updateLabels = () => {
+    if (mapRef.current.getSource("grid-labels")) {
+      mapRef.current.removeLayer("grid-text");
+      mapRef.current.removeSource("grid-labels");
+    }
+    
+    mapRef.current.addSource("grid-labels",{
+        type: "geojson",
+        data: drawRef.current.getAll(),
+      });
+    
+    mapRef.current.addLayer({
+      id: "grid-text",
+      type: "symbol",
+      source: "grid-labels",
+      layout: {
+        "text-field": ["get", "name"],
+        "text-size": 12,
+        "text-anchor": "center",
+      },
+      paint: {
+        "text-color": "#ffffff",
+      },
+    });
+  }
 
   useEffect(() => {
     if (!flightDetails) return;
@@ -62,6 +89,7 @@ const GeoTIFFMap = ({
         version: 8,
         sources: {},
         layers: [],
+        glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
       },
     });
     mapRef.current.addControl(new mapboxgl.NavigationControl(), "top-left");
