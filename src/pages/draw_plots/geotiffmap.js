@@ -6,6 +6,8 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import DrawRectangle from "mapbox-gl-draw-rectangle-mode";
 import { createGrid, reorderGrid } from "../../utils/mapUtils";
+import { CustomControl } from "../../components/MapControls";
+import SelectPolygonsMode from "../../components/SelectPolygonsMode";
 
 // TODO: Change the default EPSG:3857 projection to EPSG:4326
 const GeoTIFFMap = ({
@@ -150,10 +152,18 @@ const GeoTIFFMap = ({
         modes: {
           ...MapboxDraw.modes,
           draw_rectangle: DrawRectangle,
+          select_polygons: SelectPolygonsMode
         },
       });
       drawRef.current = draw;
       mapRef.current.addControl(draw);
+
+      const onClick = () => {
+        drawRef.current.changeMode("select_polygons", drawRef.current.getAll());
+      }
+
+      mapRef.current.addControl(new CustomControl(onClick));
+      mapRef.current.addControl(new mapboxgl.FullscreenControl());
 
       mapRef.current.on("draw.create", handleDrawCreate);
       mapRef.current.on("draw.modechange", handleModeChange);
