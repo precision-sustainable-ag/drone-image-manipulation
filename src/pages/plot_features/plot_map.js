@@ -11,11 +11,9 @@ import {
   CircularProgress,
 } from "@mui/material";
 import "../../styles/App.css";
-import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import geoUtils from "../../utils/geoUtils";
 
 const PlotMap = forwardRef(({ apiOutput }, ref) => {
 
@@ -135,110 +133,33 @@ const PlotMap = forwardRef(({ apiOutput }, ref) => {
 
   const exportPlotImages = async () => {
     if (!mapRef.current || !apiOutput.features) return;
-    const layersToHide = ["grid-layer", "grids-labels"];
-    
+
     try {
       setIsLoading(true);
-      layersToHide.forEach((layer) => {
-        if (mapRef.current.getLayer(layer)) {
-          mapRef.current.setLayoutProperty(layer, "visibility", "none");
-        }
+
+      const response = await fetch("http://127.0.0.1:5000/export-images", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          flight_id: apiOutput.flight_details.flight_id,
+          features: apiOutput.features.features,
+        }),
       });
 
-      const zip = new JSZip();
-
-      for (const feature of apiOutput.features.features) {
-        const coordinates = feature.geometry.coordinates[0];
-        const imageBlob = await capturePolygonAsImage(coordinates);
-        const name = feature.properties.name || `grid-cell-${Date.now()}`;
-        zip.file(`${name}.png`, imageBlob, { binary: true });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to export images: ${errorData.message}`);
       }
-      zip.generateAsync({ type: "blob" }).then((content) => {
-        saveAs(content, "plot_images.zip");
-      });
+
+      const blob = await response.blob();
+      saveAs(blob, "plot_images.zip");
     } catch (error) {
-      alert("Error in exporting images" + error);
+      alert("Error in exporting images " + error);
     } finally {
-      layersToHide.forEach((layer) => {
-        if (mapRef.current.getLayer(layer)) {
-          mapRef.current.setLayoutProperty(layer, "visibility", "visible");
-        }
-      });
-      mapRef.current.fitBounds(metadata.geographic_bounds, {
-        padding: 50,
-        duration: 1000,
-      });
       setIsLoading(false);
     }
-  };
-
-  const capturePolygonAsImage = async (coordinates) => {
-    const bounds = coordinates.reduce(
-      (bounds, coord) => {
-        const [lng, lat] = coord;
-        return [
-          Math.min(bounds[0], lng),
-          Math.min(bounds[1], lat),
-          Math.max(bounds[2], lng),
-          Math.max(bounds[3], lat),
-        ];
-      },
-      [Infinity, Infinity, -Infinity, -Infinity]
-    );
-
-    // Calculate angle of the plot
-    const start = coordinates[0];
-    const end = coordinates[1];
-    const centerLat = (start[1] + end[1]) / 2;
-    const dxMeters = geoUtils.lonToMeters(end[0] - start[0], centerLat);
-    const dyMeters = geoUtils.latToMeters(end[1] - start[1]);
-    const angle = geoUtils.toDegrees(Math.atan2(dyMeters, dxMeters));
-
-    // Fit map to this plot and angle
-    mapRef.current.fitBounds(bounds, { duration: 0 });
-    mapRef.current.setBearing(-angle);
-    await new Promise((resolve) => {
-      mapRef.current.once("idle", resolve);
-    });
-
-    // Map geographic coordinates to pixel coordinates and calculate the bounds accordingly
-    const pixelCoords = coordinates.map((coord) =>
-      mapRef.current.project(coord)
-    );
-    const minX = Math.min(...pixelCoords.map((p) => p.x));
-    const maxX = Math.max(...pixelCoords.map((p) => p.x));
-    const minY = Math.min(...pixelCoords.map((p) => p.y));
-    const maxY = Math.max(...pixelCoords.map((p) => p.y));
-
-    const width = Math.ceil(maxX - minX);
-    const height = Math.ceil(maxY - minY);
-
-    return new Promise((resolve, reject) => {
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const context = canvas.getContext("2d");
-      const mapCanvas = mapRef.current.getCanvas();
-
-      if (mapCanvas) {
-        context.drawImage(
-          mapCanvas,
-          minX,
-          minY,
-          width,
-          height,
-          0,
-          0,
-          width,
-          height
-        );
-        canvas.toBlob((blob) => {
-          resolve(blob);
-        }, "image/png");
-      } else {
-        reject(new Error("Canvas element not found"));
-      }
-    });
   };
 
   return (
