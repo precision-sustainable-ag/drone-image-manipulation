@@ -1,10 +1,11 @@
-version: '1'
+version: '3.8'
+
 # Define environments first
 x-environments:
   dev-local: &dev-local-env
     environment:
       NODE_ENV: development
-      REACT_APP_API_URL: http://localhost:5000
+      REACT_APP_API_URL: http://api-dev:5000
       SERVER_NAME: localhost
       DNS_RESOLVER: 8.8.8.8
       SSL_CONFIG: ""
@@ -14,18 +15,43 @@ x-environments:
       NODE_ENV: development
       REACT_APP_API_URL: http://dronepilotapp.psi.ncsu.edu
       SERVER_NAME: localhost
-      DNS_RESOLVER: 152.1.14.14 # points to NCSU DNS server (not needed if already on VPN/ currently not in use)
+      DNS_RESOLVER: 152.1.14.14
       SSL_CONFIG: ""
 
   prod: &prod-env
     environment:
       NODE_ENV: production
-      # REACT_APP_API_URL: http://api:5000
-      # DNS_RESOLVER: ""
-      # SSL_CONFIG: ""
+      REACT_APP_API_URL: http://dronepilotapp.psi.ncsu.edu/
+      SERVER_NAME: dronepilotapp.psi.ncsu.edu
+      SSL_CONFIG: ""
 
 services:
-  dev-local:
+  # Import API services
+  api-dev:
+    extends:
+      file: ./drone-image_processing-api/docker-compose.yml
+      service: api-dev
+    profiles:
+      - dev-local
+  
+  file-server:
+    extends:
+      file: ./drone-image_processing-api/docker-compose.yml
+      service: file-server
+    profiles:
+      - dev-local
+      - dev-prod
+      - prod
+  
+  api-prod:
+    extends:
+      file: ./drone-image_processing-api/docker-compose.yml
+      service: api-prod
+    profiles:
+      - prod
+  
+  # Import frontend services
+  frontend-dev-local:
     image: node:22
     working_dir: /usr/src/app
     volumes:
@@ -34,10 +60,10 @@ services:
       - "3000:3000"
     command: npm start
     <<: *dev-local-env
-    profiles:
-      - dev-local
+    networks:
+      - drone-network
 
-  dev-prod:
+  frontend-dev-prod:
     image: node:22
     working_dir: /usr/src/app
     volumes:
@@ -46,31 +72,37 @@ services:
       - "3000:3000"
     command: npm start
     <<: *dev-prod-env
-    profiles:
-      - dev-prod
+    networks:
+      - drone-network
 
-  prod:
+  frontend-prod:
     build:
       context: .
       dockerfile: dev.Dockerfile
       platforms:
         - "linux/amd64"
       args:
-        # API_URL: http://api:5000
-        # API_URL: http://192.168.1.254:5000
-        # HOSTNAME: 192.168.1.254
-        # API_URL: http://dronepilotapp.psi.ncsu.edu:5000
-        API_URL: http://172.18.0.2:5000
+        # API_URL: http://api-prod:5000
+        API_URL: http://dronepilotapp.psi.ncsu.edu/
         HOSTNAME: dronepilotapp.psi.ncsu.edu
-        
     ports:
       - "80:80"
+    environment:
+      NODE_ENV: production
+      # REACT_APP_API_URL: http://api-prod:5000
+      REACT_APP_API_URL: http://dronepilotapp.psi.ncsu.edu/
+      SERVER_NAME: dronepilotapp.psi.ncsu.edu
     networks:
       - drone-network
     <<: *prod-env
-    profiles:
-      - prod
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   drone-network:
+    name: drone-network
     external: true
