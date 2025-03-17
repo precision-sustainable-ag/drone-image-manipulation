@@ -29,14 +29,14 @@ services:
   # Import API services
   api-dev:
     extends:
-      file: ./drone-image_processing-api/docker-compose.yml
+      file: ../drone-image_processing-api/docker-compose.yml
       service: api-dev
     profiles:
       - dev-local
   
   file-server:
     extends:
-      file: ./drone-image_processing-api/docker-compose.yml
+      file: ../drone-image_processing-api/docker-compose.yml
       service: file-server
     profiles:
       - dev-local
@@ -45,7 +45,7 @@ services:
   
   api-prod:
     extends:
-      file: ./drone-image_processing-api/docker-compose.yml
+      file: ../drone-image_processing-api/docker-compose.yml
       service: api-prod
     profiles:
       - prod
