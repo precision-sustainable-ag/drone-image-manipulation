@@ -40,7 +40,6 @@ services:
       service: file-server
     profiles:
       - dev-local
-      - dev-prod
       - prod
   
   api-prod:
@@ -62,6 +61,8 @@ services:
     <<: *dev-local-env
     networks:
       - drone-network
+    profiles:
+      - dev-local
 
   frontend-dev-prod:
     image: node:22
@@ -72,8 +73,8 @@ services:
       - "3000:3000"
     command: npm start
     <<: *dev-prod-env
-    networks:
-      - drone-network
+    profiles:
+      - dev-prod
 
   frontend-prod:
     build:
@@ -82,19 +83,19 @@ services:
       platforms:
         - "linux/amd64"
       args:
-        # API_URL: http://api-prod:5000
         API_URL: http://dronepilotapp.psi.ncsu.edu/
         HOSTNAME: dronepilotapp.psi.ncsu.edu
     ports:
       - "80:80"
     environment:
       NODE_ENV: production
-      # REACT_APP_API_URL: http://api-prod:5000
       REACT_APP_API_URL: http://dronepilotapp.psi.ncsu.edu/
       SERVER_NAME: dronepilotapp.psi.ncsu.edu
     networks:
       - drone-network
     <<: *prod-env
+    profiles:
+      - prod
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80"]
