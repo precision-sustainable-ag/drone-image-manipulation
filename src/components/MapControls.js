@@ -120,8 +120,9 @@ export class ToggleDraw extends Control {
 }
 
 export class CustomControl {
-  constructor(onClick) {
+  constructor(onClick, title) {
     this.onClick = onClick;
+    this.title = title || "";
   }
   onAdd(map) {
     this._map = map;
@@ -135,6 +136,7 @@ export class CustomControl {
     button.style.backgroundSize = "20px 20px";
     button.style.backgroundPosition = "center";
     button.style.backgroundRepeat = "no-repeat";
+    button.title = this.title;
 
     // Append image to container
     this._container.appendChild(button);

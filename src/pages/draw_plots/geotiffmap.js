@@ -162,7 +162,7 @@ const GeoTIFFMap = ({
         drawRef.current.changeMode("select_polygons", drawRef.current.getAll());
       }
 
-      mapRef.current.addControl(new CustomControl(onClick));
+      mapRef.current.addControl(new CustomControl(onClick, "Select plots"));
       mapRef.current.addControl(new mapboxgl.FullscreenControl());
 
       mapRef.current.on("draw.create", handleDrawCreate);
