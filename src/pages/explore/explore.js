@@ -3,7 +3,7 @@ import '../../styles/App.css';
 import GeoTIFF from 'ol/source/GeoTIFF';
 import FlightList from './flight_list';
 import Header from "../../components/Header";
-import {Box, Grid, TextField, Typography} from '@mui/material';
+import {Box, FormControl, Grid, InputLabel, MenuItem, Select, Typography} from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MapComponent from '../../components/MapComponent';
 import WebGLTileLayer from 'ol/layer/WebGLTile';
@@ -11,6 +11,9 @@ import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 import { RotateMap } from '../../components/MapControls';
 import Footer from "../../components/Footer";
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
 function Explore() {
 
@@ -23,11 +26,22 @@ function Explore() {
   const [controls, setControls] = useState([]);
   const [filteredFlights, setFilteredFlights] = useState(flightList);
   const [filters, setFilters] = useState({
-    mission_start_time: "",
+    mission_start_time: null,
     research_station: "",
     cloudiness: "",
     pilot_name: "",
   });
+
+  const getUniqueValues = (key) => {
+    return [...new Set(flightList.map((flight) => flight[key]))]
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b));
+  };
+  
+  const missionTimes = getUniqueValues("mission_start_time");
+  const researchStations = getUniqueValues("research_station");
+  const cloudinessOptions = getUniqueValues("cloudiness");
+  const pilotNames = getUniqueValues("pilot_name");
 
   const handleFlightDetailsUpdate = (newFlightDetails) => {
     setFlightDetails(newFlightDetails);
@@ -68,9 +82,14 @@ function Explore() {
     const filtered = flightList.filter((flight) => {
       const { pilot_name, cloudiness, mission_start_time, research_station } =
         filters;
+
+      const flightDateStr = flight.mission_start_time.split(" ")[0];
+      const flightDate = dayjs(flightDateStr);
+    
+      const matchesDate = !mission_start_time || flightDate.isSame(mission_start_time, 'day');
+
       return (
-        (!mission_start_time ||
-          flight.mission_start_time.includes(mission_start_time)) &&
+        matchesDate &&
         (!research_station ||
           flight.research_station
             .toLowerCase()
@@ -140,50 +159,84 @@ function Explore() {
             <Grid container spacing={2}>
               {/* First Row */}
               <Grid item xs={6}>
-                <TextField
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
                   label="Date"
                   value={filters.mission_start_time}
-                  onChange={(e) =>
-                    handleFilterChange("mission_start_time", e.target.value)
-                  }
-                  size="small"
-                  fullWidth
+                  onChange={(newDate) => handleFilterChange("mission_start_time", newDate)}
+                  slotProps={{
+                    textField: { size: 'small', fullWidth: true }
+                  }}
+                  clearable
                 />
+              </LocalizationProvider>
+              {filters.mission_start_time && (
+                <Box mt={1} textAlign="right">
+                  <Typography
+                    variant="body2"
+                    color="primary"
+                    sx={{ cursor: 'pointer' }}
+                    onClick={() => handleFilterChange("mission_start_time", null)}
+                  >
+                    Clear Date
+                  </Typography>
+                </Box>
+              )}
               </Grid>
               <Grid item xs={6}>
-                <TextField
-                  label="Research Station"
-                  value={filters.research_station}
-                  onChange={(e) =>
-                    handleFilterChange("research_station", e.target.value)
-                  }
-                  size="small"
-                  fullWidth
-                />
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Research Station</InputLabel>
+                  <Select
+                    value={filters.research_station}
+                    label="Research Station"
+                    onChange={(e) =>
+                      handleFilterChange("research_station", e.target.value)
+                    }
+                  >
+                    <MenuItem value="">None</MenuItem>
+                    {researchStations.map((station, idx) => (
+                      <MenuItem key={idx} value={station}>
+                        {station}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
 
               {/* Second Row */}
               <Grid item xs={6}>
-                <TextField
-                  label="Cloudiness"
-                  value={filters.cloudiness}
-                  onChange={(e) =>
-                    handleFilterChange("cloudiness", e.target.value)
-                  }
-                  size="small"
-                  fullWidth
-                />
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Cloudiness</InputLabel>
+                  <Select
+                    value={filters.cloudiness}
+                    label="Cloudiness"
+                    onChange={(e) => handleFilterChange("cloudiness", e.target.value)}
+                  >
+                    <MenuItem value="">None</MenuItem>
+                    {cloudinessOptions.map((cloud, idx) => (
+                      <MenuItem key={idx} value={cloud}>
+                        {cloud}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item xs={6}>
-                <TextField
-                  label="Pilot Name"
-                  value={filters.pilot_name}
-                  onChange={(e) =>
-                    handleFilterChange("pilot_name", e.target.value)
-                  }
-                  size="small"
-                  fullWidth
-                />
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Pilot Name</InputLabel>
+                  <Select
+                    value={filters.pilot_name}
+                    label="Pilot Name"
+                    onChange={(e) => handleFilterChange("pilot_name", e.target.value)}
+                  >
+                    <MenuItem value="">None</MenuItem>
+                    {pilotNames.map((pilot, idx) => (
+                      <MenuItem key={idx} value={pilot}>
+                        {pilot}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
             </Grid>
           </Box>
