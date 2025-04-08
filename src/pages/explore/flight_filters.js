@@ -110,7 +110,7 @@ const FlightFilters = ({ flightList, setFilteredFlights }) => {
                 handleFilterChange("research_station", e.target.value)
               }
             >
-              <MenuItem value="">None</MenuItem>
+              <MenuItem value="">All</MenuItem>
               {researchStations.map((station, idx) => (
                 <MenuItem key={idx} value={station}>
                   {station}
@@ -129,7 +129,7 @@ const FlightFilters = ({ flightList, setFilteredFlights }) => {
               label="Cloudiness"
               onChange={(e) => handleFilterChange("cloudiness", e.target.value)}
             >
-              <MenuItem value="">None</MenuItem>
+              <MenuItem value="">All</MenuItem>
               {cloudinessOptions.map((cloud, idx) => (
                 <MenuItem key={idx} value={cloud}>
                   {cloud}
@@ -146,7 +146,7 @@ const FlightFilters = ({ flightList, setFilteredFlights }) => {
               label="Pilot Name"
               onChange={(e) => handleFilterChange("pilot_name", e.target.value)}
             >
-              <MenuItem value="">None</MenuItem>
+              <MenuItem value="">All</MenuItem>
               {pilotNames.map((pilot, idx) => (
                 <MenuItem key={idx} value={pilot}>
                   {pilot}
