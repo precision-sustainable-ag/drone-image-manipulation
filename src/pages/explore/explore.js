@@ -11,15 +11,18 @@ import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 import { RotateMap } from '../../components/MapControls';
 import Footer from "../../components/Footer";
+import FlightFilters from './flight_filters';
 
 function Explore() {
 
   const {state} = useLocation();
   const navigate = useNavigate();
 
+  const flightList = state ? Object.values(state) : [];
   const [flightDetails, setFlightDetails] = useState('');
   const [vectorLayer, setVectorLayer] = useState(null);
   const [controls, setControls] = useState([]);
+  const [filteredFlights, setFilteredFlights] = useState(flightList);
 
   const handleFlightDetailsUpdate = (newFlightDetails) => {
     setFlightDetails(newFlightDetails);
@@ -85,17 +88,22 @@ function Explore() {
         >
           <Typography
             variant="h5"
-            gutterBottom
             align="center"
             sx={{
               position: "sticky",
               top: 0,
               zIndex: 10,
-              py: 1,
+              pt: 1,
             }}
           >
             Flights
           </Typography>
+
+          <FlightFilters
+            flightList={flightList}
+            setFilteredFlights={setFilteredFlights}
+          />
+          
           <Box
             sx={{
               overflowY: "auto",
@@ -105,7 +113,7 @@ function Explore() {
           >
             <FlightList
               sendData={handleFlightDetailsUpdate}
-              flightList={state}
+              flightList={filteredFlights}
             />
           </Box>
         </Box>
@@ -142,7 +150,7 @@ function Explore() {
             return;
           }
           navigate("/draw-plots", {
-            state: { flightDetails, flightList: state },
+            state: { flightDetails, flightList },
           });
         }}
         nextDisabled={!flightDetails}
