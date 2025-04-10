@@ -7,6 +7,7 @@ import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import FlightFilters from './flight_filters';
 
 function Explore() {
   const { state } = useLocation();
@@ -14,9 +15,11 @@ function Explore() {
   const mapRef = useRef();
   const mapContainerRef = useRef();
 
-  const [flightDetails, setFlightDetails] = useState("");
   // const INITIAL_CENTER = [-78.99, 35.43];
   // const INITIAL_ZOOM = 7;
+  const flightList = state ? Object.values(state) : [];
+  const [flightDetails, setFlightDetails] = useState("");
+  const [filteredFlights, setFilteredFlights] = useState(flightList);
 
   const handleFlightDetailsUpdate = (newFlightDetails) => {
     setFlightDetails(newFlightDetails);
@@ -125,17 +128,22 @@ function Explore() {
         >
           <Typography
             variant="h5"
-            gutterBottom
             align="center"
             sx={{
               position: "sticky",
               top: 0,
               zIndex: 10,
-              py: 1,
+              pt: 1,
             }}
           >
             Flights
           </Typography>
+
+          <FlightFilters
+            flightList={flightList}
+            setFilteredFlights={setFilteredFlights}
+          />
+          
           <Box
             sx={{
               overflowY: "auto",
@@ -145,7 +153,7 @@ function Explore() {
           >
             <FlightList
               sendData={handleFlightDetailsUpdate}
-              flightList={state}
+              flightList={filteredFlights}
             />
           </Box>
         </Box>
@@ -182,7 +190,7 @@ function Explore() {
             return;
           }
           navigate("/draw-plots", {
-            state: { flightDetails, flightList: state },
+            state: { flightDetails, flightList },
           });
         }}
         nextDisabled={!flightDetails}
