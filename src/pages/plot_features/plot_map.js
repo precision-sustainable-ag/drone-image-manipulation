@@ -19,7 +19,6 @@ const PlotMap = forwardRef(({ apiOutput }, ref) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [flightDetails] = useState(apiOutput["flight_details"] || {});
-  const [metadata, setMetadata] = useState(null);
 
   useImperativeHandle(ref, () => ({
     exportPlotImages,
@@ -52,7 +51,6 @@ const PlotMap = forwardRef(({ apiOutput }, ref) => {
         throw new Error("Failed to fetch metadata");
       }
       const metadata = await response.json();
-      setMetadata(metadata);
 
       mapRef.current.addSource("cog-source", {
         type: "raster",

@@ -180,6 +180,7 @@ const GeoTIFFMap = ({
         mapRef.current.remove();
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flightDetails]);
 
   useEffect(() => {
@@ -229,6 +230,7 @@ const GeoTIFFMap = ({
         console.error("Grid generation error:", error);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseline, gridCols, gridRows, plotLength, plotWidth, lengthAlleywaySize, widthAlleywaySize, walkPattern, walkStartLocation]);
 
   useEffect(() => {
@@ -272,6 +274,7 @@ const GeoTIFFMap = ({
     });
 
     handleDrawUpdateAndDelete();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uploadedGeojson]);
   
   return (
