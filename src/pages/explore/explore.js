@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
 import "../../styles/App.css";
 import FlightList from "./flight_list";
+import FlightFilters from './flight_filters';
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import FlightFilters from './flight_filters';
 
 function Explore() {
   const { state } = useLocation();
@@ -17,7 +17,9 @@ function Explore() {
 
   // const INITIAL_CENTER = [-78.99, 35.43];
   // const INITIAL_ZOOM = 7;
-  const flightList = state ? Object.values(state) : [];
+  const flightList = useMemo(() => {
+    return state ? Object.values(state) : [];
+  }, [state]);
   const [flightDetails, setFlightDetails] = useState("");
   const [filteredFlights, setFilteredFlights] = useState(flightList);
 
