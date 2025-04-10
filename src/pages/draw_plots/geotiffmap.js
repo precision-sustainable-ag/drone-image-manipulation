@@ -98,7 +98,7 @@ const GeoTIFFMap = ({
 
     mapRef.current.on("load", async () => {
       const response = await fetch(
-        `http://localhost:8000/metadata/${flightDetails.cog_path}`
+        `${process.env.REACT_APP_TILING_SERVER_URL}/metadata/${flightDetails.cog_path}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch metadata");

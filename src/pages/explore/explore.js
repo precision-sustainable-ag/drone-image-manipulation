@@ -41,7 +41,7 @@ function Explore() {
 
     mapRef.current.on("load", async () => {
       const response = await fetch(
-        `http://localhost:8000/metadata/${flightDetails.cog_path}`
+        `${process.env.REACT_APP_TILING_SERVER_URL}/metadata/${flightDetails.cog_path}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch metadata");
@@ -51,7 +51,7 @@ function Explore() {
       mapRef.current.addSource("cog-source", {
         type: "raster",
         tiles: [
-          `http://localhost:8000/cog/tiles/WebMercatorQuad/{z}/{x}/{y}?` +
+          `${process.env.REACT_APP_TILING_SERVER_URL}/cog/tiles/WebMercatorQuad/{z}/{x}/{y}?` +
             `url=${metadata.url}` +
             `&format=png` +
             `&bidx=1&bidx=2&bidx=3` + // Specify RGB bands
