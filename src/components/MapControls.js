@@ -118,3 +118,35 @@ export class ToggleDraw extends Control {
     }
   }
 }
+
+export class CustomControl {
+  constructor(onClick, title) {
+    this.onClick = onClick;
+    this.title = title || "";
+  }
+  onAdd(map) {
+    this._map = map;
+    this._container = document.createElement("div");
+    this._container.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
+    const button = document.createElement("button");
+    button.className = "mapbox-gl-draw_ctrl-draw-btn";
+    button.style.backgroundImage =
+      "url('https://img.icons8.com/?size=100&id=4uEWdHgixYd6&format=png&color=000000')";
+    button.alt = "Custom Icon";
+    button.style.backgroundSize = "20px 20px";
+    button.style.backgroundPosition = "center";
+    button.style.backgroundRepeat = "no-repeat";
+    button.title = this.title;
+
+    // Append image to container
+    this._container.appendChild(button);
+    this._container.addEventListener("click", this.onClick)
+
+    return this._container;
+  }
+
+  onRemove() {
+    this._container.parentNode.removeChild(this._container);
+    this._map = undefined;
+  }
+}

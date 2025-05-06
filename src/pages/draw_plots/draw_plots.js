@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../../styles/App.css";
-import GeoTIFFMap from "./geotiffmap";
-import Header from "../../components/Header";
 import {
   Box,
+  Button,
   CircularProgress,
   FormControl,
   Grid,
@@ -15,8 +14,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useLocation, useNavigate } from "react-router-dom";
+import "../../styles/App.css";
+import GeoTIFFMap from "./geotiffmap";
 import FieldFeatureModal from "./field_features_modal";
+import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import FlightAccordion from "../../components/FlightAccordion";
 
@@ -26,6 +27,11 @@ function DrawPlots() {
 
   const [gridCols, setGridCols] = useState(2);
   const [gridRows, setGridRows] = useState(2);
+  const [plotLength, setPlotLength] = useState(10);
+  const [plotWidth, setPlotWidth] = useState(10);
+  const [lengthAlleywaySize, setLengthAlleywaySize] = useState(0);
+  const [widthAlleywaySize, setWidthAlleywaySize] = useState(0);
+
   const [walkPattern, setWalkPattern] = useState("dh");
   const [walkStartLocation, setWalkStartLocation] = useState("tl");
   const [fieldFeatures, setFieldFeatures] = useState({
@@ -33,7 +39,9 @@ function DrawPlots() {
     insect_damage: null,
     crop_type: null,
   });
+
   const [coordinateFeatures, setCoordinateFeatures] = useState({});
+  const [uploadedGeojson, setUploadedGeojson] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [respData, setRespData] = useState(null);
@@ -48,12 +56,49 @@ function DrawPlots() {
     setGridRows(newRows);
   };
 
+  const handlePlotLengthChange = (event) => {
+    const newPlotLength = parseFloat(event.target.value) || 0;
+    setPlotLength(newPlotLength);
+  };
+
+  const handlePlotWidthChange = (event) => {
+    const newPlotWidth = parseFloat(event.target.value) || 0;
+    setPlotWidth(newPlotWidth);
+  };
+
+  const handleLengthAlleywaySizeChange = (event) => {
+    const newLengthAlleywaySize = parseFloat(event.target.value) || 0;
+    setLengthAlleywaySize(newLengthAlleywaySize);
+  };
+
+  const handleWidthAlleywaySizeChange = (event) => {
+    const newWidthAlleywaySize = parseFloat(event.target.value) || 0;
+    setWidthAlleywaySize(newWidthAlleywaySize);
+  };
+
   const handleFieldFeaturesUpdate = (newData) => {
     setFieldFeatures(newData);
   };
 
   const handleCoordinateFeaturesUpdate = (newData) => {
     setCoordinateFeatures(newData);
+  };
+
+  const handleFileUpload = (event) => {
+    console.log(event)
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const geojson = JSON.parse(e.target.result);
+        setUploadedGeojson(geojson);
+      } catch (error) {
+        console.error("Invalid GeoJSON file:", error);
+      }
+    };
+    reader.readAsText(file);
   };
 
   const forceLoad = (d) => {
@@ -85,27 +130,29 @@ function DrawPlots() {
       return;
     }
     const requestData = {
-      flight_id: coordinateFeatures["flight_id"],
+      flight_id: state.flightDetails.flight_id,
       coordinate_features: coordinateFeatures,
       data_collection_method: {
         start_point: walkStartLocation,
         pattern: walkPattern,
       },
       field_features: fieldFeatures,
+      grid_dimensions: {
+        cols: gridCols,
+        rows: gridRows,
+      }
     };
 
     if (
-      !coordinateFeatures.vertical ||
-      coordinateFeatures.vertical.length === 0 ||
-      !coordinateFeatures.horizontal ||
-      coordinateFeatures.horizontal.length === 0
+      !coordinateFeatures.features ||
+      coordinateFeatures.features.length === 0
     ) {
       alert(
-        "Grid data is incomplete. Please ensure the vertical and horizontal values are properly populated."
+        "Grid data is incomplete. Please ensure to create a grid before moving to the next page."
       );
       return;
     }
-    
+
     try {
       setLoading(true);
       const response = await axios.post(
@@ -266,6 +313,62 @@ function DrawPlots() {
               />
             </Box>
 
+            {/* Plot dimensions */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                py: 2,
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              <TextField
+                label="Plot length (meters)"
+                type="number"
+                value={plotLength}
+                onChange={handlePlotLengthChange}
+                inputProps={{ min: 0, step: "0.1" }}
+                size="small"
+              />
+              <TextField
+                label="Plot width (meters)"
+                type="number"
+                value={plotWidth}
+                onChange={handlePlotWidthChange}
+                inputProps={{ min: 0, step: "0.1" }}
+                size="small"
+              />
+            </Box>
+
+            {/* Alleyway dimensions */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                py: 2,
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              <TextField
+                label="Length-wise alleyway (meters)"
+                type="number"
+                value={lengthAlleywaySize}
+                onChange={handleLengthAlleywaySizeChange}
+                inputProps={{ min: 0, step: "0.1" }}
+                size="small"
+              />
+              <TextField
+                label="Width-wise alleyway (meters)"
+                type="number"
+                value={widthAlleywaySize}
+                onChange={handleWidthAlleywaySizeChange}
+                inputProps={{ min: 0, step: "0.1" }}
+                size="small"
+              />
+            </Box>
+
             <Typography variant="body1" align="left">
               What is your data collection method?
             </Typography>
@@ -309,6 +412,26 @@ function DrawPlots() {
                 setFieldFeatures={handleFieldFeaturesUpdate}
               ></FieldFeatureModal>
             </Grid>
+
+            <input
+              type="file"
+              accept=".geojson,.json"
+              style={{ display: "none" }}
+              id="upload-shapefile"
+              onChange={handleFileUpload}
+            />
+            <label htmlFor="upload-shapefile">
+              <Button
+                component="span"
+                sx={{
+                  color: "black",
+                  textDecoration: "underline",
+                  "&:hover": { textDecoration: "underline" },
+                }}
+              >
+                + Upload shape file
+              </Button>
+            </label>
           </Box>
         </Box>
 
@@ -326,8 +449,15 @@ function DrawPlots() {
           <GeoTIFFMap
             gridCols={gridCols}
             gridRows={gridRows}
+            plotLength={plotLength}
+            plotWidth={plotWidth}
+            lengthAlleywaySize={lengthAlleywaySize}
+            widthAlleywaySize={widthAlleywaySize}
             flightDetails={state.flightDetails}
+            walkPattern={walkPattern}
+            walkStartLocation={walkStartLocation}
             setCoordinateFeatures={handleCoordinateFeaturesUpdate}
+            uploadedGeojson={uploadedGeojson}
           />
         </Box>
       </Box>
@@ -341,8 +471,8 @@ function DrawPlots() {
         nextDisabled={
           [null, undefined, ""].includes(fieldFeatures["crop_type"]) ||
           [null, undefined, ""].includes(fieldFeatures["lead_scientist"]) ||
-          !coordinateFeatures.box ||
-          coordinateFeatures.box.length === 0
+          !coordinateFeatures.features ||
+          coordinateFeatures.features.length === 0
         }
       />
 

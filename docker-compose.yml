@@ -35,7 +35,7 @@ services:
     volumes:
       - ./nginx-dev.conf:/etc/nginx/conf.d/default.conf
     ports:
-      - "8888:80"  # Expose on port 8888
+      - "127.0.0.1:8888:80"  # Expose on port 8888
     networks:
       - drone-network
     profiles:
