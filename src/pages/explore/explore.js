@@ -63,7 +63,7 @@ function Explore() {
         type: "raster",
         tiles: [
           // `${process.env.REACT_APP_TILING_SERVER_URL}/cog/tiles/WebMercatorQuad/{z}/{x}/{y}?` +
-          `${process.env.REACT_APP_API_URL}/cog/tiles/WebMercatorQuad/{z}/{x}/{y}?` +
+          `${process.env.REACT_APP_API_URL}/data/cog/tiles/WebMercatorQuad/{z}/{x}/{y}?` +
             `url=${metadata.url}` +
             `&format=png` +
             `&bidx=1&bidx=2&bidx=3` + // Specify RGB bands
