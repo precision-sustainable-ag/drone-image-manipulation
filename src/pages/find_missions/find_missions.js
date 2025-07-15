@@ -13,7 +13,6 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import "../../styles/App.css";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-import spatialQueryVideo from "../../assets/videos/spatial_query_eg.mp4";
 import { fromLonLat } from "ol/proj";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -283,35 +282,8 @@ const FindMissions = () => {
             Find Missions
           </Typography>
           <Typography variant="body1" gutterBottom align="left">
-            First, draw a box on the map to see missions in that area →
+            First, draw a box on the map to see missions in that area. For help using the map, click "HELP" in the header.
           </Typography>
-          <div
-            style={{
-              marginTop: "10px",
-              position: "relative",
-            }}
-          >
-            <Box
-              sx={{
-                width: "100%",
-                overflow: "hidden",
-                maxWidth: "500px",
-              }}
-            >
-              <video
-                src={spatialQueryVideo}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain", // Ensures the whole video is visible without cropping
-                  display: "block",
-                }}
-                muted
-                loop
-                autoPlay
-              />
-            </Box>
-          </div>
           <Typography variant="body1" gutterBottom align="left" mt={2}>
             Next, select the dates you’d like to see missions within.
           </Typography>
