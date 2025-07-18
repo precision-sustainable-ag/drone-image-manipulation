@@ -254,7 +254,7 @@ const FindMissions = () => {
         justifyContent: "space-between",
       }}
     >
-      <Header />
+      <Header showHelp={true} />
 
       <Box
         component="main"

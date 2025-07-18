@@ -85,7 +85,7 @@ function DrawPlots() {
   };
 
   const handleFileUpload = (event) => {
-    console.log(event)
+    console.log(event);
     const file = event.target.files[0];
     if (!file) return;
 
@@ -140,7 +140,7 @@ function DrawPlots() {
       grid_dimensions: {
         cols: gridCols,
         rows: gridRows,
-      }
+      },
     };
 
     if (
@@ -218,7 +218,7 @@ function DrawPlots() {
       }}
     >
       {/* HEADER */}
-      <Header />
+      <Header showHelp={false} />
 
       {/* MAIN */}
       <Box

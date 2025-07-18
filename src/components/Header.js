@@ -4,7 +4,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import spatialQueryVideo from "../assets/videos/spatial_query_eg.mp4";
 
-const Header = () => {
+const Header = ({ showHelp = false }) => {
   const navigate = useNavigate();
   const [helpOpen, setHelpOpen] = useState(false);
 
@@ -45,9 +45,11 @@ const Header = () => {
           </Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Button onClick={() => setHelpOpen(true)} sx={{ color: "#516B42" }}>
-            Help
-          </Button>
+          {showHelp && (
+            <Button onClick={() => setHelpOpen(true)} sx={{ color: "#516B42" }}>
+              Help
+            </Button>
+          )}
           <Button onClick={homeButton} sx={{ color: "#516B42" }}>
             Restart
           </Button>
@@ -107,7 +109,7 @@ const Header = () => {
             </Box>
 
             <Typography variant="body1" align="center">
-              Click the polygon icon in the top right to begin drawing a box. Then click on any 2 points to create a rectangle. 
+              Click the polygon icon in the top left to begin drawing a box. Then click on any 2 points to create a rectangle. 
               If you want to delete your box, click into it and then click the trash can icon.
             </Typography>
 

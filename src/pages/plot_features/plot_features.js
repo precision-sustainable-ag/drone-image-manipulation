@@ -25,7 +25,7 @@ const PlotFeatures = () => {
         justifyContent: "space-between",
       }}
     >
-      <Header />
+      <Header showHelp={false} />
 
       <Box
         component="main"
