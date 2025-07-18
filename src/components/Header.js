@@ -109,7 +109,7 @@ const Header = ({ showHelp = false }) => {
             </Box>
 
             <Typography variant="body1" align="center">
-              Click the polygon icon in the top left to begin drawing a box. Then click on any 2 points to create a rectangle. 
+              Click the polygon icon in the top right to begin drawing a box. Then click on any 2 points to create a rectangle. 
               If you want to delete your box, click into it and then click the trash can icon.
             </Typography>
 

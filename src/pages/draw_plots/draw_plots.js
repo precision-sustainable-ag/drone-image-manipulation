@@ -178,7 +178,6 @@ function DrawPlots() {
 
       if (forceLoad(responseData) > 0) {
         setRespData(responseData);
-        console.log("forceloaded");
         setIsSubmitted(true);
       } else {
         throw new Error("Improper response data");
