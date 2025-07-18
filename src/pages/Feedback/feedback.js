@@ -156,7 +156,7 @@ const FeedbackComponent = () => {
     >
       {/* Title */}
       <Grid container item spacing={1} justifyContent="center">
-        <Header sx={{mb:2}}/>
+        <Header showHelp={false} sx={{mb:2}} />
         <Grid item xs={12}>
           <Typography variant="h4">Drone Image Processing Feedback</Typography>
         </Grid>

@@ -85,7 +85,7 @@ function DrawPlots() {
   };
 
   const handleFileUpload = (event) => {
-    console.log(event)
+    console.log(event);
     const file = event.target.files[0];
     if (!file) return;
 
@@ -140,7 +140,7 @@ function DrawPlots() {
       grid_dimensions: {
         cols: gridCols,
         rows: gridRows,
-      }
+      },
     };
 
     if (
@@ -178,7 +178,6 @@ function DrawPlots() {
 
       if (forceLoad(responseData) > 0) {
         setRespData(responseData);
-        console.log("forceloaded");
         setIsSubmitted(true);
       } else {
         throw new Error("Improper response data");
@@ -218,7 +217,7 @@ function DrawPlots() {
       }}
     >
       {/* HEADER */}
-      <Header />
+      <Header showHelp={false} />
 
       {/* MAIN */}
       <Box

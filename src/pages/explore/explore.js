@@ -112,7 +112,7 @@ function Explore() {
         minHeight: "100vh",
       }}
     >
-      <Header />
+     <Header showHelp={false} />
 
       <Box
         component="main"
