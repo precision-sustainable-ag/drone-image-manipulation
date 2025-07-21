@@ -41,7 +41,7 @@ const Header = ({ showHelp = false }) => {
             style={{ width: "36px", height: "25px" }}
           />
           <Typography variant="h6" sx={{ color: "#516B42", marginLeft: 2 }}>
-            Site Title
+            Automated Intelligence for Research Stations
           </Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center" }}>
