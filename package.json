@@ -37,6 +37,7 @@
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
+    "build:hpc": "PUBLIC_URL=/pun/dev/backend npm run build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "dev": "react-app-rewired start",
