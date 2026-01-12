@@ -15,31 +15,50 @@ import PlotFeatures from './pages/plot_features/plot_features';
 import ErrorPage from './pages/error_page';
 import FeedbackComponent from './pages/Feedback/feedback';
 
-const router = createBrowserRouter([
-  {
-    path: '/explore',
-    element: <Explore />,
-    errorElement: <ErrorPage />
-  },
-  {
-    path: '/draw-plots',
-    element: <DrawPlots />,
-    errorElement: <ErrorPage />
-  },
-  {
-    path: '/plot-features',
-    element: <PlotFeatures />,
-  },
-  {
-    path: '/feedback',
-    element: <FeedbackComponent />,
-  },
-  {
-    path: '/',
-    element: <FindMissions />,
-    errorElement: <ErrorPage />
+function computeBasename() {
+  const path = window.location.pathname;
+
+  // Local dev or root deployment
+  if (path === "/" || path === "") {
+    return "/";
   }
-]);
+
+  // OOD case: /pun/dev/<appname>/  → basename = /pun/dev/<appname>
+  return path.replace(/\/$/, "");
+}
+
+const basename = computeBasename();
+
+console.log("Router basename:", basename);
+
+const router = createBrowserRouter(
+  [
+    {
+      path: "/explore",
+      element: <Explore />,
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/draw-plots",
+      element: <DrawPlots />,
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/plot-features",
+      element: <PlotFeatures />,
+    },
+    {
+      path: "/feedback",
+      element: <FeedbackComponent />,
+    },
+    {
+      path: "/",
+      element: <FindMissions />,
+      errorElement: <ErrorPage />,
+    },
+  ],
+  { basename }
+);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
