@@ -31,12 +31,12 @@ const Header = ({ showHelp = false }) => {
       >
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <img
-            src="/ncsu-logo.png"
+            src={`${process.env.PUBLIC_URL}/ncsu-logo.png`}
             alt="NC State Logo"
             style={{ width: "120px", height: "35px" }}
           />
           <img
-            src="/usda-logo.png"
+            src={`${process.env.PUBLIC_URL}/usda-logo.png`}
             alt="USDA Logo"
             style={{ width: "36px", height: "25px" }}
           />
