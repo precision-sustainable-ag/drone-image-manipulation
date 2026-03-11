@@ -33,12 +33,17 @@ const Header = ({ showHelp = false }) => {
           <img
             src={`${process.env.PUBLIC_URL}/ncsu-logo.png`}
             alt="NC State Logo"
-            style={{ width: "120px", height: "35px" }}
+            style={{ width: "240px", height: "70px" }}
           />
           <img
             src={`${process.env.PUBLIC_URL}/usda-logo.png`}
             alt="USDA Logo"
-            style={{ width: "36px", height: "25px" }}
+            style={{ width: "70px", height: "50px" }}
+          />
+          <img
+            src={`${process.env.PUBLIC_URL}/dash-with-logo.png`}
+            alt="DASH Logo"
+            style={{ width: "70px", height: "70px", paddingLeft: "30px" }}
           />
           <Typography variant="h6" sx={{ color: "#516B42", marginLeft: 2 }}>
             Automated Intelligence for Research Stations

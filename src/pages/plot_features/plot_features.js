@@ -31,7 +31,7 @@ const PlotFeatures = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          mt: "52px",
+          mt: "100px",
           mb: "59px",
           display: "flex",
           overflow: "auto",
