@@ -20,6 +20,7 @@ import CancelIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { PSAFigmaButton } from "shared-react-components/src";
 import FlightAccordion from "../../components/FlightAccordion";
+import centroid from "@turf/centroid";
 
 const PlotTable = ({ state, plotMapRef }) => {
   const [editingRowId, setEditingRowId] = useState(null);
@@ -295,7 +296,39 @@ const PlotTable = ({ state, plotMapRef }) => {
     });
     FileSaver.saveAs(blob, `${state.flight_details.flight_id}.geojson`);
     handleClose();
-  };  
+  };
+
+  const exportCentroid = () => {
+    if (!state.features || state.features.features.length === 0) {
+      console.error("No features available to export");
+      return;
+    }
+
+    const centroidFeatures = state.features.features.map((feature) => {
+      const point = centroid(feature);
+
+      return {
+        ...point,
+        id: feature.id,
+        properties: {
+          ...feature.properties,
+          original_type: "Polygon",
+        },
+      };
+    });
+
+    const centroidGeoJSON = {
+      type: "FeatureCollection",
+      features: centroidFeatures,
+    };
+
+    const blob = new Blob([JSON.stringify(centroidGeoJSON, null, 2)], {
+      type: "application/json",
+    });
+
+    FileSaver.saveAs(blob, `${state.flight_details.flight_id}_centroids.geojson`);
+    handleClose();
+  };
 
   const exportAll = () => {
     handleDownloadBrAPIRequest();
@@ -303,6 +336,7 @@ const PlotTable = ({ state, plotMapRef }) => {
     exportMetadataAsCSV();
     plotMapRef.current.exportPlotImages();
     exportShapefile();
+    exportCentroid();
   };
 
   const handleDownloadBrAPIRequest = () => {
@@ -370,6 +404,9 @@ const PlotTable = ({ state, plotMapRef }) => {
           </MenuItem>
           <MenuItem onClick={exportShapefile}>
             EXPORT SHAPEFILE
+          </MenuItem>
+          <MenuItem onClick={exportCentroid}>
+            EXPORT CENTROID GEOJSON
           </MenuItem>
           <Divider />
           <MenuItem onClick={exportAll}>EXPORT ALL</MenuItem>
